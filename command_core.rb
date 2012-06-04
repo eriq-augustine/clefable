@@ -18,6 +18,10 @@ class Command
       return @usage
    end
 
+   def description
+      return @description
+   end
+
    def self.invoke(server, fromUser, line, onConsole = false)
       if ((match = line.match(/^(\S+)\s*(.*)$/)) &&
           @@commands.has_key?(match[1]))
@@ -127,8 +131,10 @@ class Help < Command
       if (args.length() > 0 && @@commands.has_key?(args))
          if (onConsole)
             puts "USAGE: #{@@commands[args].usage()}"
+            puts "#{@@commands[args].description()}"
          else
             server.chat("USAGE: #{@@commands[args].usage()}")
+            server.chat("#{@@commands[args].description()}")
          end
       else
          message = "Commands: "

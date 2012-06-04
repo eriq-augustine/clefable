@@ -7,12 +7,15 @@ require './command_core.rb'
 require './console_commands.rb'
 require './dance.rb'
 require './replay.rb'
+require './trivia.rb'
 
 IRC_HOST = 'irc.freenode.net'
 IRC_PORT = 6667
 IRC_NICK = 'Clefable_BOT'
-#IRC_CHANNEL = '#softwareinventions'
-IRC_CHANNEL = '#eriq_secret'
+IRC_CHANNEL = '#softwareinventions'
+#IRC_CHANNEL = '#eriq_secret'
+
+MAX_MESSAGE_LEN = 400
 
 USER_NAME = IRC_NICK
 HOST_NAME = 'Mt.Moon'
@@ -65,7 +68,12 @@ class IRCServer
    end
 
    def chat(message)
-      sendMessage("PRIVMSG #{@channelName} :#{message}")
+      # TODO: Split better, so words are not broken.
+      for i in 0..(message.length() / MAX_MESSAGE_LEN)
+         part = message[i * MAX_MESSAGE_LEN, (i + 1) * MAX_MESSAGE_LEN]
+         sendMessage("PRIVMSG #{@channelName} :#{part}")
+         sleep(0.1)
+      end
    end
 
    def handleServerInput(message)
