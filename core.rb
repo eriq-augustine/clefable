@@ -6,6 +6,7 @@ require "mysql"
 require './command_core.rb'
 require './console_commands.rb'
 require './dance.rb'
+require './replay.rb'
 
 IRC_HOST = 'irc.freenode.net'
 IRC_PORT = 6667

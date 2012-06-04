@@ -26,13 +26,11 @@ def loadDBDances
 end
 
 def insertDance(server, name, steps)
-
-   # TODO: MYSQL::escape_string(), but will that ruin the dance?
    insert = "INSERT INTO #{DANCE_TABLE} (name, ordinal, step) VALUES "
    steps.each_index{|index|
-      insert += "('#{name}', #{index}, '#{steps[index]}'), "
+      insert += "('#{name}', #{index}, '#{Mysql::escape_string(steps[index])}'), "
 
-      if (steps.match(/(INSERT)|(DELETE)|(SELECT)|(REPLACE)|(DROP)|(UPDATE)|(ALTER)/i))
+      if (steps[index].match(/(INSERT)|(DELETE)|(SELECT)|(REPLACE)|(DROP)|(UPDATE)|(ALTER)/i))
          server.chat("HEY! You trying to give me an injection?!?")
          return;
       end
