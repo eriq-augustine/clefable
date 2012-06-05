@@ -25,13 +25,13 @@ def loadDBDances
    }
 end
 
-def insertDance(server, name, steps)
+def insertDance(server, channel, name, steps)
    insert = "INSERT INTO #{DANCE_TABLE} (name, ordinal, step) VALUES "
    steps.each_index{|index|
       insert += "('#{name}', #{index}, '#{Mysql::escape_string(steps[index])}'), "
 
       if (steps[index].match(/(INSERT)|(DELETE)|(SELECT)|(REPLACE)|(DROP)|(UPDATE)|(ALTER)/i))
-         server.chat("HEY! You trying to give me an injection?!?")
+         server.chat(channel, "HEY! You trying to give me an injection?!?")
          return;
       end
    }
@@ -52,7 +52,7 @@ class Dance < Command
 
    @@instance = Dance.new()
 
-   def onCommand(server, fromUser, args, onConsole)
+   def onCommand(server, channel, fromUser, args, onConsole)
       args.strip!
 
       if (args.length() == 0 || args.match(/^LIST$/i))
@@ -62,7 +62,7 @@ class Dance < Command
          }
          message.sub!(/, $/, '')
 
-         server.chat(message)
+         server.chat(channel, message)
       # LEARN <dance name> <delim> <dance>
       elsif (args.match(/^LEARN/i))
          # TODO: Learn by going into a seperate channel
@@ -73,23 +73,23 @@ class Dance < Command
 
             # TODO: Let someone override/delete dance
             if ($dances.has_key?(name))
-               server.chat('That dance already exists, and you are not allowed to override it.');
+               server.chat(channel, 'That dance already exists, and you are not allowed to override it.');
             else
                steps = match[3].rstrip().split(delim)
                $dances[name] = steps
-               insertDance(server, name, steps)
+               insertDance(server, channel, name, steps)
             end
          else
-            server.chat('USAGE: DANCE LEARN <dance name> <delim> <dance>')
+            server.chat(channel, 'USAGE: DANCE LEARN <dance name> <delim> <dance>')
          end
       else
          if ($dances.has_key?(args))
             $dances[args].each{|line|
-               server.chat(line)
+               server.chat(channel, line)
                sleep(0.5)
             }
          else
-            server.chat("I don't know that dance.")
+            server.chat(channel, "I don't know that dance.")
          end
       end
    end

@@ -16,18 +16,27 @@ class Replay < Command
 
    @@instance = Replay.new()
 
-   def onCommand(server, fromUser, args, onConsole)
+   def onCommand(server, channel, fromUser, args, onConsole)
       if (match = args.strip.match(/^LAST\s+(\d+)$/))
          startTime = Time.now().to_i() - (match[1].to_i * 60)
-         res = @db.query("SELECT timestamp, user, message" + 
+
+
+         puts "SELECT timestamp, `from`, message" + 
                          " FROM #{LOG_TABLE}" +
                          " WHERE timestamp >= #{startTime}" +
+                         "  AND `to` = '#{channel}'" + 
+                         " ORDER BY timestamp"
+
+         res = @db.query("SELECT timestamp, `from`, message" + 
+                         " FROM #{LOG_TABLE}" +
+                         " WHERE timestamp >= #{startTime}" +
+                         "  AND `to` = '#{channel}'" + 
                          " ORDER BY timestamp")
          res.each{|row|
-            server.chat("[#{Time.at(row[0].to_i)}] #{row[1]}: #{row[2]}")
+            server.chat(channel, "[#{Time.at(row[0].to_i)}] #{row[1]}: #{row[2]}")
          }
       else
-         server.chat("I don't understand that time, just use an int.")
+         server.chat(channel, "I don't understand that time, just use an int.")
       end
    end
 end

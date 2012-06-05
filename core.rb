@@ -12,8 +12,10 @@ require './trivia.rb'
 IRC_HOST = 'irc.freenode.net'
 IRC_PORT = 6667
 IRC_NICK = 'Clefable_BOT'
-IRC_CHANNEL = '#softwareinventions'
-#IRC_CHANNEL = '#eriq_secret'
+
+#DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
+#DEFAULT_CHANNELS = ['#eriq_secret']
+DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub', '#softwareinventions']
 
 MAX_MESSAGE_LEN = 400
 
@@ -39,13 +41,12 @@ class User
 end
 
 class IRCServer
-   def initialize(hostName, port, nick, channelName)
+   def initialize(hostName, port, nick)
       @hostName = hostName
       @port = port
       @nick = nick
-      @channelName = channelName
       @ircSocket = nil
-      @users = Hash.new()
+      @users = Hash.new{|hash, key| hash[key] = Hash.new() }
       @db = Mysql::new(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB)
    end
 
@@ -55,23 +56,27 @@ class IRCServer
       @ircSocket.send("#{message}\n", 0) 
    end
 
-   # Connect to the host irc server and join @channel
+   # Connect to the host irc server
    def connect()
       puts '[INFO] Connecting to server...'
 
       @ircSocket = TCPSocket.open(@hostName, @port)
       sendMessage("USER #{USER_NAME} 0 * :#{REAL_NAME}")
       sendMessage("NICK #{@nick}")
-      sendMessage("JOIN #{@channelName}")
 
-      puts "[INFO] Connected to #{@hostName}:#{@port}#{@channel} as #{@nick}"
+      puts "[INFO] Connected to #{@hostName}:#{@port} as #{@nick}"
    end
 
-   def chat(message)
+   def join(channel)
+      sendMessage("JOIN #{channel}")
+      puts "[INFO] Joined #{channel}"
+   end
+
+   def chat(channel, message)
       # TODO: Split better, so words are not broken.
       for i in 0..(message.length() / MAX_MESSAGE_LEN)
          part = message[i * MAX_MESSAGE_LEN, (i + 1) * MAX_MESSAGE_LEN]
-         sendMessage("PRIVMSG #{@channelName} :#{part}")
+         sendMessage("PRIVMSG #{channel} :#{part}")
          sleep(0.1)
       end
    end
@@ -86,15 +91,29 @@ class IRCServer
       # :<from user>!<from user>@<from address> PRIVMSG <to> :<message>
       # <to> is usually a channel
       elsif (match = message.match(/^:([^!]*)!([^@]*)@([^\s]*)\sPRIVMSG\s([^\s]*)\s:(.*)$/))
-         if (commandMatch = match[5].strip.match(/^#{IRC_NICK}:\s*(.+)$/))
-            Command.invoke(self, match[1], commandMatch[1])
+         fromUser = match[1]
+         target = match[4]
+         content = match[5]
+
+         if (commandMatch = content.strip.match(/^#{IRC_NICK}:\s*(.+)$/))
+            respondTo = target
+
+            # TODO: This breaks replay when doing PMs
+            # If this was a PM, respond to the user, not the target
+            if (!respondTo.start_with?('#'))
+               respondTo = fromUser
+            end
+
+            Command.invoke(self, respondTo, fromUser, commandMatch[1])
          end
-         log(match[1], match[5])
+
+         log(fromUser, target, content)
       # Recieving user names from the server
       # admin names are prepended with '@'
       # :<server> 353 <nick> @ <channel> :<user list (space seperated)>
       elsif (match = message.match(/^:(\S+)\s+353\s+(\S+)\s+@\s+(\S+)\s+:(.*)$/))
          users = match[4].split(/\s+/)
+         channel = match[3]
 
          users.each{|user|
             user.strip!
@@ -105,23 +124,26 @@ class IRCServer
                user.sub!(/^@/, '')
             end
 
-            if (!@users.has_key?(user))
-               @users[user] = User.new(user, admin)
-               Command.userPresentOnJoin(self, user)
+            if (!@users[channel].has_key?(user))
+               @users[channel][user] = User.new(user, admin)
+               Command.userPresentOnJoin(self, channel, user)
             end
          }
       # :<from user>!<from user>@<from address> JOIN <channel>
       elsif (match = message.match(/^:([^!]*)!([^@]*)@(\S*)\sJOIN\s(\S*)$/))
          user = match[1]
-         @users[user] = User.new(user, false)
-         Command.userJoined(self, user)
+         channel = match[4]
+
+         @users[channel][user] = User.new(user, false)
+         Command.userJoined(self, channel, user)
       # :<from user>!<from user>@<from address> PART <channel> :<reason>
       elsif (match = message.match(/^:([^!]*)!([^@]*)@(\S*)\sPART\s(\S*)\s:(.*)$/))
          user = match[1]
+         channel = match[4]
          reason = match[5]
 
          @users.delete(user)
-         Command.userLeft(self, user, reason)
+         Command.userLeft(self, channel, user, reason)
       end
    end
 
@@ -130,21 +152,32 @@ class IRCServer
 
       if (command.length() > 0)
          puts "[INFO] Recieved command: #{command}"
-         Command.invoke(self, '_CONSOLE_', command, true)
+         Command.invoke(self, '_CONSOLE_', '_CONSOLE_', command, true)
       end
    end
 
+   # Check all channels
    def hasUser?(nick)
-      return @users.has_key?(nick)
+      @users.each_value{|channelUsers|
+         if (channelUsers.has_key?(nick))
+            return true
+         end
+      }
+      return false
+   end
+
+   # Check only the current channel
+   def hasUser?(nick, channel)
+      return @users[channel].has_key?(nick)
    end
 
    def getUsers()
       return @users
    end
 
-   def log(fromUser, message)
-      @db.query("INSERT INTO #{LOG_TABLE} (timestamp, user, message)" + 
-               " VALUES (#{Time.now().to_i()}, '#{fromUser}', '#{@db.escape_string(message)}')")
+   def log(fromUser, toUser, message)
+      @db.query("INSERT INTO #{LOG_TABLE} (timestamp, `to`, `from`, message)" + 
+               " VALUES (#{Time.now().to_i()}, '#{toUser}', '#{fromUser}', '#{@db.escape_string(message)}')")
    end
 
    # The main listening loop
@@ -176,11 +209,14 @@ class IRCServer
    end
 end
 
-irc = IRCServer.new(IRC_HOST, IRC_PORT, IRC_NICK, IRC_CHANNEL)
+irc = IRCServer.new(IRC_HOST, IRC_PORT, IRC_NICK)
 irc.connect()
 
 #Request the user list now
-irc.sendMessage("NAMES #{IRC_CHANNEL}")
+DEFAULT_CHANNELS.each{|channel|
+   irc.join(channel)
+   irc.sendMessage("NAMES #{channel}")
+}
 
 begin
    irc.listen()

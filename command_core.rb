@@ -22,56 +22,63 @@ class Command
       return @description
    end
 
-   def self.invoke(server, fromUser, line, onConsole = false)
+   # target is usually a channel
+   def self.invoke(server, target, fromUser, line, onConsole = false)
       if ((match = line.match(/^(\S+)\s*(.*)$/)) &&
           @@commands.has_key?(match[1]))
 
          if (!@@commands[match[1]].consoleOnly? ||
              (onConsole && @@commands[match[1]].consoleOnly?))
-            @@commands[match[1]].onCommand(server, fromUser, match[2], onConsole)
+            @@commands[match[1]].onCommand(server, target, fromUser, match[2], onConsole)
          end
       else
          puts("[INFO] Unrecognized command: #{line}")
 
          if (!onConsole)
-            server.chat("Unrecognized command. Try: HELP [command]")
+            respondTo = target
+            # If invocation was in a channel, respond to the channel,
+            #  otherwise respond back to the user
+            if (!target.start_with?('#'))
+               respondTo = fromUser
+            end
+            server.chat(respondTo, "Unrecognized command. Try: HELP [command]")
          end
       end
    end
 
-   def self.userPresentOnJoin(server, user)
+   def self.userPresentOnJoin(server, channel, user)
       @@commands.each_value{|command|
-         command.onUserPresence(server, user)
+         command.onUserPresence(server, channel, user)
       }
    end
 
-   def self.userJoined(server, user)
+   def self.userJoined(server, channel, user)
       @@commands.each_value{|command|
-         command.onUserPresence(server, user)
-         command.onUserJoin(server, user)
+         command.onUserPresence(server, channel, user)
+         command.onUserJoin(server, channel, user)
       }
    end
 
-   def self.userLeft(server, user, reason)
+   def self.userLeft(server, channel, user, reason)
       @@commands.each_value{|command|
-         command.onUserLeave(server, user, reason)
+         command.onUserLeave(server, channel, user, reason)
       }
    end
 
    # Invoked when the command is used in chat
-   def onCommand(server, fromUser, args, onConsole = false)
+   def onCommand(server, channel, fromUser, args, onConsole = false)
    end
 
    # Invoked on connect if the user is present, and if the user join
-   def onUserPresence(server, user)
+   def onUserPresence(server, channel, user)
    end
 
    # Invoked if a user joins
-   def onUserJoin(server, user)
+   def onUserJoin(server, channel, user)
    end
 
    # Invoked if a user leaves
-   def onUserLeave(server, user, reason)
+   def onUserLeave(server, channel, user, reason)
    end
 end
 
@@ -87,13 +94,13 @@ class SendMessage < Command
 
    @@instance = SendMessage.new()
 
-   def onCommand(server, fromUser, args, onConsole = false)
+   def onCommand(server, channel, fromUser, args, onConsole = false)
       if (match = args.strip.match(/^(\S+)\s+(.+)$/i))
          toUser = match[1]
          message = "Message from #{fromUser} recieved on #{Time.now()}: #{match[2]}"
 
          if (server.hasUser?(toUser))
-            server.chat("#{toUser}: #{message}")
+            server.chat(channel, "#{toUser}: #{message}")
          else
             if (!@messageQueue.has_key?(toUser))
                @messageQueue[toUser] = Array.new()
@@ -102,14 +109,14 @@ class SendMessage < Command
             @messageQueue[toUser] << message
          end
       else
-         server.chat("USAGE: #{@usage}")
+         server.chat(channel, "USAGE: #{@usage}")
       end
    end
 
-   def onUserPresence(server, user)
+   def onUserPresence(server, channel, user)
       if (@messageQueue.has_key?(user))
          @messageQueue[user].each{|message|
-            server.chat("#{user}: #{message}")
+            server.chat(channel, "#{user}: #{message}")
          }
          @messageQueue.delete(user)
       end
@@ -125,7 +132,7 @@ class Help < Command
 
    @@instance = Help.new()
 
-   def onCommand(server, fromUser, args, onConsole = false)
+   def onCommand(server, channel, fromUser, args, onConsole = false)
       args.strip!
 
       if (args.length() > 0 && @@commands.has_key?(args))
@@ -133,8 +140,8 @@ class Help < Command
             puts "USAGE: #{@@commands[args].usage()}"
             puts "#{@@commands[args].description()}"
          else
-            server.chat("USAGE: #{@@commands[args].usage()}")
-            server.chat("#{@@commands[args].description()}")
+            server.chat(channel, "USAGE: #{@@commands[args].usage()}")
+            server.chat(channel, "#{@@commands[args].description()}")
          end
       else
          message = "Commands: "
@@ -149,7 +156,7 @@ class Help < Command
          if (onConsole)
             puts message
          else
-            server.chat(message)
+            server.chat(channel, message)
          end
       end
    end
