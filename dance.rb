@@ -25,13 +25,13 @@ def loadDBDances
    }
 end
 
-def insertDance(server, channel, name, steps)
+def insertDance(responseInfo, name, steps)
    insert = "INSERT INTO #{DANCE_TABLE} (name, ordinal, step) VALUES "
    steps.each_index{|index|
       insert += "('#{name}', #{index}, '#{Mysql::escape_string(steps[index])}'), "
 
       if (steps[index].match(/(INSERT)|(DELETE)|(SELECT)|(REPLACE)|(DROP)|(UPDATE)|(ALTER)/i))
-         server.chat(channel, "HEY! You trying to give me an injection?!?")
+         responseInfo.respond("HEY! You trying to give me an injection?!?")
          return;
       end
    }
@@ -52,7 +52,7 @@ class Dance < Command
 
    @@instance = Dance.new()
 
-   def onCommand(server, channel, fromUser, args, onConsole)
+   def onCommand(responseInfo, args, onConsole)
       args.strip!
 
       if (args.length() == 0 || args.match(/^LIST$/i))
@@ -62,7 +62,7 @@ class Dance < Command
          }
          message.sub!(/, $/, '')
 
-         server.chat(channel, message)
+         responseInfo.respond(message)
       # LEARN <dance name> <delim> <dance>
       elsif (args.match(/^LEARN/i))
          # TODO: Learn by going into a seperate channel
@@ -73,23 +73,23 @@ class Dance < Command
 
             # TODO: Let someone override/delete dance
             if ($dances.has_key?(name))
-               server.chat(channel, 'That dance already exists, and you are not allowed to override it.');
+               responseInfo.respond('That dance already exists, and you are not allowed to override it.');
             else
                steps = match[3].rstrip().split(delim)
+               insertDance(responseInfo, name, steps)
                $dances[name] = steps
-               insertDance(server, channel, name, steps)
             end
          else
-            server.chat(channel, 'USAGE: DANCE LEARN <dance name> <delim> <dance>')
+            responseInfo.respond('USAGE: DANCE LEARN <dance name> <delim> <dance>')
          end
       else
          if ($dances.has_key?(args))
             $dances[args].each{|line|
-               server.chat(channel, line)
+               responseInfo.respond(line)
                sleep(0.5)
             }
          else
-            server.chat(channel, "I don't know that dance.")
+            responseInfo.respond("I don't know that dance.")
          end
       end
    end

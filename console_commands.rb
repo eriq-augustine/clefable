@@ -13,8 +13,8 @@ class DirectCommand < Command
 
    @@instance = DirectCommand.new()
 
-   def onCommand(server, channel, fromUser, args, onConsole = false)
-      server.sendMessage(channel, args)
+   def onCommand(responseInfo, args, onConsole)
+      responseInfo.server.sendMessage(args)
    end
 end
 
@@ -28,8 +28,8 @@ class ListUsers < Command
 
    @@instance = ListUsers.new()
 
-   def onCommand(server, channel, fromUser, args, onConsole = false)
-      channels = server.getUsers()
+   def onCommand(responseInfo, args, onConsole)
+      channels = responseInfo.server.getUsers()
 
       channels.each_pair{|channel, users|
          puts "#{channel}"
@@ -55,7 +55,7 @@ class LoadCommands < Command
 
    @@instance = LoadCommands.new()
 
-   def onCommand(server, channel, fromUser, args, onConsole = false)
+   def onCommand(responseInfo, args, onConsole = false)
       load args
    end
 end

@@ -16,27 +16,25 @@ class Replay < Command
 
    @@instance = Replay.new()
 
-   def onCommand(server, channel, fromUser, args, onConsole)
+   # TODO: This allows others to see PM to Clefable, fix that by checking from if PM.
+   def onCommand(responseInfo, args, onConsole)
       if (match = args.strip.match(/^LAST\s+(\d+)$/))
          startTime = Time.now().to_i() - (match[1].to_i * 60)
-
-
-         puts "SELECT timestamp, `from`, message" + 
-                         " FROM #{LOG_TABLE}" +
-                         " WHERE timestamp >= #{startTime}" +
-                         "  AND `to` = '#{channel}'" + 
-                         " ORDER BY timestamp"
 
          res = @db.query("SELECT timestamp, `from`, message" + 
                          " FROM #{LOG_TABLE}" +
                          " WHERE timestamp >= #{startTime}" +
-                         "  AND `to` = '#{channel}'" + 
+                         "  AND `to` = '#{responseInfo.target}'" + 
                          " ORDER BY timestamp")
-         res.each{|row|
-            server.chat(channel, "[#{Time.at(row[0].to_i)}] #{row[1]}: #{row[2]}")
-         }
+         if (res.num_rows() == 0)
+               responseInfo.respondPM("No results.")
+         else
+            res.each{|row|
+               responseInfo.respondPM("[#{Time.at(row[0].to_i)}] #{row[1]}: #{row[2]}")
+            }
+         end
       else
-         server.chat(channel, "I don't understand that time, just use an int.")
+         responseInfo.respond("I don't understand that time, just use an int.")
       end
    end
 end

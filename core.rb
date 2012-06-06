@@ -14,12 +14,14 @@ IRC_PORT = 6667
 IRC_NICK = 'Clefable_BOT'
 
 #DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
-#DEFAULT_CHANNELS = ['#eriq_secret']
-DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub', '#softwareinventions']
+DEFAULT_CHANNELS = ['#eriq_secret']
+#DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub', '#softwareinventions']
 
 MAX_MESSAGE_LEN = 400
+CONSOLE = '_CONSOLE_'
 
 USER_NAME = IRC_NICK
+SHORT_NICK = 'CLEF'
 HOST_NAME = 'Mt.Moon'
 SERVER_NAME = 'Kanto'
 REAL_NAME = 'Clefable Bot'
@@ -93,18 +95,12 @@ class IRCServer
       elsif (match = message.match(/^:([^!]*)!([^@]*)@([^\s]*)\sPRIVMSG\s([^\s]*)\s:(.*)$/))
          fromUser = match[1]
          target = match[4]
-         content = match[5]
+         content = match[5].strip
 
-         if (commandMatch = content.strip.match(/^#{IRC_NICK}:\s*(.+)$/))
-            respondTo = target
+         responseInfo = ResponseInfo.new(self, fromUser, target)
 
-            # TODO: This breaks replay when doing PMs
-            # If this was a PM, respond to the user, not the target
-            if (!respondTo.start_with?('#'))
-               respondTo = fromUser
-            end
-
-            Command.invoke(self, respondTo, fromUser, commandMatch[1])
+         if (commandMatch = content.strip.match(/^((?:#{IRC_NICK})|(?:#{SHORT_NICK})):\s*(.+)$/i))
+            Command.invoke(responseInfo, commandMatch[2])
          end
 
          log(fromUser, target, content)
@@ -152,7 +148,7 @@ class IRCServer
 
       if (command.length() > 0)
          puts "[INFO] Recieved command: #{command}"
-         Command.invoke(self, '_CONSOLE_', '_CONSOLE_', command, true)
+         Command.invoke(ResponseInfo.new(self, CONSOLE, CONSOLE), command, true)
       end
    end
 

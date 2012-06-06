@@ -1,3 +1,36 @@
+class ResponseInfo
+   def initialize(server, fromUser, target)
+      @server = server
+      @fromUser = fromUser
+      @target = target
+
+      @onConsole = (fromUser == CONSOLE)
+   end
+
+   attr_reader :server, :fromUser, :target
+
+   def respondPM(message)
+      if (@onConsole)
+         puts message
+      else
+         server.chat(fromUser, message)
+      end
+   end
+
+   # Respond with the default behavior.
+   # If the target is a channel, respond to the channel,
+   #  otherwise respond to the user.
+   def respond(message)
+      if (target.start_with?('#'))
+         server.chat(target, message)
+      elsif (target == CONSOLE)
+         puts message
+      else
+         server.chat(fromUser, message)
+      end
+   end
+end
+
 class Command
    @@commands = Hash.new()
 
@@ -7,7 +40,7 @@ class Command
       @description = description
       @consoleOnly = consoleOnly
 
-      @@commands[@name] = self
+      @@commands[@name.upcase] = self
    end
 
    def consoleOnly?
@@ -23,26 +56,21 @@ class Command
    end
 
    # target is usually a channel
-   def self.invoke(server, target, fromUser, line, onConsole = false)
-      if ((match = line.match(/^(\S+)\s*(.*)$/)) &&
-          @@commands.has_key?(match[1]))
-
-         if (!@@commands[match[1]].consoleOnly? ||
-             (onConsole && @@commands[match[1]].consoleOnly?))
-            @@commands[match[1]].onCommand(server, target, fromUser, match[2], onConsole)
-         end
-      else
-         puts("[INFO] Unrecognized command: #{line}")
-
-         if (!onConsole)
-            respondTo = target
-            # If invocation was in a channel, respond to the channel,
-            #  otherwise respond back to the user
-            if (!target.start_with?('#'))
-               respondTo = fromUser
+   def self.invoke(responseInfo, line, onConsole = false)
+      success = false
+      if (match = line.match(/^(\S+)\s*(.*)$/))
+         commandName = match[1].upcase
+         if (@@commands.has_key?(commandName))
+            command = @@commands[commandName]
+            if (!command.consoleOnly? || (onConsole && command.consoleOnly?))
+               command.onCommand(responseInfo, match[2], onConsole)
+               success = true
             end
-            server.chat(respondTo, "Unrecognized command. Try: HELP [command]")
          end
+      end
+
+      if (!success)
+         responseInfo.respond("Unrecognized command. Try: HELP [command]")
       end
    end
 
@@ -66,7 +94,7 @@ class Command
    end
 
    # Invoked when the command is used in chat
-   def onCommand(server, channel, fromUser, args, onConsole = false)
+   def onCommand(responseInfo, args, onConsole = false)
    end
 
    # Invoked on connect if the user is present, and if the user join
@@ -82,6 +110,7 @@ class Command
    end
 end
 
+# TODO: use DB
 class SendMessage < Command
    def initialize
       super('SEND-MESSAGE',
@@ -94,13 +123,13 @@ class SendMessage < Command
 
    @@instance = SendMessage.new()
 
-   def onCommand(server, channel, fromUser, args, onConsole = false)
+   def onCommand(responseInfo, args, onConsole = false)
       if (match = args.strip.match(/^(\S+)\s+(.+)$/i))
          toUser = match[1]
-         message = "Message from #{fromUser} recieved on #{Time.now()}: #{match[2]}"
+         message = "Message from #{responseInfo.fromUser} recieved on #{Time.now()}: #{match[2]}"
 
-         if (server.hasUser?(toUser))
-            server.chat(channel, "#{toUser}: #{message}")
+         if (responseInfo.server.hasUser?(toUser))
+            responseInfo.server.chat(toUser, "#{toUser}: #{message}")
          else
             if (!@messageQueue.has_key?(toUser))
                @messageQueue[toUser] = Array.new()
@@ -109,7 +138,7 @@ class SendMessage < Command
             @messageQueue[toUser] << message
          end
       else
-         server.chat(channel, "USAGE: #{@usage}")
+         responseInfo.respond("USAGE: #{@usage}")
       end
    end
 
@@ -132,17 +161,12 @@ class Help < Command
 
    @@instance = Help.new()
 
-   def onCommand(server, channel, fromUser, args, onConsole = false)
+   def onCommand(responseInfo, args, onConsole = false)
       args.strip!
 
       if (args.length() > 0 && @@commands.has_key?(args))
-         if (onConsole)
-            puts "USAGE: #{@@commands[args].usage()}"
-            puts "#{@@commands[args].description()}"
-         else
-            server.chat(channel, "USAGE: #{@@commands[args].usage()}")
-            server.chat(channel, "#{@@commands[args].description()}")
-         end
+         responseInfo.respond("USAGE: #{@@commands[args].usage()}")
+         responseInfo.respond("#{@@commands[args].description()}")
       else
          message = "Commands: "
 
@@ -152,12 +176,35 @@ class Help < Command
             end
          }
          message.sub!(/, $/, '')
-      
-         if (onConsole)
-            puts message
-         else
-            server.chat(channel, message)
-         end
+     
+         responseInfo.respond(message)
+      end
+   end
+end
+
+class About < Command
+   def initialize
+      super('ABOUT',
+            'ABOUT [NAME | SOURCE]',
+            'Learn about Clefable.')
+   end
+
+   @@instance = About.new()
+   @@basic = 'Clefable is a chat bot started by Eriq'
+   @@name = 'The name "Clefable" holds no special meaning.' +
+            ' A random number was generated, and that pokemon was chosen.'
+   @@source = 'Clefable was written all in Ruby and you can get the source at:' +
+              'https://github.com/eriq-augustine/clefable'
+
+   def onCommand(responseInfo, args, onConsole)
+      if (args == 'NAME')
+         responseInfo.respond(@@name)
+      elsif (args == 'SOURCE')
+         responseInfo.respond(@@source)
+      else
+         responseInfo.respond(@@basic)
+         responseInfo.respond(@@name)
+         responseInfo.respond(@@source)
       end
    end
 end
