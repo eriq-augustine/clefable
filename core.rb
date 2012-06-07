@@ -1,9 +1,10 @@
 # encoding: utf-8
 
-require "socket"
-require "mysql"
+require 'socket'
 
+require './db.rb'
 require './command_core.rb'
+require './message.rb'
 require './console_commands.rb'
 require './dance.rb'
 require './replay.rb'
@@ -26,12 +27,6 @@ HOST_NAME = 'Mt.Moon'
 SERVER_NAME = 'Kanto'
 REAL_NAME = 'Clefable Bot'
 
-MYSQL_HOST = 'localhost'
-MYSQL_USER = 'clefable'
-MYSQL_PASS = 'KantoMtMoon'
-MYSQL_DB = 'clefable_bot'
-LOG_TABLE = 'logs'
-
 # TODO: Remove admin when ops is taken
 class User
    attr_reader :nick, :isAdmin
@@ -43,13 +38,14 @@ class User
 end
 
 class IRCServer
+   include DB
+
    def initialize(hostName, port, nick)
       @hostName = hostName
       @port = port
       @nick = nick
       @ircSocket = nil
       @users = Hash.new{|hash, key| hash[key] = Hash.new() }
-      @db = Mysql::new(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB)
    end
 
    # Send to the IRC Server
@@ -153,7 +149,7 @@ class IRCServer
    end
 
    # Check all channels
-   def hasUser?(nick)
+   def globalHasUser?(nick)
       @users.each_value{|channelUsers|
          if (channelUsers.has_key?(nick))
             return true
@@ -163,7 +159,7 @@ class IRCServer
    end
 
    # Check only the current channel
-   def hasUser?(nick, channel)
+   def channelHasUser?(nick, channel)
       return @users[channel].has_key?(nick)
    end
 
@@ -172,8 +168,8 @@ class IRCServer
    end
 
    def log(fromUser, toUser, message)
-      @db.query("INSERT INTO #{LOG_TABLE} (timestamp, `to`, `from`, message)" + 
-               " VALUES (#{Time.now().to_i()}, '#{toUser}', '#{fromUser}', '#{@db.escape_string(message)}')")
+      db.query("INSERT INTO #{LOG_TABLE} (timestamp, `to`, `from`, message)" + 
+               " VALUES (#{Time.now().to_i()}, '#{toUser}', '#{fromUser}', '#{db.escape_string(message)}')")
    end
 
    # The main listening loop

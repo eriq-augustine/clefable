@@ -110,48 +110,6 @@ class Command
    end
 end
 
-# TODO: use DB
-class SendMessage < Command
-   def initialize
-      super('SEND-MESSAGE',
-            'SEND-MESSAGE <to user> <message>',
-            'Send a message to a user. If they are in the channel, it will just repeat it.' +
-             'However if they are gone, the message will be sent when they return.')
-
-      @messageQueue = Hash.new()
-   end
-
-   @@instance = SendMessage.new()
-
-   def onCommand(responseInfo, args, onConsole = false)
-      if (match = args.strip.match(/^(\S+)\s+(.+)$/i))
-         toUser = match[1]
-         message = "Message from #{responseInfo.fromUser} recieved on #{Time.now()}: #{match[2]}"
-
-         if (responseInfo.server.hasUser?(toUser))
-            responseInfo.server.chat(toUser, "#{toUser}: #{message}")
-         else
-            if (!@messageQueue.has_key?(toUser))
-               @messageQueue[toUser] = Array.new()
-            end
-
-            @messageQueue[toUser] << message
-         end
-      else
-         responseInfo.respond("USAGE: #{@usage}")
-      end
-   end
-
-   def onUserPresence(server, channel, user)
-      if (@messageQueue.has_key?(user))
-         @messageQueue[user].each{|message|
-            server.chat(channel, "#{user}: #{message}")
-         }
-         @messageQueue.delete(user)
-      end
-   end
-end
-
 class Help < Command
    def initialize
       super('HELP',
@@ -162,11 +120,11 @@ class Help < Command
    @@instance = Help.new()
 
    def onCommand(responseInfo, args, onConsole = false)
-      args.strip!
+      command = args.strip.upcase
 
-      if (args.length() > 0 && @@commands.has_key?(args))
-         responseInfo.respond("USAGE: #{@@commands[args].usage()}")
-         responseInfo.respond("#{@@commands[args].description()}")
+      if (command.length() > 0 && @@commands.has_key?(command))
+         responseInfo.respond("USAGE: #{@@commands[command].usage()}")
+         responseInfo.respond("#{@@commands[command].description()}")
       else
          message = "Commands: "
 
@@ -194,7 +152,7 @@ class About < Command
    @@name = 'The name "Clefable" holds no special meaning.' +
             ' A random number was generated, and that pokemon was chosen.'
    @@source = 'Clefable was written all in Ruby and you can get the source at:' +
-              'https://github.com/eriq-augustine/clefable'
+              ' https://github.com/eriq-augustine/clefable'
 
    def onCommand(responseInfo, args, onConsole)
       if (args == 'NAME')

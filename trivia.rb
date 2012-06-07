@@ -1,19 +1,10 @@
-require 'mysql'
-
-MYSQL_HOST = 'localhost'
-MYSQL_USER = 'clefable'
-MYSQL_PASS = 'KantoMtMoon'
-MYSQL_DB = 'clefable_bot'
-
-JOKES_TABLE = 'jokes'
-FACTS_TABLE = 'facts'
-
 class Trivia < Command
+   include DB
+
    def initialize
       super('TRIVIA',
             'TRIVIA [<fact number>]',
             'Get a fun fact. If no number is provided, a random one is picked.')
-      @db = Mysql::new(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB)
    end
 
    @@instance = Trivia.new()
@@ -21,7 +12,7 @@ class Trivia < Command
    def onCommand(responseInfo, args, onConsole)
       args.strip!
       if (args.match(/^\d+$/))
-         res = @db.query("SELECT fact" + 
+         res = db.query("SELECT fact" + 
                          " FROM #{FACTS_TABLE}" +
                          " WHERE id = #{args}")
          if (!res || res.num_rows() == 0)
@@ -30,7 +21,7 @@ class Trivia < Command
             responseInfo.respond("Fact ##{args}: #{res.fetch_row()[0]}")
          end
       else
-         res = @db.query("SELECT id, fact" + 
+         res = db.query("SELECT id, fact" + 
                          " FROM #{FACTS_TABLE}" +
                          " ORDER BY RAND() LIMIT 1")
          row = res.fetch_row()
@@ -40,11 +31,12 @@ class Trivia < Command
 end
 
 class Joke < Command
+   include DB
+
    def initialize
       super('JOKE',
             'JOKE [<joke number>]',
             'Get a "funny" joke. If no number is provided, a random one is picked.')
-      @db = Mysql::new(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB)
    end
 
    @@instance = Joke.new()
@@ -52,7 +44,7 @@ class Joke < Command
    def onCommand(responseInfo, args, onConsole)
       args.strip!
       if (args.match(/^\d+$/))
-         res = @db.query("SELECT joke" + 
+         res = db.query("SELECT joke" + 
                          " FROM #{JOKES_TABLE}" +
                          " WHERE id = #{args}")
          if (!res || res.num_rows() == 0)
@@ -61,7 +53,7 @@ class Joke < Command
             responseInfo.respond("Joke ##{args}: #{res.fetch_row()[0]}")
          end
       else
-         res = @db.query("SELECT id, joke" + 
+         res = db.query("SELECT id, joke" + 
                          " FROM #{JOKES_TABLE}" +
                          " ORDER BY RAND() LIMIT 1")
          row = res.fetch_row()
