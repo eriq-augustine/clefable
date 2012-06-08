@@ -189,7 +189,169 @@ class Pass < Command
    end
 end
 
-# TODO
 # GRANT | REMOVE | MOD
 class Admin < Command
+   include DB   
+   
+   def initialize
+      super('ADMIN',
+            "ADMIN GRANT <user> <level>; " + 
+            "ADMIN REMOVE <user>; " + 
+            "ADMIN MOD <user> <new level>",
+            "GRANT a user admin rights. REMOVE a user's admin rights. MOD a user's admin rights.")
+   end
+
+   @@instance = Admin.new()
+
+   def modLevel(user, level)
+      db.query("UPDATE #{ADMIN_TABLE} SET `level` = #{level} WHERE `user` = '#{escape(user)}'")
+   end
+
+   def getLevel(user)
+      res = db.query("SELECT `level`" +
+                     " FROM #{ADMIN_TABLE}" +
+                     " WHERE `user` = '#{escape(user)}'")
+      if (res.num_rows() == 0)
+         return nil
+      else
+         row = res.fetch_row()
+         return row[0].to_i
+      end
+   end
+    
+   def handleRemove(responseInfo, users, requestUser, removeUser)
+      actualLevel = getLevel(removeUser)
+
+      if (!actualLevel)
+         responseInfo.respond("#{removeUser} is not in the system and therefore not an admin.")
+         return false
+      end
+
+      if (actualLevel == -1)
+         responseInfo.respond("#{removeUser} is not an admin.")
+         return false
+      end
+
+      if (actualLevel <= requestUser.adminLevel)
+         responseInfo.respond("You cannot remove an admin with equal or more power than yourself.")
+         return false
+      end
+
+      modLevel(removeUser, -1)
+
+      # Update runtime information
+      if (users.has_key?(removeUser))
+         users[removeUser].setAdmin(-1)
+      end
+
+      return true
+   end
+
+   def handleMod(responseInfo, users, requestUser, modUser, requestLevel)
+      actualLevel = getLevel(modUser)
+
+      if (!actualLevel)
+         responseInfo.respond("#{modUser} is not in the system and therefore not an admin.")
+         return false
+      end
+
+      if (actualLevel == -1)
+         responseInfo.respond("#{modUser} is not an admin.")
+         return false
+      end
+
+      if (requestLevel < 0)
+         responseInfo.respond("#{requestLevel} is not a valid level for an admin.")
+         return false
+      end
+      
+      if (requestLevel < requestUser.adminLevel)
+         responseInfo.respond("You cannot create an admin with more power than yourself.")
+         return false
+      end
+
+      if (actualLevel <= requestUser.adminLevel)
+         responseInfo.respond("You cannot mod an admin with equal or more power than yourself.")
+         return false
+      end
+
+      modLevel(modUser, requestLevel)
+
+      # Update runtime information
+      if (users.has_key?(modUser))
+         users[modUser].setAdmin(requestLevel)
+      end
+
+      return true
+   end
+  
+   def handleGrant(responseInfo, users, requestUser, grantUser, requestLevel)
+      actualLevel = getLevel(grantUser)
+
+      if (!actualLevel)
+         responseInfo.respond("#{grantUser} is not in the system. They have to REGISTER before becoming an admin.")
+         return false
+      end
+
+      if (actualLevel != -1)
+         responseInfo.respond("#{grantUser} is already an admin with level #{actualLevel}. Try ADMIN MOD.")
+         return false
+      end
+
+      if (requestLevel < 0)
+         responseInfo.respond("#{requestLevel} is not a valid level for an admin.")
+         return false
+      end
+      
+      if (requestLevel < requestUser.adminLevel)
+         responseInfo.respond("You cannot add an admin with more power than yourself.")
+         return false
+      end
+
+      modLevel(grantUser, requestLevel)
+
+      # Update runtime information
+      if (users.has_key?(grantUser))
+         users[grantUser].setAdmin(requestLevel)
+      end
+
+      return true
+   end
+
+   def onCommand(responseInfo, args, onConsole)
+      users = responseInfo.server.getUsers()
+
+      if (!users.has_key?(responseInfo.fromUser))
+         responseInfo.respond('You are not loged into the system.')
+      end
+
+      requestUser = users[responseInfo.fromUser]
+
+      if (!requestUser.isAuth?)
+         responseInfo.respond("You must be AUTH'd first.")
+         return
+      end
+
+      if (requestUser.adminLevel == -1)
+         responseInfo.respond("You are not an admin. Only admins can add admins.")
+         return
+      end
+
+      args.strip!
+      if (match = args.match(/^GRANT\s+(\S+)\s+(\d+)/i))
+         if(handleGrant(responseInfo, users, requestUser, match[1], match[2].to_i))
+            responseInfo.respond("#{match[1]} has sucessfully become and amdin with level #{match[2]}")
+         end
+      elsif (match = args.match(/^REMOVE\s+(\S+)/i))
+         if(handleRemove(responseInfo, users, requestUser, match[1]))
+            responseInfo.respond("#{match[1]} has sucessfully been striped of all admin rights.")
+         end
+      elsif (match = args.match(/^MOD\s+(\S+)\s+(\d+)/i))
+         if(handleMod(responseInfo, users, requestUser, match[1], match[2].to_i))
+            responseInfo.respond("#{match[1]} has sucessfully had their rights changed to #{match[2]}")
+         end
+      else
+         responseInfo.respond("I don't understand. Try: HELP ADMIN")
+      end
+   end
 end

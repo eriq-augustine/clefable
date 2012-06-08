@@ -32,7 +32,7 @@ REAL_NAME = 'Clefable Bot'
 
 # TODO: Remove admin when ops is taken
 class User
-   attr_reader :nick, :ops, :adminLevel, :auth
+   attr_reader :nick, :ops, :adminLevel
 
    def initialize(nick, ops)
       @nick = nick
@@ -47,6 +47,10 @@ class User
 
    def auth
       @auth = true
+   end
+
+   def isAuth?
+      return @auth
    end
 end
 
