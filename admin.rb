@@ -29,6 +29,11 @@ class Auth < Command
    end
 
    def onCommand(responseInfo, args, onConsole)
+      if (responseInfo.target != IRC_NICK)
+         responseInfo.respond('You must do this in a PM.')
+         return
+      end
+
       pass = args.strip
 
       hash = passHash(responseInfo.fromUser, pass)
@@ -113,6 +118,11 @@ class Register < Command
    end
 
    def onCommand(responseInfo, args, onConsole)
+      if (responseInfo.target != IRC_NICK)
+         responseInfo.respond('You must do this in a PM.')
+         return
+      end
+
       pass = args.strip
 
       if (pass.length() == 0)
@@ -154,6 +164,11 @@ class Pass < Command
    end
 
    def onCommand(responseInfo, args, onConsole)
+      if (responseInfo.target != IRC_NICK)
+         responseInfo.respond('You must do this in a PM.')
+         return
+      end
+
       pass = args.strip
 
       if (pass.length() == 0)

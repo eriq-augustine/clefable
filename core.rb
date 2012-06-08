@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+# TODO: Deal with QUIT
+
 require 'socket'
 
 require './db.rb'
@@ -149,6 +151,7 @@ class IRCServer
          channel = match[4]
          ensureUser(user, channel, false)
          Command.userJoined(self, channel, user)
+      # TODO: Deal with QUIT
       # :<from user>!<from user>@<from address> PART <channel> :<reason>
       elsif (match = message.match(/^:([^!]*)!([^@]*)@(\S*)\sPART\s(\S*)\s:(.*)$/))
          user = match[1]
