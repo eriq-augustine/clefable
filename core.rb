@@ -4,8 +4,9 @@ require 'socket'
 
 require './db.rb'
 require './command_core.rb'
-require './message.rb'
+require './admin.rb'
 require './console_commands.rb'
+require './message.rb'
 require './dance.rb'
 require './replay.rb'
 require './trivia.rb'
@@ -15,8 +16,8 @@ IRC_PORT = 6667
 IRC_NICK = 'Clefable_BOT'
 
 #DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
-DEFAULT_CHANNELS = ['#eriq_secret']
-#DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub', '#softwareinventions']
+#DEFAULT_CHANNELS = ['#eriq_secret']
+DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub', '#softwareinventions']
 
 MAX_MESSAGE_LEN = 400
 CONSOLE = '_CONSOLE_'
@@ -29,11 +30,21 @@ REAL_NAME = 'Clefable Bot'
 
 # TODO: Remove admin when ops is taken
 class User
-   attr_reader :nick, :isAdmin
+   attr_reader :nick, :ops, :adminLevel, :auth
 
-   def initialize(nick, isAdmin)
+   def initialize(nick, ops)
       @nick = nick
-      @isAdmin = isAdmin
+      @ops = ops
+      @adminLevel = -1
+      @auth = false
+   end
+
+   def setAdmin(level)
+      @adminLevel = level
+   end
+
+   def auth
+      @auth = true
    end
 end
 
@@ -45,7 +56,11 @@ class IRCServer
       @port = port
       @nick = nick
       @ircSocket = nil
-      @users = Hash.new{|hash, key| hash[key] = Hash.new() }
+
+      # { channelName => { userName => user } }
+      @channels = Hash.new{|hash, key| hash[key] = Hash.new() }
+      # { userName => user }
+      @users = Hash.new()
    end
 
    # Send to the IRC Server
@@ -79,6 +94,16 @@ class IRCServer
       end
    end
 
+   def ensureUser(user, channel, ops)
+      if (!@users.has_key?(user))
+         userInfo = User.new(user, ops)
+         @users[user] = userInfo
+         @channels[channel][user] = userInfo
+      elsif (!@channels[channel].has_key?(user))
+         @channels[channel][user] = @users[user]
+      end
+   end
+
    def handleServerInput(message)
       message.strip!
       puts "[INFO] Server says: #{message}"
@@ -101,7 +126,7 @@ class IRCServer
 
          log(fromUser, target, content)
       # Recieving user names from the server
-      # admin names are prepended with '@'
+      # ones with ops names are prepended with '@'
       # :<server> 353 <nick> @ <channel> :<user list (space seperated)>
       elsif (match = message.match(/^:(\S+)\s+353\s+(\S+)\s+@\s+(\S+)\s+:(.*)$/))
          users = match[4].split(/\s+/)
@@ -109,24 +134,20 @@ class IRCServer
 
          users.each{|user|
             user.strip!
-            admin = false
+            ops = false
 
             if (user.start_with?('@'))
-               admin = true
+               ops = true
                user.sub!(/^@/, '')
             end
 
-            if (!@users[channel].has_key?(user))
-               @users[channel][user] = User.new(user, admin)
-               Command.userPresentOnJoin(self, channel, user)
-            end
+            ensureUser(user, channel, ops)
          }
       # :<from user>!<from user>@<from address> JOIN <channel>
       elsif (match = message.match(/^:([^!]*)!([^@]*)@(\S*)\sJOIN\s(\S*)$/))
          user = match[1]
          channel = match[4]
-
-         @users[channel][user] = User.new(user, false)
+         ensureUser(user, channel, false)
          Command.userJoined(self, channel, user)
       # :<from user>!<from user>@<from address> PART <channel> :<reason>
       elsif (match = message.match(/^:([^!]*)!([^@]*)@(\S*)\sPART\s(\S*)\s:(.*)$/))
@@ -134,7 +155,20 @@ class IRCServer
          channel = match[4]
          reason = match[5]
 
-         @users.delete(user)
+         @channels[channel].delete(user)
+
+         found = false
+         @channels.each_value{|users|
+            if (users.has_key?(user))
+               found = true
+               break
+            end
+         }
+
+         if (!found)
+            @users.delete(user)
+         end
+
          Command.userLeft(self, channel, user, reason)
       end
    end
@@ -150,17 +184,16 @@ class IRCServer
 
    # Check all channels
    def globalHasUser?(nick)
-      @users.each_value{|channelUsers|
-         if (channelUsers.has_key?(nick))
-            return true
-         end
-      }
-      return false
+      return @users.has_key?(nick)
    end
 
    # Check only the current channel
    def channelHasUser?(nick, channel)
-      return @users[channel].has_key?(nick)
+      return @channels[channel].has_key?(nick)
+   end
+
+   def getChannels()
+      return @channels
    end
 
    def getUsers()

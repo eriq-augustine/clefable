@@ -1,0 +1,6 @@
+DROP TABLE IF EXISTS admin;
+CREATE TABLE admin (
+   `user` VARCHAR(128) PRIMARY KEY,
+   pass VARCHAR(64) NOT NULL,
+   `level` INT NOT NULL DEFAULT -1
+);

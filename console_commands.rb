@@ -29,7 +29,7 @@ class ListUsers < Command
    @@instance = ListUsers.new()
 
    def onCommand(responseInfo, args, onConsole)
-      channels = responseInfo.server.getUsers()
+      channels = responseInfo.server.getChannels()
 
       channels.each_pair{|channel, users|
          puts "#{channel}"

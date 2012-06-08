@@ -10,10 +10,12 @@ module DB
    DANCE_TABLE = 'dances'
    JOKES_TABLE = 'jokes'
    FACTS_TABLE = 'facts'
+   ADMIN_TABLE = 'admin'
 
    def db
       if (@db.nil?)
          @db = Mysql::new(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB)
+         @db.reconnect = true
       end
       
       return @db

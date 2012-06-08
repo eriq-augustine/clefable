@@ -9,22 +9,46 @@ class Replay < Command
 
    @@instance = Replay.new()
 
-   # TODO: This allows others to see PM to Clefable, fix that by checking from if PM.
+   def calcSleepTime(numMessages)
+      if (numMessages >= 50)
+         return 1
+      end
+
+      return 0.2 + 0.75 * (numMessages / 50.0)
+   end
+
    def onCommand(responseInfo, args, onConsole)
-      if (match = args.strip.match(/^LAST\s+(\d+)$/))
+      if (match = args.strip.match(/^LAST\s+(\d+)$/i))
          startTime = Time.now().to_i() - (match[1].to_i * 60)
 
-         res = db.query("SELECT timestamp, `from`, message" + 
-                         " FROM #{LOG_TABLE}" +
-                         " WHERE timestamp >= #{startTime}" +
-                         "  AND `to` = '#{responseInfo.target}'" + 
-                         " ORDER BY timestamp")
+         if (!responseInfo.target.start_with?('#'))
+            # A PM, check user
+            query = "SELECT timestamp, `from`, message" + 
+                    " FROM #{LOG_TABLE}" +
+                    " WHERE timestamp >= #{startTime}" +
+                    "  AND `to` = '#{responseInfo.target}'" + 
+                    "  AND `from` = '#{responseInfo.fromUser}'" + 
+                    " ORDER BY timestamp"
+         else
+            query = "SELECT timestamp, `from`, message" + 
+                    " FROM #{LOG_TABLE}" +
+                    " WHERE timestamp >= #{startTime}" +
+                    "  AND `to` = '#{responseInfo.target}'" + 
+                    " ORDER BY timestamp"
+         end
+
+         res = db.query(query)
+
          if (res.num_rows() == 0)
                responseInfo.respondPM("No results.")
          else
+            sleepTime = calcSleepTime(res.num_rows())
+
+            puts "SleepTime: #{sleepTime}"
+            
             res.each{|row|
                responseInfo.respondPM("[#{Time.at(row[0].to_i)}] #{row[1]}: #{row[2]}")
-               sleep(0.2)
+               sleep(sleepTime)
             }
          end
       else
