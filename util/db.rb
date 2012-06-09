@@ -13,6 +13,7 @@ module DB
    ADMIN_TABLE = 'admin'
    NOTES_TABLE = 'notes'
    NOTE_TAGS_TABLE = 'note_tags'
+   MESSAGES_TABLE = 'messages'
 
    def db
       if (@db.nil?)

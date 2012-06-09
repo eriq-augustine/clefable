@@ -1,5 +1,20 @@
 # TODO: use DB
 class SendMessage < Command
+   include DB
+
+   def loadMessages()
+      res = db.query("SELECT to_user, message FROM #{MESSAGES_TABLE}")
+      if (res)
+         res.each{|row|
+            if (!@messageQueue.key?(row[0]))
+               @messageQueue[row[0]] = Array.new()
+            end
+
+            @messageQueue[row[0]] << row[1]
+         }
+      end
+   end
+
    def initialize
       super('SEND-MESSAGE',
             'SEND-MESSAGE [!INCOGNITO] <to user> <message>',
@@ -7,9 +22,25 @@ class SendMessage < Command
              'However if they are gone, the message will be sent when they return.')
 
       @messageQueue = Hash.new()
+      loadMessages()
    end
 
    @@instance = SendMessage.new()
+
+   def addMessage(toUser, message)
+      if (!@messageQueue.has_key?(toUser))
+         @messageQueue[toUser] = Array.new()
+      end
+
+      @messageQueue[toUser] << message
+
+      db.query("INSERT INTO #{MESSAGES_TABLE} (to_user, message) VALUES ('#{toUser}', '#{escape(message)}')")
+   end
+
+   def removeAllMessages(toUser)
+      @messageQueue.delete(toUser)
+      db.query("DELETE FROM #{MESSAGES_TABLE} WHERE to_user = '#{toUser}'")
+   end
 
    def onCommand(responseInfo, args, onConsole = false)
       if (match = args.strip.match(/^(\S+)\s+(.+)$/))
@@ -26,12 +57,10 @@ class SendMessage < Command
 
          if (responseInfo.server.globalHasUser?(toUser))
             responseInfo.server.chat(toUser, "#{toUser}: #{message}")
+            responseInfo.respond('Message delivered.')
          else
-            if (!@messageQueue.has_key?(toUser))
-               @messageQueue[toUser] = Array.new()
-            end
-
-            @messageQueue[toUser] << message
+            addMessage(toUser, message)
+            responseInfo.respond('User is not available, but message was queued.')
          end
       else
          responseInfo.respond("USAGE: #{@usage}")
@@ -43,7 +72,7 @@ class SendMessage < Command
          @messageQueue[user].each{|message|
             server.chat(channel, "#{user}: #{message}")
          }
-         @messageQueue.delete(user)
       end
+      removeAllMessages(user)
    end
 end

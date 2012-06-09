@@ -41,7 +41,7 @@ class Command
 
       @consoleOnly = false
       if (options.key?(:consoleOnly))
-         @consoleOnly = options[:consolOnly]
+         @consoleOnly = options[:consoleOnly]
       end
 
       @skipLog = false
