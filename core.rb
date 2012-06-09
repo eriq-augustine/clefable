@@ -6,29 +6,29 @@ require 'socket'
 
 require './db.rb'
 require './command_core.rb'
-require './admin.rb'
-require './console_commands.rb'
-require './message.rb'
-require './dance.rb'
-require './replay.rb'
-require './trivia.rb'
 
 IRC_HOST = 'irc.freenode.net'
 IRC_PORT = 6667
 IRC_NICK = 'Clefable_BOT'
 
 #DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
-#DEFAULT_CHANNELS = ['#eriq_secret']
-DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub', '#softwareinventions']
+DEFAULT_CHANNELS = ['#eriq_secret']
+#DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub', '#softwareinventions']
 
 MAX_MESSAGE_LEN = 400
 CONSOLE = '_CONSOLE_'
+COMMAND_DIR = './commands'
 
 USER_NAME = IRC_NICK
 SHORT_NICK = 'CLEF'
 HOST_NAME = 'Mt.Moon'
 SERVER_NAME = 'Kanto'
 REAL_NAME = 'Clefable Bot'
+
+# Load all the commands from COMMAND_DIR
+Dir["#{COMMAND_DIR}/*.rb"].each{|file|
+   require file
+}
 
 # TODO: Remove admin when ops is taken
 class User
@@ -126,11 +126,18 @@ class IRCServer
 
          responseInfo = ResponseInfo.new(self, fromUser, target)
 
+         logMessage = true
+         # If sent message is started with "#{IRC_NICK}:" or "#{SHORT_NICK}:"
          if (commandMatch = content.strip.match(/^((?:#{IRC_NICK})|(?:#{SHORT_NICK})):\s*(.+)$/i))
-            Command.invoke(responseInfo, commandMatch[2])
+            logMessage = Command.invoke(responseInfo, commandMatch[2])
+         # If message was sent in a PM
+         elsif (target == IRC_NICK)
+            logMessage = Command.invoke(responseInfo, content)
          end
 
-         log(fromUser, target, content)
+         if (logMessage)
+            log(fromUser, target, content)
+         end
       # Recieving user names from the server
       # ones with ops names are prepended with '@'
       # :<server> 353 <nick> @ <channel> :<user list (space seperated)>

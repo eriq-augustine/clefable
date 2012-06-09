@@ -11,7 +11,8 @@ class Auth < Command
    def initialize
       super('AUTH',
             'AUTH <pass phrase>',
-            'Authenticate as a user. You should AUTH in a PM. You have to REGISTER before you can AUTH.')
+            'Authenticate as a user. You should AUTH in a PM. You have to REGISTER before you can AUTH.',
+            {:skipLog => true})
    end
 
    @@instance = Auth.new()
@@ -44,7 +45,7 @@ class Auth < Command
       elsif (info[:pass] == hash)
          responseInfo.server.getUsers()[responseInfo.fromUser].setAdmin(info[:level])
          responseInfo.server.getUsers()[responseInfo.fromUser].auth()
-         responseInfo.respond('You are authenticated!')
+         responseInfo.respond('You are now authenticated!')
       else
          responseInfo.respond('Bad Pass Phrase.')
       end
@@ -101,7 +102,8 @@ class Register < Command
    def initialize
       super('REGISTER',
             'REGISTER <pass phrase>',
-            'Register this nick into the Clefable system. Please REGISTER using a PM.')
+            'Register this nick into the Clefable system. Please REGISTER using a PM.',
+            {:skipLog => true})
    end
 
    @@instance = Register.new()
@@ -147,7 +149,8 @@ class Pass < Command
    def initialize
       super('PASS',
             'PASS <new pass phrase>',
-            "Register a new pass phrase for your nick. Must be AUTH'd first.")
+            "Register a new pass phrase for your nick. Must be AUTH'd first.",
+            {:skipLog => true})
    end
 
    @@instance = Pass.new()
