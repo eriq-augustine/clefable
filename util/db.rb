@@ -11,6 +11,8 @@ module DB
    JOKES_TABLE = 'jokes'
    FACTS_TABLE = 'facts'
    ADMIN_TABLE = 'admin'
+   NOTES_TABLE = 'notes'
+   NOTE_TAGS_TABLE = 'note_tags'
 
    def db
       if (@db.nil?)

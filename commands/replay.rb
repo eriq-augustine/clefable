@@ -1,5 +1,6 @@
 class Replay < Command
    include DB
+   include RateLimit
 
    def initialize
       super('REPLAY',
@@ -8,14 +9,6 @@ class Replay < Command
    end
 
    @@instance = Replay.new()
-
-   def calcSleepTime(numMessages)
-      if (numMessages >= 50)
-         return 1
-      end
-
-      return 0.2 + 0.75 * (numMessages / 50.0)
-   end
 
    def onCommand(responseInfo, args, onConsole)
       if (match = args.strip.match(/^LAST\s+(\d+)$/i))

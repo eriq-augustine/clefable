@@ -4,7 +4,6 @@
 
 require 'socket'
 
-require './db.rb'
 require './command_core.rb'
 
 IRC_HOST = 'irc.freenode.net'
@@ -17,13 +16,20 @@ DEFAULT_CHANNELS = ['#eriq_secret']
 
 MAX_MESSAGE_LEN = 400
 CONSOLE = '_CONSOLE_'
+
 COMMAND_DIR = './commands'
+UTIL_DIR = './util'
 
 USER_NAME = IRC_NICK
 SHORT_NICK = 'CLEF'
 HOST_NAME = 'Mt.Moon'
 SERVER_NAME = 'Kanto'
 REAL_NAME = 'Clefable Bot'
+
+# Load all the utilities
+Dir["#{UTIL_DIR}/*.rb"].each{|file|
+   require file
+}
 
 # Load all the commands from COMMAND_DIR
 Dir["#{COMMAND_DIR}/*.rb"].each{|file|
