@@ -1,14 +1,16 @@
 #TODO: Better tag matching
 # Right now it tries to match all the tags
 
+#TODO: query
+
 class Note < Command
    include DB
    include RateLimit
 
    def initialize
       super('NOTE',
-            'NOTE TAGS; ADD <tags> ! <note>; NOTE SEARCH <tags>',
-            'See the currently used tags, add a note, or search through notes.' + 
+            'NOTE TAGS; ADD <tags> ! <note>; NOTE SEARCH <tags>; NOTE DETAILS <note number>',
+            'See the currently used tags; add a note; or search through notes.' + 
             ' Tags should be whitespace seperated')
    end
 
@@ -48,7 +50,7 @@ class Note < Command
       }
       tagStr.sub!(/, $/, '')
 
-      res = db.query("SELECT n.note, tags.tags" +
+      res = db.query("SELECT n.id, n.note, tags.tags, n.author, n.timestamp" +
                      " FROM" +
                      " #{NOTES_TABLE} n JOIN (" +
                      "   SELECT note_id, COUNT(*) as tag_count" +
@@ -66,11 +68,32 @@ class Note < Command
 
       if (res)
          res.each{|row|
-            notes << {:note => row[0], :tags => row[1]}
+            notes << {:id => row[0], :note => row[1], :tags => row[2],
+                      :author => row[3], :timestamp => row[4].to_i}
          }
       end
 
       return notes
+   end
+
+   def getNote(id)
+      res = db.query("SELECT n.id, n.note, tags.tags, n.author, n.timestamp" +
+                     " FROM" +
+                     " #{NOTES_TABLE} n" +
+                     " JOIN (" +
+                     "   SELECT note_id, GROUP_CONCAT(tag ORDER BY tag SEPARATOR ', ') as tags" +
+                     "   FROM #{NOTE_TAGS_TABLE}" + 
+                     "   WHERE note_id = #{id}" + 
+                     "   GROUP BY note_id" +
+                     " ) tags ON tags.note_id = n.id")
+      
+      if (!res || res.num_rows() == 0)
+         return nil
+      else
+         row = res.fetch_row()
+         return {:id => row[0], :note => row[1], :tags => row[2],
+                 :author => row[3], :timestamp => row[4].to_i}
+      end
    end
 
    def onCommand(responseInfo, args, onConsole)
@@ -93,7 +116,7 @@ class Note < Command
                responseInfo.respond('No results.')
             else
                res.each{|note|
-                  responseInfo.respond("Tags: [#{note[:tags]}]; Note: #{note[:note]}")
+                  responseInfo.respond("Note ##{note[:id]} -- Tags: [#{note[:tags]}]; Note: #{note[:note]}")
                }
             end
          end
@@ -105,6 +128,14 @@ class Note < Command
             responseInfo.respond('Successfully added note.')
          else
             responseInfo.respond('There was an error adding the note.')
+         end
+      elsif (match = args.match(/^DETAILS\s+(\d+)$/i))
+         if (note = getNote(match[1].to_i))
+            message = "Id: #{note[:id]}, Author: #{note[:author]}," +
+                      " Time: #{Time.at(note[:timestamp])}, Tags: [#{note[:tags]}]"
+            responseInfo.respond(message)
+         else
+            responseInfo.respond('Unable to find that note.')
          end
       else
          responseInfo.respond('What? Try: HELP NOTE')

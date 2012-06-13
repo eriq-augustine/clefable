@@ -36,7 +36,7 @@ class About < Command
    end
 
    @@instance = About.new()
-   @@basic = 'Clefable is a chat bot started by Eriq'
+   @@basic = 'Clefable is a chat bot started by ^Eriq'
    @@name = 'The name "Clefable" holds no special meaning.' +
             ' A random number was generated, and that pokemon was chosen.'
    @@source = 'Clefable was written all in Ruby and you can get the source at:' +
