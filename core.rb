@@ -56,6 +56,11 @@ class User
       @auth = true
    end
 
+   def deauth
+      @auth = false
+      @adminLevel = -1
+   end
+
    def isAuth?
       return @auth
    end

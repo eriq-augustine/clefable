@@ -4,7 +4,6 @@ def passHash(user, pass)
    return Digest::SHA2.new().update(user + '3.1415' + pass).to_s
 end
 
-# TODO: Breaks if Clefable does not know about the user (not in it's channles)
 class Auth < Command
    include DB
 
@@ -35,7 +34,18 @@ class Auth < Command
          return
       end
 
+      userInfo = responseInfo.server.getUsers()[responseInfo.fromUser]
+      if (!userInfo)
+         responseInfo.respond("I don't know if you are actually on. If you are real, leave and rejoin.")
+         return
+      end
+
       pass = args.strip
+
+      if (pass.length() == 0)
+         responseInfo.respond("USAGE: #{@usage}")
+         return
+      end
 
       hash = passHash(responseInfo.fromUser, pass)
       info = getInfo(responseInfo.fromUser)
@@ -43,14 +53,36 @@ class Auth < Command
       if (!info)
          responseInfo.respond('You are not in the system. Please REGISTER')
       elsif (info[:pass] == hash)
-         responseInfo.server.getUsers()[responseInfo.fromUser].setAdmin(info[:level])
-         responseInfo.server.getUsers()[responseInfo.fromUser].auth()
+         userInfo.setAdmin(info[:level])
+         userInfo.auth()
          responseInfo.respond('You are now authenticated!')
       else
          responseInfo.respond('Bad Pass Phrase.')
       end
    end
 end
+
+class Deauth < Command
+   include DB
+
+   def initialize
+      super('DEAUTH',
+            'DEAUTH',
+            'Deauthenticate from the Clefable system.')
+   end
+
+   @@instance = Deauth.new()
+
+   def onCommand(responseInfo, args, onConsole)
+      userInfo = responseInfo.server.getUsers()[responseInfo.fromUser]
+      if (userInfo)
+         userInfo.deauth
+      end
+
+      responseInfo.respond("You are DEAUTH'd.")
+   end
+end
+
 
 class UserInfo < Command
    include DB

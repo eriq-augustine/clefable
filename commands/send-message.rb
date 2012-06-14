@@ -19,7 +19,7 @@ class SendMessage < Command
       super('SEND-MESSAGE',
             'SEND-MESSAGE [!INCOGNITO] [^]<to user> <message>',
             'Send a message to a user. If they are in the channel, it will just repeat it.' +
-             'However if they are gone, the message will be sent when they return.')
+             ' However if they are gone, the message will be sent when they return.')
 
       @messageQueue = Hash.new()
       loadMessages()
