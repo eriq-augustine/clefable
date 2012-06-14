@@ -238,6 +238,14 @@ class IRCServer
       return @users
    end
 
+   def giveOps(user, channel)
+      sendMessage("MODE #{channel} +o #{user}")
+   end
+
+   def takeOps(user, channel)
+      sendMessage("MODE #{channel} -o #{user}")
+   end
+
    def log(fromUser, toUser, message)
       db.query("INSERT INTO #{LOG_TABLE} (timestamp, `to`, `from`, message)" + 
                " VALUES (#{Time.now().to_i()}, '#{toUser}', '#{fromUser}', '#{db.escape_string(message)}')")
