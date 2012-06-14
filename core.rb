@@ -136,7 +136,7 @@ class IRCServer
 
    def handleServerInput(message)
       message.strip!
-      puts "[INFO] Server says: #{message}"
+      #puts "[INFO] Server says: #{message}"
 
       # PING :<server>
       if (match = message.match(/^PING\s:(.*)$/))

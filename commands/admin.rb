@@ -235,7 +235,8 @@ class Admin < Command
             "ADMIN GRANT [^]<user> <level>; " + 
             "ADMIN REMOVE [^]<user>; " + 
             "ADMIN MOD [^]<user> <new level>",
-            "GRANT a user admin rights. REMOVE a user's admin rights. MOD a user's admin rights.",
+            "GRANT a user admin rights. REMOVE a user's admin rights. MOD a user's admin rights." +
+            " Admins can GRANT other admins to as high as their own level, and can MOD/REMOVE admins below their level.",
             {:adminLevel => MAX_LEVEL})
    end
 
@@ -380,7 +381,7 @@ class Admin < Command
          user = match[1].sub(/^\^/, '')
          level = match[2].to_i
          if(handleGrant(responseInfo, users, requestUser, user, level))
-            responseInfo.respond("^#{user} has sucessfully become and amdin with level #{level} rights.")
+            responseInfo.respond("^#{user} has sucessfully become and admin with level #{level} rights.")
          end
       elsif (match = args.match(/^REMOVE\s+(\S+)/i))
          user = match[1].sub(/^\^/, '')

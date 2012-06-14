@@ -7,7 +7,14 @@ class LastMessage < Command
             'Get the last message from given user.')
    end
 
-   @@instance = LastMessage.new()
+   def secsToHMS(totalSecs)
+      hours = totalSecs / 3600
+      totalSecs -= hours * 3600
+      mins = totalSecs / 60
+      secs = totalSecs - mins * 60
+
+      return {:hours => hours, :mins => mins, :secs => secs}
+   end
 
    def onCommand(responseInfo, args, onConsole)
       args = args.strip.upcase
@@ -31,11 +38,14 @@ class LastMessage < Command
                         " LIMIT 1")
 
          if (!res || res.num_rows() == 0)
-            message = "No results for #{user}"
+            message = "No results for ^#{user.downcase}"
          else
             row = res.fetch_row()
-            message = "Last message recieved from ^#{user.downcase} at" + 
-                      " #{Time.at(row[0].to_i)} in #{row[1]}: #{row[2]}"
+            hms = secsToHMS(Time.now().to_i - row[0].to_i)
+            message = "Last message recieved from ^#{user.downcase} (" + 
+                      "#{hms[:hours]} hours, #{hms[:mins]} minutes ago in #{row[1]}): #{row[2]}"
+            #message = "Last message recieved from ^#{user.downcase} at" + 
+            #          " #{Time.at(row[0].to_i)} in #{row[1]}: #{row[2]}"
             #message = "Last message recieved from ^#{user.downcase} at" + 
             #          " #{Time.at(row[0].to_i)}: #{row[2]}"
          end
@@ -47,4 +57,6 @@ class LastMessage < Command
          responseInfo.respond(message)
       end
    end
+
+   @@instance = LastMessage.new()
 end
