@@ -3,17 +3,25 @@ class LastMessage < Command
 
    def initialize
       super('LAST-MESSAGE',
-            'LAST-MESSAGE <user>',
+            'LAST-MESSAGE -PM [^]<user>',
             'Get the last message from given user.')
    end
 
    @@instance = LastMessage.new()
 
    def onCommand(responseInfo, args, onConsole)
-      user = args.strip
+      args = args.strip.upcase
+      pm = false
+
+      if (args.start_with?('-PM'))
+         pm = true
+         args.sub!(/^-PM\s*/, '')
+      end
+
+      user = args.sub(/^\^\s*/, '')
 
       if (user.length() == 0)
-         responseInfo.respond('You have to specify a user.')
+         message = 'You have to specify a user.'
       else
          res = db.query("SELECT timestamp, `to`, message" +
                         " FROM #{LOG_TABLE}" +
@@ -23,12 +31,20 @@ class LastMessage < Command
                         " LIMIT 1")
 
          if (!res || res.num_rows() == 0)
-            responseInfo.respond("No results for #{user}")
+            message = "No results for #{user}"
          else
             row = res.fetch_row()
-            responseInfo.respond("Last message recied from #{user} at" + 
-                                 " #{Time.at(row[0].to_i)} in #{row[1]}: #{row[2]}")
+            #message = "Last message recieved from ^#{user.downcase} at" + 
+            #          " #{Time.at(row[0].to_i)} in #{row[1]}: #{row[2]}"
+            message = "Last message recieved from ^#{user.downcase} at" + 
+                      " #{Time.at(row[0].to_i)}: #{row[2]}"
          end
+      end
+
+      if (pm)
+         responseInfo.respondPM(message)
+      else
+         responseInfo.respond(message)
       end
    end
 end

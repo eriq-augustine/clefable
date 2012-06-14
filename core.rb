@@ -11,8 +11,8 @@ IRC_PORT = 6667
 IRC_NICK = 'Clefable_BOT'
 
 #DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
-DEFAULT_CHANNELS = ['#eriq_secret']
-#DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub', '#softwareinventions']
+#DEFAULT_CHANNELS = ['#eriq_secret']
+DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub', '#softwareinventions']
 
 MAX_MESSAGE_LEN = 400
 CONSOLE = '_CONSOLE_'
@@ -22,6 +22,7 @@ UTIL_DIR = './util'
 
 USER_NAME = IRC_NICK
 SHORT_NICK = 'CLEF'
+TRIGGER = '`'
 HOST_NAME = 'Mt.Moon'
 SERVER_NAME = 'Kanto'
 REAL_NAME = 'Clefable Bot'
@@ -98,6 +99,9 @@ class IRCServer
    end
 
    def chat(channel, message)
+      # Protection
+      message.gsub!(/bestfriends?club/, 'SafariZone')
+
       # TODO: Split better, so words are not broken.
       for i in 0..(message.length() / MAX_MESSAGE_LEN)
          part = message[i * MAX_MESSAGE_LEN, (i + 1) * MAX_MESSAGE_LEN]
@@ -133,8 +137,8 @@ class IRCServer
          responseInfo = ResponseInfo.new(self, fromUser, target)
 
          logMessage = true
-         # If sent message is started with "#{IRC_NICK}:" or "#{SHORT_NICK}:"
-         if (commandMatch = content.strip.match(/^((?:#{IRC_NICK})|(?:#{SHORT_NICK})):\s*(.+)$/i))
+         # If sent message is started with "#{IRC_NICK}:" or "#{SHORT_NICK}:" or "#{TRIGGER}"
+         if (commandMatch = content.strip.match(/^((?:#{IRC_NICK}:)|(?:#{SHORT_NICK}:)|(?:#{TRIGGER}))\s*(.+)$/i))
             logMessage = Command.invoke(responseInfo, commandMatch[2])
          # If message was sent in a PM
          elsif (target == IRC_NICK)
