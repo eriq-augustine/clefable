@@ -40,7 +40,7 @@ class Replay < Command
             puts "SleepTime: #{sleepTime}"
             
             res.each{|row|
-               responseInfo.respondPM("[#{Time.at(row[0].to_i)}] #{row[1]}: #{row[2]}")
+               responseInfo.respondPM("[#{Time.at(row[0].to_i)}] ^#{row[1]}: #{row[2]}")
                sleep(sleepTime)
             }
          end

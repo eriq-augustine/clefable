@@ -17,7 +17,7 @@ class SendMessage < Command
 
    def initialize
       super('SEND-MESSAGE',
-            'SEND-MESSAGE [!INCOGNITO] <to user> <message>',
+            'SEND-MESSAGE [!INCOGNITO] [^]<to user> <message>',
             'Send a message to a user. If they are in the channel, it will just repeat it.' +
              'However if they are gone, the message will be sent when they return.')
 
@@ -46,11 +46,11 @@ class SendMessage < Command
       if (match = args.strip.match(/^(\S+)\s+(.+)$/))
          if (match[1].upcase == '!INCOGNITO')
             incognitoMatch = match[2].match(/^(\S+)\s+(.+)$/)
-            toUser = incognitoMatch[1]
+            toUser = incognitoMatch[1].sub(/^\^/, '')
             payload = incognitoMatch[2]
             message = "Message recieved on #{Time.now()}: #{payload}"
          else
-            toUser = match[1]
+            toUser = match[1].sub(/^\^/, '')
             payload = match[2]
             message = "Message from #{responseInfo.fromUser} recieved on #{Time.now()}: #{payload}"
          end
@@ -70,7 +70,7 @@ class SendMessage < Command
    def onUserPresence(server, channel, user)
       if (@messageQueue.has_key?(user))
          @messageQueue[user].each{|message|
-            server.chat(channel, "#{user}: #{message}")
+            server.chat(user, "#{user}: #{message}")
          }
       end
       removeAllMessages(user)

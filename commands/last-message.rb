@@ -34,10 +34,10 @@ class LastMessage < Command
             message = "No results for #{user}"
          else
             row = res.fetch_row()
-            #message = "Last message recieved from ^#{user.downcase} at" + 
-            #          " #{Time.at(row[0].to_i)} in #{row[1]}: #{row[2]}"
             message = "Last message recieved from ^#{user.downcase} at" + 
-                      " #{Time.at(row[0].to_i)}: #{row[2]}"
+                      " #{Time.at(row[0].to_i)} in #{row[1]}: #{row[2]}"
+            #message = "Last message recieved from ^#{user.downcase} at" + 
+            #          " #{Time.at(row[0].to_i)}: #{row[2]}"
          end
       end
 

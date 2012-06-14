@@ -57,7 +57,7 @@ class UserInfo < Command
 
    def initialize
       super('USER-INFO',
-            'USER-INFO [user]',
+            'USER-INFO [[^]user]',
             'Get info about a user, or yourself if no user is given.')
    end
 
@@ -76,7 +76,7 @@ class UserInfo < Command
    end
 
    def onCommand(responseInfo, args, onConsole)
-      user = args.strip
+      user = args.strip.sub(/^\^/, '')
 
       if (user.length() == 0)
          user = responseInfo.fromUser
@@ -85,12 +85,12 @@ class UserInfo < Command
       level = getLevel(user)
 
       if (!level)
-         responseInfo.respond("Sorry, #{user} is not in my system.")
+         responseInfo.respond("Sorry, ^#{user} is not in my system.")
       else
          if (level == -1)
-            responseInfo.respond("#{user} is a regular user.")
+            responseInfo.respond("^#{user} is a regular user.")
          else
-            responseInfo.respond("#{user} an admin with level #{level} rights.")
+            responseInfo.respond("^#{user} is an admin with level #{level} rights.")
          end
       end
    end
@@ -200,9 +200,9 @@ class Admin < Command
 
    def initialize
       super('ADMIN',
-            "ADMIN GRANT <user> <level>; " + 
-            "ADMIN REMOVE <user>; " + 
-            "ADMIN MOD <user> <new level>",
+            "ADMIN GRANT [^]<user> <level>; " + 
+            "ADMIN REMOVE [^]<user>; " + 
+            "ADMIN MOD [^]<user> <new level>",
             "GRANT a user admin rights. REMOVE a user's admin rights. MOD a user's admin rights.",
             {:adminLevel => MAX_LEVEL})
    end
@@ -345,16 +345,21 @@ class Admin < Command
 
       args.strip!
       if (match = args.match(/^GRANT\s+(\S+)\s+(\d+)/i))
-         if(handleGrant(responseInfo, users, requestUser, match[1], match[2].to_i))
-            responseInfo.respond("#{match[1]} has sucessfully become and amdin with level #{match[2]}")
+         user = match[1].sub(/^\^/, '')
+         level = match[2].to_i
+         if(handleGrant(responseInfo, users, requestUser, user, level))
+            responseInfo.respond("^#{user} has sucessfully become and amdin with level #{level} rights.")
          end
       elsif (match = args.match(/^REMOVE\s+(\S+)/i))
-         if(handleRemove(responseInfo, users, requestUser, match[1]))
-            responseInfo.respond("#{match[1]} has sucessfully been striped of all admin rights.")
+         user = match[1].sub(/^\^/, '')
+         if(handleRemove(responseInfo, users, requestUser, user))
+            responseInfo.respond("^#{match[1]} has sucessfully been striped of all admin rights.")
          end
       elsif (match = args.match(/^MOD\s+(\S+)\s+(\d+)/i))
-         if(handleMod(responseInfo, users, requestUser, match[1], match[2].to_i))
-            responseInfo.respond("#{match[1]} has sucessfully had their rights changed to #{match[2]}")
+         user = match[1].sub(/^\^/, '')
+         level = match[2].to_i
+         if(handleMod(responseInfo, users, requestUser, user, level))
+            responseInfo.respond("^#{user} has sucessfully had their rights changed to #{level}.")
          end
       else
          responseInfo.respond("I don't understand. Try: HELP ADMIN")
