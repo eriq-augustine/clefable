@@ -14,6 +14,7 @@ module DB
    NOTES_TABLE = 'notes'
    NOTE_TAGS_TABLE = 'note_tags'
    MESSAGES_TABLE = 'messages'
+   REWRITE_TABLE = 'rewrite_rules'
 
    def db
       if (@db.nil?)
@@ -26,5 +27,19 @@ module DB
 
    def escape(str)
       return Mysql::escape_string(str)
+   end
+
+   def getRewriteRules()
+      rtn = Hash.new()
+
+      res = db.query("SELECT target, rewrite FROM #{REWRITE_TABLE}")
+
+      if (res)
+         res.each{|row|
+            rtn[row[0]] = row[1]
+         }
+      end
+
+      return rtn
    end
 end

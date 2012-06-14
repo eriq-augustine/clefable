@@ -10,9 +10,9 @@ IRC_HOST = 'irc.freenode.net'
 IRC_PORT = 6667
 IRC_NICK = 'Clefable_BOT'
 
-#DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
+DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
 #DEFAULT_CHANNELS = ['#eriq_secret']
-DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub', '#softwareinventions']
+#DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub', '#softwareinventions']
 
 MAX_MESSAGE_LEN = 400
 CONSOLE = '_CONSOLE_'
@@ -64,6 +64,8 @@ end
 class IRCServer
    include DB
 
+   attr_reader :rewriteRules
+
    def initialize(hostName, port, nick)
       @hostName = hostName
       @port = port
@@ -74,6 +76,9 @@ class IRCServer
       @channels = Hash.new{|hash, key| hash[key] = Hash.new() }
       # { userName => user }
       @users = Hash.new()
+   
+      # { target => rewrite }
+      @rewriteRules = getRewriteRules()
    end
 
    # Send to the IRC Server
@@ -98,9 +103,13 @@ class IRCServer
       puts "[INFO] Joined #{channel}"
    end
 
-   def chat(channel, message)
+   def chat(channel, message, rewrite = true)
       # Protection
-      message.gsub!(/bestfriends?club/, 'SafariZone')
+      if (rewrite)
+         @rewriteRules.each_pair{|target, rewrite|
+            message.gsub!(/#{target}/i, rewrite)
+         }
+      end
 
       # TODO: Split better, so words are not broken.
       for i in 0..(message.length() / MAX_MESSAGE_LEN)
@@ -134,7 +143,7 @@ class IRCServer
          target = match[4]
          content = match[5].strip
 
-         responseInfo = ResponseInfo.new(self, fromUser, target)
+         responseInfo = ResponseInfo.new(self, fromUser, target, @users[fromUser])
 
          logMessage = true
          # If sent message is started with "#{IRC_NICK}:" or "#{SHORT_NICK}:" or "#{TRIGGER}"
@@ -202,7 +211,7 @@ class IRCServer
 
       if (command.length() > 0)
          puts "[INFO] Recieved command: #{command}"
-         Command.invoke(ResponseInfo.new(self, CONSOLE, CONSOLE), command, true)
+         Command.invoke(ResponseInfo.new(self, CONSOLE, CONSOLE, nil), command, true)
       end
    end
 

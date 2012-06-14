@@ -1,38 +1,44 @@
+# TODO: Information is deiplayed about a command if they try and invoke it and it
+#  requires admin. Should this info be hidden?
+
 class ResponseInfo
-   def initialize(server, fromUser, target)
+   attr_reader :server, :fromUser, :target, :fromUserInfo
+
+   def initialize(server, fromUser, target, fromUserInfo)
       @server = server
       @fromUser = fromUser
       @target = target
+      @fromUserInfo = fromUserInfo
 
       @onConsole = (fromUser == CONSOLE)
    end
 
-   attr_reader :server, :fromUser, :target
-
-   def respondPM(message)
+   def respondPM(message, rewrite = true)
       if (@onConsole)
          puts message
       else
-         server.chat(fromUser, message)
+         server.chat(fromUser, message, rewrite)
       end
    end
 
    # Respond with the default behavior.
    # If the target is a channel, respond to the channel,
    #  otherwise respond to the user.
-   def respond(message)
+   def respond(message, rewrite = true)
       if (target.start_with?('#'))
-         server.chat(target, message)
+         server.chat(target, message, rewrite)
       elsif (target == CONSOLE)
          puts message
       else
-         server.chat(fromUser, message)
+         server.chat(fromUser, message, rewrite)
       end
    end
 end
 
 class Command
    @@commands = Hash.new()
+
+   attr_reader :usage, :name, :description, :admin, :requiredLevel
 
    def initialize(name, usage, description, options = {})
       @name = name
@@ -49,41 +55,65 @@ class Command
          @skipLog = options[:skipLog]
       end
 
+      @admin = false
+      if (options.key?(:adminLevel))
+         @admin = true
+         @requiredLevel = options[:adminLevel].to_i
+      end
+
       @@commands[@name.upcase] = self
    end
 
    def consoleOnly?
       return @consoleOnly
    end
-   
+
+   def admin?
+      return @admin
+   end
+
    def skipLog?
       return @skipLog
-   end
-
-   def usage
-      return @usage
-   end
-
-   def description
-      return @description
    end
 
    # Return true if the command should be logged, false if it should not be logged.
    # target is usually a channel
    def self.invoke(responseInfo, line, onConsole = false)
+      message = "Unrecognized command: [#{line}. Try: HELP [command]"
+      log = true
+
       if (match = line.match(/^(\S+)\s*(.*)$/))
          commandName = match[1].upcase
          if (@@commands.has_key?(commandName))
             command = @@commands[commandName]
+            #Console commands on the console only
             if (!command.consoleOnly? || (onConsole && command.consoleOnly?))
-               command.onCommand(responseInfo, match[2], onConsole)
-               return !command.skipLog?
+            # Check admin, console users are implicitly trusted
+            # There should be a UserInfo associated with a non-console user
+               if (!command.admin? ||
+                   responseInfo.fromUser == CONSOLE ||
+                   responseInfo.fromUserInfo && responseInfo.fromUserInfo.isAuth? &&
+                   responseInfo.fromUserInfo.adminLevel <= command.requiredLevel)
+                  command.onCommand(responseInfo, match[2], onConsole)
+                  return !command.skipLog?
+               else
+                  log = !command.skipLog?
+                  message = "You do not have the rights to execute this command." +
+                            " This command requires admin level #{command.requiredLevel}"
+                  if (!responseInfo.fromUserInfo)
+                     message += " and you don't have any credentials, try REGISTER."
+                  elsif (!responseInfo.fromUserInfo.isAuth?)
+                     message += " and you are not AUTH'd, try AUTH."
+                  else
+                     message += " and you have level #{responseInfo.fromUserInfo.adminLevel}."
+                  end
+               end
             end
          end
       end
 
-      responseInfo.respond("Unrecognized command. Try: HELP [command]")
-      return true
+      responseInfo.respond(message)
+      return log
    end
 
    def self.userPresentOnJoin(server, channel, user)

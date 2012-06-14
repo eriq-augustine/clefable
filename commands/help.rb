@@ -7,23 +7,45 @@ class Help < Command
 
    @@instance = Help.new()
 
-   def onCommand(responseInfo, args, onConsole = false)
-      command = args.strip.upcase
+   def printAllCommands(responseInfo, onConsole)
+      message = "Commands: "
 
-      if (command.length() > 0 && @@commands.has_key?(command))
-         responseInfo.respond("USAGE: #{@@commands[command].usage()}")
-         responseInfo.respond("#{@@commands[command].description()}")
-      else
-         message = "Commands: "
-
-         @@commands.each_pair{|name, command|
+      @@commands.keys.sort.each{|name|
+         command = @@commands[name]
+         
+         if (!command.admin? ||
+               responseInfo.fromUserInfo && responseInfo.fromUserInfo.isAuth? &&
+               responseInfo.fromUserInfo.adminLevel <= command.requiredLevel)
             if (onConsole || !command.consoleOnly?)
                message += "#{name}, "
             end
-         }
-         message.sub!(/, $/, '')
-     
-         responseInfo.respond(message)
+         end
+      }
+      message.sub!(/, $/, '')
+   
+      responseInfo.respond(message)
+   end
+
+   def onCommand(responseInfo, args, onConsole)
+      commandStr = args.strip.upcase
+
+      if (commandStr.length() > 0 && @@commands.has_key?(commandStr))
+         command = @@commands[commandStr]
+
+         if (!command.admin? ||
+             responseInfo.fromUserInfo && responseInfo.fromUserInfo.isAuth? &&
+             responseInfo.fromUserInfo.adminLevel <= command.requiredLevel)
+            if (onConsole || !command.consoleOnly?)
+               responseInfo.respond("USAGE: #{command.usage()}")
+               responseInfo.respond("#{command.description()}")
+            else
+               printAllCommands(responseInfo, onConsole)
+            end
+         else
+            printAllCommands(responseInfo, onConsole)
+         end
+      else
+         printAllCommands(responseInfo, onConsole)
       end
    end
 end

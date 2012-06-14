@@ -196,12 +196,15 @@ end
 class Admin < Command
    include DB   
    
+   MAX_LEVEL = 999
+
    def initialize
       super('ADMIN',
             "ADMIN GRANT <user> <level>; " + 
             "ADMIN REMOVE <user>; " + 
             "ADMIN MOD <user> <new level>",
-            "GRANT a user admin rights. REMOVE a user's admin rights. MOD a user's admin rights.")
+            "GRANT a user admin rights. REMOVE a user's admin rights. MOD a user's admin rights.",
+            {:adminLevel => MAX_LEVEL})
    end
 
    @@instance = Admin.new()
@@ -263,7 +266,7 @@ class Admin < Command
          return false
       end
 
-      if (requestLevel < 0)
+      if (requestLevel < 0 || requestLevel > MAX_LEVEL)
          responseInfo.respond("#{requestLevel} is not a valid level for an admin.")
          return false
       end
@@ -301,7 +304,7 @@ class Admin < Command
          return false
       end
 
-      if (requestLevel < 0)
+      if (requestLevel < 0 || requestLevel > MAX_LEVEL)
          responseInfo.respond("#{requestLevel} is not a valid level for an admin.")
          return false
       end
