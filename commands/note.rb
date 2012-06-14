@@ -9,9 +9,10 @@ class Note < Command
 
    def initialize
       super('NOTE',
-            'NOTE TAGS; ADD <tags> ! <note>; NOTE SEARCH <tags>; NOTE DETAILS <note number>',
-            'See the currently used tags; add a note; or search through notes.' + 
-            ' Tags should be whitespace seperated')
+            'NOTE TAGS; ADD <tags> ! <note>; NOTE SEARCH <tags>; NOTE DETAILS <note number>' +
+            ' NOTE REMOVE <note number>; NOTE EDIT <note number> <tags> ! <note>',
+            'See the currently used TAGS; ADD a note; or SEARCH through notes using tags;' + 
+            ' REMOVE a note; EDIT a note (this is esentially a replacement). Tags should be whitespace seperated.')
    end
 
    @@instance = Note.new()
@@ -28,6 +29,18 @@ class Note < Command
       return tags
    end
 
+   def removeNote(id)
+      begin
+         db.query("DELETE FROM #{NOTES_TABLE} WHERE id = #{id}")
+         db.query("DELETE FROM #{NOTE_TAGS_TABLE} WHERE note_id = #{id}")
+         return true
+      rescue Exception => ex
+         puts ex.message
+         return false
+      end
+      return false
+   end
+
    def insertNote(note, tags)
       res = db.query("INSERT INTO #{NOTES_TABLE} (id, note) VALUES (NULL, '#{escape(note)}')")
       id = db.insert_id()
@@ -41,6 +54,26 @@ class Note < Command
       db.query(insert)
 
       return true
+   end
+
+   def replaceNote(id, note, tags)
+      begin
+         db.query("REPLACE INTO #{NOTES_TABLE} (id, note) VALUES (#{id}, '#{escape(note)}')")
+         db.query("DELETE FROM #{NOTE_TAGS_TABLE} WHERE note_id = #{id}")
+
+         insert = "INSERT IGNORE INTO #{NOTE_TAGS_TABLE} (note_id, tag) VALUES "
+         tags.each{|tag|
+            insert += "(#{id}, '#{escape(tag)}'), "
+         }
+         insert.sub!(/, $/, '')
+
+         db.query(insert)
+         return true
+      rescue Exception => ex
+         puts ex.message
+         return false
+      end
+      return false
    end
 
    def getMatchingNotes(tags)
@@ -136,6 +169,22 @@ class Note < Command
             responseInfo.respond(message)
          else
             responseInfo.respond('Unable to find that note.')
+         end
+      elsif (match = args.match(/^REMOVE\s+(\d+)$/i))
+         if (removeNote(match[1].to_i))
+            responseInfo.respond('Note successfully removed.')
+         else
+            responseInfo.respond('There was an error removing the note, does it exist?')
+         end
+      elsif (match = args.match(/^EDIT\s+(\d+)\s+([^!]*)\s*!\s*(.+)$/i))
+         number = match[1].to_i
+         tags = match[2].split(/\s+/)
+         note = match[3].strip
+
+         if(replaceNote(number, note, tags))
+            responseInfo.respond('Successfully edited note.')
+         else
+            responseInfo.respond('There was an error editing the note.')
          end
       else
          responseInfo.respond('What? Try: HELP NOTE')
