@@ -16,7 +16,7 @@ class Ops < Command
          return
       end
 
-      if (match = args.match(/^((?:GIVE)|(?:TAKE))\s+^?(\S*)$/i))
+      if (match = args.match(/^((?:GIVE)|(?:TAKE))\s*\^?(\S*)$/i))
          if (match[2].length == 0)
             user = responseInfo.fromUser
          else
