@@ -9,6 +9,7 @@ class Replay < Command
    end
 
    @@instance = Replay.new()
+   @@max_res = 100
 
    def onCommand(responseInfo, args, onConsole)
       if (match = args.strip.match(/^LAST\s+(\d+)$/i))
@@ -34,14 +35,11 @@ class Replay < Command
 
          if (res.num_rows() == 0)
                responseInfo.respondPM("No results.")
+         elsif (res.num_rows() > @@max_res)
+               responseInfo.respondPM("Sorry, that request generated too many results. Bug eriq about threading if you want to be able to do large requests.")
          else
-            sleepTime = calcSleepTime(res.num_rows())
-
-            puts "SleepTime: #{sleepTime}"
-            
             res.each{|row|
                responseInfo.respondPM("[#{Time.at(row[0].to_i)}] ^#{row[1]}: #{row[2]}")
-               sleep(sleepTime)
             }
          end
       else

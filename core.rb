@@ -5,6 +5,7 @@
 require 'socket'
 
 require './command_core.rb'
+require './users.rb'
 
 IRC_HOST = 'irc.freenode.net'
 IRC_PORT = 6667
@@ -12,7 +13,8 @@ IRC_NICK = 'Clefable_BOT'
 
 #DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
 #DEFAULT_CHANNELS = ['#eriq_secret']
-DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub', '#softwareinventions']
+DEFAULT_CHANNELS = ['#crx', '#eriq_secret', '#bestfriendsclub', '#softwareinventions']
+#DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub', '#softwareinventions']
 
 MAX_MESSAGE_LEN = 400
 CONSOLE = '_CONSOLE_'
@@ -37,35 +39,6 @@ Dir["#{COMMAND_DIR}/*.rb"].each{|file|
    require file
 }
 
-# TODO: Remove admin when ops is taken
-class User
-   attr_reader :nick, :ops, :adminLevel
-
-   def initialize(nick, ops)
-      @nick = nick
-      @ops = ops
-      @adminLevel = -1
-      @auth = false
-   end
-
-   def setAdmin(level)
-      @adminLevel = level
-   end
-
-   def auth
-      @auth = true
-   end
-
-   def deauth
-      @auth = false
-      @adminLevel = -1
-   end
-
-   def isAuth?
-      return @auth
-   end
-end
-
 class IRCServer
    include DB
 
@@ -84,11 +57,38 @@ class IRCServer
    
       # { target => rewrite }
       @rewriteRules = getRewriteRules()
+
+      @floodControl = Hash.new(0)
+   end
+
+   # Get the amount of time to wait before putting out a new message.
+   # Strategy:
+   #  Get the current epoch minute
+   #  Add up five most recent buckets
+   #  Do math
+   def waitTime()
+      time = Time.now().to_i / 60
+      
+      # Cleanup every ten minutes
+      if (time % 10 == 0)
+         @floodControl.delete_if{|key, val|
+            return (key <= time - 5)
+         }
+      end
+
+      @floodControl[time]++
+
+      count = 0
+      for i in 0...5
+         count += @floodControl[time - i]
+      end
+
+      return (count / 50.0)
    end
 
    # Send to the IRC Server
    def sendMessage(message)
-      puts "[INFO] Sending: #{message}"
+      #puts "[INFO] Sending: #{message}"
       @ircSocket.send("#{message}\n", 0) 
    end
 
@@ -108,9 +108,11 @@ class IRCServer
       puts "[INFO] Joined #{channel}"
    end
 
-   def chat(channel, message, rewrite = true)
-      # Protection
-      if (rewrite)
+   # Available options:
+   #  :rewrite: whether to invoke the rewrite engine (default: true)
+   #  :delay: ensure a delay of at least this much, may be more because of flood control (default: 0)
+   def chat(channel, message, options = {})
+      if (!options[:rewrite] || options[:rewrite])
          @rewriteRules.each_pair{|target, rewrite|
             message.gsub!(/#{target}/i, rewrite)
          }
@@ -118,9 +120,15 @@ class IRCServer
 
       # TODO: Split better, so words are not broken.
       for i in 0..(message.length() / MAX_MESSAGE_LEN)
+         sleepTime = waitTime()
+         delay = options[:delay]
+         if (delay)
+            sleepTime = (sleepTime < delay) ? delay : sleepTime
+         end
+
          part = message[i * MAX_MESSAGE_LEN, (i + 1) * MAX_MESSAGE_LEN]
          sendMessage("PRIVMSG #{channel} :#{part}")
-         sleep(0.1)
+         sleep(sleepTime)
       end
    end
 
@@ -215,8 +223,8 @@ class IRCServer
       command.strip!
 
       if (command.length() > 0)
-         puts "[INFO] Recieved command: #{command}"
-         Command.invoke(ResponseInfo.new(self, CONSOLE, CONSOLE, nil), command, true)
+         #puts "[INFO] Recieved command: #{command}"
+         Command.invoke(ResponseInfo.new(self, CONSOLE, CONSOLE, User.new(CONSOLE, false)), command, true)
       end
    end
 

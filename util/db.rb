@@ -15,6 +15,7 @@ module DB
    NOTE_TAGS_TABLE = 'note_tags'
    MESSAGES_TABLE = 'messages'
    REWRITE_TABLE = 'rewrite_rules'
+   GLOSSARY_TABLE = 'glossary'
 
    def db
       if (@db.nil?)
@@ -42,4 +43,28 @@ module DB
 
       return rtn
    end
+
+   def query(queryStr)
+      begin
+         res = db.query(queryStr)
+         return res
+      rescue Exception => ex
+         puts ex.message
+         return nil
+      end
+      return nil
+   end
+
+   def update(statement)
+      begin
+         db.query(statement)
+         return true
+      rescue Exception => ex
+         puts ex.message
+         return false
+      end
+      return false
+   end
+
+
 end

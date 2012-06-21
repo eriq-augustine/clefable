@@ -13,24 +13,24 @@ class ResponseInfo
       @onConsole = (fromUser == CONSOLE)
    end
 
-   def respondPM(message, rewrite = true)
+   def respondPM(message, options = {})
       if (@onConsole)
          puts message
       else
-         server.chat(fromUser, message, rewrite)
+         server.chat(fromUser, message, options)
       end
    end
 
    # Respond with the default behavior.
    # If the target is a channel, respond to the channel,
    #  otherwise respond to the user.
-   def respond(message, rewrite = true)
+   def respond(message, options = {})
       if (target.start_with?('#'))
-         server.chat(target, message, rewrite)
+         server.chat(target, message, options)
       elsif (target == CONSOLE)
          puts message
       else
-         server.chat(fromUser, message, rewrite)
+         server.chat(fromUser, message, options)
       end
    end
 end

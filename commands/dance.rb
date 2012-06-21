@@ -34,8 +34,7 @@ class Dance < Command
       else
          if (@@dances.has_key?(args))
             @@dances[args].each{|line|
-               responseInfo.respond(line)
-               sleep(0.5)
+               responseInfo.respond(line, {:delay => 0.5})
             }
          else
             responseInfo.respond("I don't know that dance.")

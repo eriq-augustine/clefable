@@ -48,7 +48,7 @@ class Rewrite < Command
             responseInfo.respond('There are currently no rewrite rules.')
          else
             # Don't rewrite
-            responseInfo.respond(rules, false)
+            responseInfo.respond(rules, {:rewrite => false})
          end
       elsif (match = args.match(/^ADD\s+([^!]+)\s*!\s*(.*)$/i))
          target = match[1].strip
