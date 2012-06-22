@@ -1,3 +1,5 @@
+require 'set'
+
 class Help < Command
    def initialize
       super('HELP',
@@ -9,14 +11,17 @@ class Help < Command
 
    def printAllCommands(responseInfo)
       message = "Commands: "
+      commandsToPrint = SortedSet.new()
 
-      @@commands.keys.sort.each{|name|
-         command = @@commands[name]
-        
+      @@commands.values.each{|command|
          execResponse = responseInfo.fromUserInfo.canExecute?(command.requiredLevel)
          if (!command.requiredLevel || execResponse[:success])
-            message += "#{name}, "
+            commandsToPrint << command.name
          end
+      }
+
+      commandsToPrint.each{|commandName|
+         message += "#{commandName}, "
       }
       message.sub!(/, $/, '')
    
