@@ -38,7 +38,7 @@ end
 class Command
    @@commands = Hash.new()
 
-   attr_reader :usage, :name, :description, :admin, :requiredLevel
+   attr_reader :usage, :name, :description, :admin, :requiredLevel, :aliases
 
    def initialize(name, usage, description, options = {})
       @name = name
@@ -62,6 +62,14 @@ class Command
       end
 
       @@commands[@name.upcase] = self
+
+      @aliases = nil
+      if (options[:aliases])
+         @aliases = options[:aliases]
+         options[:aliases].each{|aliasName|
+            @@commands[aliasName.upcase] = self
+         }
+      end
    end
 
    def consoleOnly?
@@ -79,7 +87,7 @@ class Command
    # Return true if the command should be logged, false if it should not be logged.
    # target is usually a channel
    def self.invoke(responseInfo, line, onConsole = false)
-      message = "Unrecognized command: [#{line}. Try: HELP [command]"
+      message = "Unrecognized command: [#{line}]. Try: HELP [command]"
       log = true
 
       if (match = line.match(/^(\S+)\s*(.*)$/))

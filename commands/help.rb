@@ -38,6 +38,9 @@ class Help < Command
             if (onConsole || !command.consoleOnly?)
                responseInfo.respond("USAGE: #{command.usage()}")
                responseInfo.respond("#{command.description()}")
+               if (aliases = command.aliases)
+                  responseInfo.respond("ALIASES: #{aliases}")
+               end
             else
                printAllCommands(responseInfo, onConsole)
             end

@@ -5,11 +5,9 @@ class Glossary < Command
       super('WHAT',
             'WHAT <word / phrase> | WHAT -A <word / phrase> ! <description>; WHAT -R <word / phrase>',
             'Lookup what a word/phrase means; Add a word/phrase into the glossary; Remove a word/phrase from the glossary.' +
-            ' Adding and Removing requires at least admin level 5. Great for TLA.')
+            ' Adding and Removing requires at least admin level 5. Great for TLA.',
+            {:aliases => @@aliases})
    end
-
-   @@instance = Glossary.new()
-   @@level = 5
 
    def insertWord(word, desc, user)
       return update("REPLACE INTO #{GLOSSARY_TABLE} (word, description, `user`) VALUES ('#{escape(word)}', '#{escape(desc)}', '#{escape(user)}')")
@@ -72,4 +70,8 @@ class Glossary < Command
          responseInfo.respond('I don''t understand. Try HELP WHAT.')
       end
    end
+   
+   @@level = 5
+   @@aliases = ['?', 'WHAT?']
+   @@instance = Glossary.new()
 end
