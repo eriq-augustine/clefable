@@ -17,7 +17,7 @@ class Tree < Command
    # Should be constant, but using class instance instead to avoid redef warning.
    @@statusUri = URI('http://chromium-status.appspot.com/current?format=json')
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       message = ''
 
       begin

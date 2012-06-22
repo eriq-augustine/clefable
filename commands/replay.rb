@@ -11,7 +11,7 @@ class Replay < Command
    @@instance = Replay.new()
    @@max_res = 100
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       if (match = args.strip.match(/^LAST\s+(\d+)$/i))
          startTime = Time.now().to_i() - (match[1].to_i * 60)
 

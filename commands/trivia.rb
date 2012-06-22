@@ -9,7 +9,7 @@ class Trivia < Command
 
    @@instance = Trivia.new()
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       args.strip!
       if (args.match(/^\d+$/))
          res = db.query("SELECT fact" + 

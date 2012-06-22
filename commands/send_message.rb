@@ -42,7 +42,7 @@ class SendMessage < Command
       db.query("DELETE FROM #{MESSAGES_TABLE} WHERE to_user = '#{toUser}'")
    end
 
-   def onCommand(responseInfo, args, onConsole = false)
+   def onCommand(responseInfo, args)
       if (match = args.strip.match(/^(\S+)\s+(.+)$/))
          if (match[1].upcase == '!INCOGNITO')
             incognitoMatch = match[2].match(/^(\S+)\s+(.+)$/)

@@ -18,7 +18,7 @@ class ChangeLog < Command
    @@uri = URI('https://api.github.com/repos/eriq-augustine/clefable/commits' + "?access_token=#{@@oauthToken}")
    @@defaultCommits = 5
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       args.strip!
 
       if (args.length() == 0)

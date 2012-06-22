@@ -10,7 +10,7 @@ class Joke < Command
 
    @@instance = Joke.new()
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       args.strip!
       if (args.match(/^\d+$/))
          res = db.query("SELECT joke" + 

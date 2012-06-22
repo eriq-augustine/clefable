@@ -27,7 +27,7 @@ class Glossary < Command
       return row[0]
    end
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       args.strip!
 
       if (match = args.match(/^-A\s+(.+)\s*!\s*(.*)\s*$/i))

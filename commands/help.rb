@@ -7,18 +7,15 @@ class Help < Command
 
    @@instance = Help.new()
 
-   def printAllCommands(responseInfo, onConsole)
+   def printAllCommands(responseInfo)
       message = "Commands: "
 
       @@commands.keys.sort.each{|name|
          command = @@commands[name]
-         
-         if (!command.admin? ||
-               responseInfo.fromUserInfo && responseInfo.fromUserInfo.isAuth? &&
-               responseInfo.fromUserInfo.adminLevel <= command.requiredLevel)
-            if (onConsole || !command.consoleOnly?)
-               message += "#{name}, "
-            end
+        
+         execResponse = responseInfo.fromUserInfo.canExecute?(command.requiredLevel)
+         if (!command.requiredLevel || execResponse[:success])
+            message += "#{name}, "
          end
       }
       message.sub!(/, $/, '')
@@ -26,29 +23,23 @@ class Help < Command
       responseInfo.respond(message)
    end
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       commandStr = args.strip.upcase
 
       if (commandStr.length() > 0 && @@commands.has_key?(commandStr))
          command = @@commands[commandStr]
-
-         if (!command.admin? ||
-             responseInfo.fromUserInfo && responseInfo.fromUserInfo.isAuth? &&
-             responseInfo.fromUserInfo.adminLevel <= command.requiredLevel)
-            if (onConsole || !command.consoleOnly?)
-               responseInfo.respond("USAGE: #{command.usage()}")
-               responseInfo.respond("#{command.description()}")
-               if (aliases = command.aliases)
-                  responseInfo.respond("ALIASES: #{aliases}")
-               end
-            else
-               printAllCommands(responseInfo, onConsole)
+         
+         execResponse = responseInfo.fromUserInfo.canExecute?(command.requiredLevel)
+         if (!command.requiredLevel || execResponse[:success])
+            responseInfo.respond("USAGE: #{command.usage()}")
+            responseInfo.respond("#{command.description()}")
+            if (aliases = command.aliases)
+               responseInfo.respond("ALIASES: #{aliases}")
             end
-         else
-            printAllCommands(responseInfo, onConsole)
+            return
          end
-      else
-         printAllCommands(responseInfo, onConsole)
       end
+      
+      printAllCommands(responseInfo)
    end
 end

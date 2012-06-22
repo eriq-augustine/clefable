@@ -29,7 +29,8 @@ class User
 
    # Can the user execute the command with |level|
    def canExecute?(level)
-      if (@nick == CONSOLE)
+      # If there are no level requirements
+      if (!level)
          return {:success => true}
       end
 

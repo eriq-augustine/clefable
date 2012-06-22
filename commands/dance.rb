@@ -1,7 +1,7 @@
 class Dance < Command
    include DB
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       args.strip!
 
       if (args.length() == 0 || args.match(/^LIST$/i))

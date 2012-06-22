@@ -8,7 +8,7 @@ class Ops < Command
    end
 
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       args.strip!
 
       if (!responseInfo.target.start_with?('#'))

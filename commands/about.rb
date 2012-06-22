@@ -11,11 +11,11 @@ class About < Command
             ' A random number was generated, and that pokemon was chosen.'
    @@source = 'Clefable was written all in Ruby and you can get the source at:' +
               ' https://github.com/eriq-augustine/clefable'
-   @@usage = "You can invoke commands by using '#{IRC_NICK}: <command>', '#{SHORT_NICK}: <command>', or '#{TRIGGER}<command>'."
+   @@usage = "You can invoke commands by using '#{IRC_NICK}: <command>', '#{SHORT_NICK}: <command>', or '#{TRIGGER}<command>'. When PMing, you can just enter commands."
    @@case = "Case is generally ignored, but no promises."
 
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       args.upcase!
 
       if (args == 'NAME')

@@ -8,12 +8,12 @@ class DirectCommand < Command
       super('DIRECT-COMMAND',
             'DIRECT-COMMAND <command>',
             'Puts a command directly through to the server.',
-            {:consoleOnly => true})
+            {:adminLevel => 0})
    end
 
    @@instance = DirectCommand.new()
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       responseInfo.server.sendMessage(args)
    end
 end
@@ -23,24 +23,30 @@ class ListUsers < Command
       super('LIST-USERS',
             'LIST-USERS',
             'List all the users that the server knows about.',
-            {:consoleOnly => true})
+            {:adminLevel => 0})
    end
 
    @@instance = ListUsers.new()
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       channels = responseInfo.server.getChannels()
 
       channels.each_pair{|channel, users|
-         puts "#{channel}"
+         chanList = "#{channel}: "
 
          users.each{|nick, user|
-            if (user.isAdmin)
-               puts "   @#{nick}"
-            else
-               puts "   #{nick}"
+            prefix = ''
+            if (user.isAuth?)
+               prefix += '!'
             end
+
+            if (user.ops)
+               prefix += '@'
+            end
+
+            chanList += "#{prefix}^#{nick}(#{user.adminLevel}), "
          }
+         responseInfo.respond(chanList.sub(/, $/, ''))
       }
    end
 end
@@ -50,12 +56,14 @@ class LoadCommands < Command
       super('LOAD-COMMANDS',
             'LOAD-COMMANDS <command file path>',
             'Loads a command file.',
-            {:consoleOnly => true})
+            {:adminLevel => 0})
    end
 
    @@instance = LoadCommands.new()
 
-   def onCommand(responseInfo, args, onConsole = false)
+   def onCommand(responseInfo, args)
+      args.strip!
       load args
+      responseInfo.respond("Successfully Loaded #{args}")
    end
 end

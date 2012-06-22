@@ -16,7 +16,7 @@ class LastMessage < Command
       return {:hours => hours, :mins => mins, :secs => secs}
    end
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       args = args.strip.upcase
       pm = false
 

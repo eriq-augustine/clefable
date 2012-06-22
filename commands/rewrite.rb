@@ -34,7 +34,7 @@ class Rewrite < Command
       return false
    end
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       args.strip!
 
       if (match = args.match(/^LIST/i))

@@ -28,7 +28,7 @@ class Auth < Command
       end
    end
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       if (responseInfo.target != IRC_NICK)
          responseInfo.respond('You must do this in a PM.')
          return
@@ -73,7 +73,7 @@ class Deauth < Command
 
    @@instance = Deauth.new()
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       userInfo = responseInfo.server.getUsers()[responseInfo.fromUser]
       if (userInfo)
          userInfo.deauth
@@ -107,7 +107,7 @@ class UserInfo < Command
       end
    end
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       user = args.strip.sub(/^\^/, '')
 
       if (user.length() == 0)
@@ -151,7 +151,7 @@ class Register < Command
       return true
    end
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       if (responseInfo.target != IRC_NICK)
          responseInfo.respond('You must do this in a PM.')
          return
@@ -198,7 +198,7 @@ class Pass < Command
       return true
    end
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       if (responseInfo.target != IRC_NICK)
          responseInfo.respond('You must do this in a PM.')
          return
@@ -357,7 +357,7 @@ class Admin < Command
       return true
    end
 
-   def onCommand(responseInfo, args, onConsole)
+   def onCommand(responseInfo, args)
       users = responseInfo.server.getUsers()
 
       if (!users.has_key?(responseInfo.fromUser))

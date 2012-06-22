@@ -17,7 +17,12 @@ DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
 #DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub', '#softwareinventions']
 
 MAX_MESSAGE_LEN = 400
+
 CONSOLE = '_CONSOLE_'
+CONSOLE_USER = User.new(CONSOLE, false)
+# TODO: Maybe don't give console user free reign
+CONSOLE_USER.auth
+CONSOLE_USER.setAdmin(0)
 
 COMMAND_DIR = './commands'
 UTIL_DIR = './util'
@@ -224,7 +229,7 @@ class IRCServer
 
       if (command.length() > 0)
          #puts "[INFO] Recieved command: #{command}"
-         Command.invoke(ResponseInfo.new(self, CONSOLE, CONSOLE, User.new(CONSOLE, false)), command, true)
+         Command.invoke(ResponseInfo.new(self, CONSOLE, CONSOLE, CONSOLE_USER), command)
       end
    end
 
