@@ -149,7 +149,7 @@ class IRCServer
 
    def handleServerInput(message)
       message.strip!
-      #puts "[INFO] Server says: #{message}"
+      puts "[INFO] Server says: #{message}"
 
       # PING :<server>
       if (match = message.match(/^PING\s:(.*)$/))
@@ -199,6 +199,11 @@ class IRCServer
          channel = match[4]
          ensureUser(user, channel, false)
          Command.userJoined(self, channel, user)
+      # Clefable PART'ed
+      # :Clefable_BOT!<something like ~Clefable_>@<from address> PART <channel>
+      elsif (match = message.match(/^:#{IRC_NICK}!([^@]*)@(\S*)\sPART\s(\S*)\s*$/))
+         channel = match[3]
+         @channels.delete(channel)
       # TODO: Deal with QUIT
       # :<from user>!<from user>@<from address> PART <channel> :<reason>
       elsif (match = message.match(/^:([^!]*)!([^@]*)@(\S*)\sPART\s(\S*)\s:(.*)$/))
