@@ -4,9 +4,9 @@
 
 require 'socket'
 
+require './users.rb'
 require './constants.rb'
 require './command_core.rb'
-require './users.rb'
 
 # Load all the utilities
 Dir["#{UTIL_DIR}/*.rb"].each{|file|
@@ -54,9 +54,7 @@ class IRCServer
       
       # Cleanup every ten minutes
       if (time % 10 == 0)
-         @floodControl.delete_if{|key, val|
-            yield (key <= time - 5)
-         }
+         @floodControl.delete_if{|key, val| key <= (time - 5) }
       end
 
       @floodControl[time] += 1
