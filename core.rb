@@ -1,7 +1,5 @@
 # encoding: utf-8
 
-# TODO: Deal with QUIT
-
 require 'socket'
 
 require './users.rb'
@@ -180,7 +178,18 @@ class IRCServer
       elsif (match = message.match(/^:#{IRC_NICK}!([^@]*)@(\S*)\sPART\s(\S*)\s*$/))
          channel = match[3]
          @channels.delete(channel)
-      # TODO: Deal with QUIT
+      # :eriq_home!~eriq_home@c-50-131-15-127.hsd1.ca.comcast.net QUIT :Quit: Leaving
+      # :<from user>!<from user>@<from address> QUIT :<reason>
+      elsif (match = message.match(/^:([^!]*)!([^@]*)@(\S*)\sQUIT\s+:(.*)$/))
+         user = match[1]
+         channel = match[4]
+         reason = match[5]
+
+         @users.delete(user)
+         @channels.each_value{|users|
+            users.delete(user)
+            Command.userLeft(self, channel, user, reason)
+         }
       # :<from user>!<from user>@<from address> PART <channel> :<reason>
       elsif (match = message.match(/^:([^!]*)!([^@]*)@(\S*)\sPART\s(\S*)\s:(.*)$/))
          user = match[1]
@@ -294,8 +303,8 @@ class IRCServer
             broadcast = false
             users.each_key{|nick|
                #It is common practice to append '_' to your nick if it is taken.
-               nick.sub!(/_+$/, '')
-               if (committer == nick || EMAIL_MAP[nick] == committer)
+               realNick = nick.sub(/_+$/, '')
+               if (committer == realNick || EMAIL_MAP[realNick] == committer)
                   broadcast = true
                   break
                end
