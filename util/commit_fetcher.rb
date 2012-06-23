@@ -108,7 +108,3 @@ class CommitFetcher
       return commits
    end
 end
-
-#TEST
-fetcher = CommitFetcher.new()
-fetcher.updateCommits
