@@ -87,18 +87,18 @@ class IRCServer
       # Cleanup every ten minutes
       if (time % 10 == 0)
          @floodControl.delete_if{|key, val|
-            return (key <= time - 5)
+            yield (key <= time - 5)
          }
       end
 
-      @floodControl[time]++
+      @floodControl[time] += 1
 
       count = 0
       for i in 0...5
-         count += @floodControl[time - i]
+         count += (@floodControl[time - i] * (5 - i))
       end
 
-      return (count / 50.0)
+      return 0.1 + (count * 0.0393)
    end
 
    # Send to the IRC Server
