@@ -292,9 +292,9 @@ class IRCServer
 
          @channels.each_pair{|channel, users|
             broadcast = false
-            users.each{|user|
+            users.each_key{|nick|
                #It is common practice to append '_' to your nick if it is taken.
-               nick = user.nick.sub(/_+$/, '')
+               nick.sub!(/_+$/, '')
                if (committer == nick || EMAIL_MAP[nick] == committer)
                   broadcast = true
                   break

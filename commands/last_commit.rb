@@ -1,12 +1,11 @@
-#TODO: Finish
-
 class LastCommit < Command
    include DB
 
    def initialize
       super('LAST-COMMIT',
             'LAST-COMMIT [<N>]',
-            'Get the last N commits. N defaults to 1.')
+            'Get the last N commits. N defaults to 1.',
+            {:aliases => ['LAST-COMMITS']})
    end
 
    @@instance = LastCommit.new()

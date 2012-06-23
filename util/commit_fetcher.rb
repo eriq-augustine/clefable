@@ -78,9 +78,6 @@ class CommitFetcher
                            commitInfo[:rev] = match[1].to_i
 
                            if (commitInfo[:rev] <= @lastCommit)
-         commits.each{|commit|
-            puts commit
-         }
                               insertCommits(commits)
                               return commits
                            end
@@ -95,10 +92,6 @@ class CommitFetcher
          }
 
          insertCommits(commits)
-         
-         commits.each{|commit|
-            puts commit
-         }
       rescue Exception => ex
          puts ex.message  
          puts ex.backtrace.inspect 
