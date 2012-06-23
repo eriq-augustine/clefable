@@ -16,6 +16,7 @@ module DB
    MESSAGES_TABLE = 'messages'
    REWRITE_TABLE = 'rewrite_rules'
    GLOSSARY_TABLE = 'glossary'
+   COMMIT_TABLE = 'commits'
 
    def db
       if (@db.nil?)

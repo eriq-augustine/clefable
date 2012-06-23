@@ -11,6 +11,9 @@ IRC_HOST = 'irc.freenode.net'
 IRC_PORT = 6667
 IRC_NICK = 'Clefable_BOT'
 
+#Wait for 2 mins on select
+SELECT_TIMEOUT = 120
+
 DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
 #DEFAULT_CHANNELS = ['#eriq_secret']
 #DEFAULT_CHANNELS = ['#crx', '#eriq_secret', '#bestfriendsclub', '#softwareinventions']
@@ -33,6 +36,9 @@ TRIGGER = '`'
 HOST_NAME = 'Mt.Moon'
 SERVER_NAME = 'Kanto'
 REAL_NAME = 'Clefable Bot'
+
+#Most people use their email as their username, but thses people don't.
+EMAIL_MAP = {'eriq' => 'eaugusti', 'eriq_home' => 'eaugusti', 'aboodman' => 'aa', 'dcronin' => 'rdevlin.cronin'}
 
 # Load all the utilities
 Dir["#{UTIL_DIR}/*.rb"].each{|file|
@@ -64,6 +70,10 @@ class IRCServer
       @rewriteRules = getRewriteRules()
 
       @floodControl = Hash.new(0)
+
+      @commitFetcher = CommitFetcher.new()
+      # Do the first update quietly
+      @commitFetcher.updateCommits()
    end
 
    # Get the amount of time to wait before putting out a new message.
@@ -149,7 +159,7 @@ class IRCServer
 
    def handleServerInput(message)
       message.strip!
-      puts "[INFO] Server says: #{message}"
+      #puts "[INFO] Server says: #{message}"
 
       # PING :<server>
       if (match = message.match(/^PING\s:(.*)$/))
@@ -272,10 +282,13 @@ class IRCServer
    # The main listening loop
    # Listents on the @ircSocket and $stdin
    def listen()
+      #Keep track of time so the periodic things can be done
+      lastTime = Time.now().to_i
+
       while (true)
          # TODO: Do it right so we can listen on $stdin and put in bg and such
          #  It may already be right, but just needs to be tested
-         selectRes = select([@ircSocket, $stdin], nil, nil, nil)
+         selectRes = IO.select([@ircSocket, $stdin], nil, nil, SELECT_TIMEOUT)
          if (selectRes)
             # Check the read ios
             selectRes[0].each{|ioStream|
@@ -294,7 +307,40 @@ class IRCServer
                end
             }
          end
+
+         now = Time.now().to_i
+         if (now - lastTime >= SELECT_TIMEOUT)
+            #Do periodic stuff
+            newCommits = @commitFetcher.updateCommits()
+            if (!newCommits.empty?)
+               #Check all the channels for the committers
+               notifyAboutCommits(newCommits)
+            end
+         end
       end
+   end
+
+   def notifyAboutCommits(newCommits)
+      newCommits.each{|commit|
+         committer = commit[:author].sub(/@.*$/, '')
+
+         @channels.each_pair{|channel, users|
+            broadcast = false
+            users.each{|user|
+               #It is common practice to append '_' to your nick if it is taken.
+               nick = user.nick.sub(/_+$/, '')
+               if (committer == nick || EMAIL_MAP[nick] == committer)
+                  broadcast = true
+                  break
+               end
+            }
+
+            if (broadcast)
+               chat(channel, "Rev: #{commit[:rev]} (#{Time.at(commit[:time])})" +
+                             " ^#{commit[:author]} -- #{commit[:summary]}")
+            end
+         }
+      }
    end
 end
 
