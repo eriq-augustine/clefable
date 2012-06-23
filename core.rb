@@ -285,6 +285,7 @@ class IRCServer
 
          now = Time.now().to_i
          if (now - lastTime >= SELECT_TIMEOUT)
+            lastTime = now
             #Do periodic stuff
             newCommits = @commitFetcher.updateCommits()
             if (!newCommits.empty?)
