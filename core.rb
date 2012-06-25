@@ -36,6 +36,7 @@ class IRCServer
       @rewriteRules = getRewriteRules()
 
       @floodControl = Hash.new(0)
+      @lastFloodBucketReap = 0
 
       @commitFetcher = CommitFetcher.new()
       # Do the first update quietly
@@ -50,9 +51,10 @@ class IRCServer
    def waitTime()
       time = Time.now().to_i / 60
       
-      # Cleanup every ten minutes
-      if (time % 10 == 0)
+      # Cleanup once every ten minutes
+      if (@lastFloodBucketReap != time && time % 10 == 0)
          @floodControl.delete_if{|key, val| key <= (time - 5) }
+         @lastFloodBucketReap = time
       end
 
       @floodControl[time] += 1
@@ -312,7 +314,7 @@ class IRCServer
             }
 
             if (broadcast)
-               chat(channel, "Rev: #{commit[:rev]} (#{Time.at(commit[:time])})" +
+               chat(channel, "http://crrev.com/#{commit[:rev]} (#{Time.at(commit[:time])})" +
                              " ^#{commit[:author]} -- #{commit[:summary]}")
             end
          }

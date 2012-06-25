@@ -38,7 +38,7 @@ class LastCommit < Command
             responseInfo.respond('No results.')
          else
             commits.each{|commit|
-               responseInfo.respond("Rev: #{commit[:rev]} (#{Time.at(commit[:time])}) ^#{commit[:author]} -- #{commit[:summary]}")
+               responseInfo.respond("http://crrev.com/#{commit[:rev]} (#{Time.at(commit[:time])}) ^#{commit[:author]} -- #{commit[:summary]}")
             }
          end
       else
