@@ -1,5 +1,6 @@
 class LastCommit < Command
    include DB
+   include TextStyle
 
    def initialize
       super('LAST-COMMIT',
@@ -38,7 +39,7 @@ class LastCommit < Command
             responseInfo.respond('No results.')
          else
             commits.each{|commit|
-               responseInfo.respond("http://crrev.com/#{commit[:rev]} (#{Time.at(commit[:time])}) ^#{commit[:author]} -- #{commit[:summary]}")
+               responseInfo.respond("#{purple("http://crrev.com/#{commit[:rev]}")} (#{Time.at(commit[:time])}) ^#{commit[:author]} -- #{commit[:summary]}")
             }
          end
       else

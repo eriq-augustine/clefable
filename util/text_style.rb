@@ -7,6 +7,9 @@ module TextStyle
    GREEN = '03'
    RED = '04'
    YELLOW = '08'
+   PINK = '13'
+   BLUE = '12'
+   PURPLE = '06'
 
    def styleText(text, textStyle, returnStyle)
       return "#{textStyle}#{text}#{returnStyle}"
@@ -30,5 +33,17 @@ module TextStyle
 
    def yellow(text)
       return colorText(text, YELLOW)
+   end
+
+   def pink(text)
+      return colorText(text, PINK)
+   end
+
+   def blue(text)
+      return colorText(text, BLUE)
+   end
+
+   def purple(text)
+      return colorText(text, PURPLE)
    end
 end

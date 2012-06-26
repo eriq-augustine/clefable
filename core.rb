@@ -18,6 +18,7 @@ Dir["#{COMMAND_DIR}/*.rb"].each{|file|
 
 class IRCServer
    include DB
+   include TextStyle
 
    attr_reader :rewriteRules
 
@@ -305,8 +306,8 @@ class IRCServer
          @channels.each_pair{|channel, users|
             broadcast = false
             users.each_key{|nick|
-               #It is common practice to append '_' to your nick if it is taken.
-               realNick = nick.sub(/_+$/, '')
+               #It is common practice to append '_' or '-' to your nick if it is taken.
+               realNick = nick.sub(/[_-]+$/, '')
                if (committer == realNick || EMAIL_MAP[realNick] == committer)
                   broadcast = true
                   break
@@ -314,7 +315,7 @@ class IRCServer
             }
 
             if (broadcast)
-               chat(channel, "http://crrev.com/#{commit[:rev]} (#{Time.at(commit[:time])})" +
+               chat(channel, "#{purple("http://crrev.com/#{commit[:rev]}")}" +
                              " ^#{commit[:author]} -- #{commit[:summary]}")
             end
          }
