@@ -20,6 +20,7 @@ CONSOLE_USER.setAdmin(0)
 
 COMMAND_DIR = './commands'
 UTIL_DIR = './util'
+CORE_DIR = './core'
 
 USER_NAME = IRC_NICK
 SHORT_NICK = 'CLEF'

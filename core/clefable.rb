@@ -1,33 +1,12 @@
-# encoding: utf-8
-
-require 'socket'
-
-require './users.rb'
-require './constants.rb'
-require './command_core.rb'
-
-# Load all the utilities
-Dir["#{UTIL_DIR}/*.rb"].each{|file|
-   require file
-}
-
-# Load all the commands from COMMAND_DIR
-Dir["#{COMMAND_DIR}/*.rb"].each{|file|
-   require file
-}
-
-class IRCServer
+# This class should only be new()'d once.
+# If you need to relad it for some reason, use reload()
+class Clefable
    include DB
    include TextStyle
 
-   attr_reader :rewriteRules
+   attr_reader :channels, :users, :rewriteRules, :floodControl, :lastFloodBucketReap, :commitFetcher
 
-   def initialize(hostName, port, nick)
-      @hostName = hostName
-      @port = port
-      @nick = nick
-      @ircSocket = nil
-
+   def initialize()
       # { channelName => { userName => user } }
       @channels = Hash.new{|hash, key| hash[key] = Hash.new() }
       # { userName => user }
@@ -68,28 +47,6 @@ class IRCServer
       return 0.1 + (count * 0.0393)
    end
 
-   # Send to the IRC Server
-   def sendMessage(message)
-      #puts "[INFO] Sending: #{message}"
-      @ircSocket.send("#{message}\n", 0) 
-   end
-
-   # Connect to the host irc server
-   def connect()
-      puts '[INFO] Connecting to server...'
-
-      @ircSocket = TCPSocket.open(@hostName, @port)
-      sendMessage("USER #{USER_NAME} 0 * :#{REAL_NAME}")
-      sendMessage("NICK #{@nick}")
-
-      puts "[INFO] Connected to #{@hostName}:#{@port} as #{@nick}"
-   end
-
-   def join(channel)
-      sendMessage("JOIN #{channel}")
-      puts "[INFO] Joined #{channel}"
-   end
-
    # Available options:
    #  :rewrite: whether to invoke the rewrite engine (default: true)
    #  :delay: ensure a delay of at least this much, may be more because of flood control (default: 0)
@@ -109,7 +66,7 @@ class IRCServer
          end
 
          part = message[i * MAX_MESSAGE_LEN, (i + 1) * MAX_MESSAGE_LEN]
-         sendMessage("PRIVMSG #{channel} :#{part}")
+         IRCServer.instance.sendMessage("PRIVMSG #{channel} :#{part}")
          sleep(sleepTime)
       end
    end
@@ -130,7 +87,7 @@ class IRCServer
 
       # PING :<server>
       if (match = message.match(/^PING\s:(.*)$/))
-         sendMessage("PONG :#{match[1]}")
+         IRCServer.instance.sendMessage("PONG :#{match[1]}")
       # :<from user>!<from user>@<from address> PRIVMSG <to> :<message>
       # <to> is usually a channel
       elsif (match = message.match(/^:([^!]*)!([^@]*)@([^\s]*)\sPRIVMSG\s([^\s]*)\s:(.*)$/))
@@ -245,11 +202,11 @@ class IRCServer
    end
 
    def giveOps(user, channel)
-      sendMessage("MODE #{channel} +o #{user}")
+      IRCServer.instance.sendMessage("MODE #{channel} +o #{user}")
    end
 
    def takeOps(user, channel)
-      sendMessage("MODE #{channel} -o #{user}")
+      IRCServer.instance.sendMessage("MODE #{channel} -o #{user}")
    end
 
    def log(fromUser, toUser, message)
@@ -257,45 +214,13 @@ class IRCServer
                " VALUES (#{Time.now().to_i()}, '#{toUser}', '#{fromUser}', '#{db.escape_string(message)}')")
    end
 
-   # The main listening loop
-   # Listents on the @ircSocket and $stdin
-   def listen()
-      #Keep track of time so the periodic things can be done
-      lastTime = Time.now().to_i
-
-      while (true)
-         # TODO: Do it right so we can listen on $stdin and put in bg and such
-         #  It may already be right, but just needs to be tested
-         selectRes = IO.select([@ircSocket, $stdin], nil, nil, SELECT_TIMEOUT)
-         if (selectRes)
-            # Check the read ios
-            selectRes[0].each{|ioStream|
-               if (ioStream.eof)
-                  # Got an eof? Stop the server
-                  return
-               end
-
-               if (ioStream == @ircSocket)
-                  handleServerInput(@ircSocket.gets())
-               elsif (ioStream == $stdin)
-                  handleStdinInput($stdin.gets())
-               else
-                  # Got some crazy io stream
-                  puts "[ERROR] Got bad io stream #{ioStream}"
-               end
-            }
-         end
-
-         now = Time.now().to_i
-         if (now - lastTime >= SELECT_TIMEOUT)
-            lastTime = now
-            #Do periodic stuff
-            newCommits = @commitFetcher.updateCommits()
-            if (!newCommits.empty?)
-               #Check all the channels for the committers
-               notifyAboutCommits(newCommits)
-            end
-         end
+   # Inform Clefable that she should perform its periodic actions
+   def periodicActions
+      # Check for new commits
+      newCommits = @commitFetcher.updateCommits()
+      if (!newCommits.empty?)
+         #Check all the channels for the committers
+         notifyAboutCommits(newCommits)
       end
    end
 
@@ -321,23 +246,41 @@ class IRCServer
          }
       }
    end
-end
 
-irc = IRCServer.new(IRC_HOST, IRC_PORT, IRC_NICK)
-irc.connect()
+   def set(channels, users, rewriteRules, floodControl, lastFloodBucketReap, commitFetcher)
+      @channels = channels
+      @users = users
+      @rewriteRules = rewriteRules
+      @floodControl = floodControl
+      @lastFloodBucketReap = lastFloodBucketReap
+      @commitFetcher = commitFetcher
+   end
 
-#Request the user list now
-DEFAULT_CHANNELS.each{|channel|
-   irc.join(channel)
-   irc.sendMessage("NAMES #{channel}")
-}
+   def self.instance
+      if (!@@instance)
+         @@instance = Clefable.new()
+      end
 
-begin
-   irc.listen()
-rescue Interrupt
-   puts '[INFO] Recieved interrupt, server shutting down...'
-rescue Exception => detail
-   puts detail.message()
-   print detail.backtrace.join("\n")
-   retry
+      return @@instance
+   end
+
+   def self.reload
+      @@insatnce = reinit()
+   end
+
+   # These lines allows Clefable to be dynamically reloaded without losing state.
+   def self.reinit()
+      if (!defined?(@@instance) || !@@instance)
+         return nil
+      end
+
+      newClef = Clefable.new()
+      newClef.set(@@instance.channels, @@instance.users,
+                  @@instance.rewriteRules, @@instance.floodControl,
+                  @@instance.lastFloodBucketReap, @@instance.commitFetcher)
+
+      return newClef
+   end
+   
+   @@instance = reinit()
 end

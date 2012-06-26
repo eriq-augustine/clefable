@@ -12,7 +12,7 @@ class DirectCommand < Command
    @@instance = DirectCommand.new()
 
    def onCommand(responseInfo, args)
-      responseInfo.server.sendMessage(args)
+      IRCServer.instance.sendMessage(args)
    end
 end
 
@@ -82,7 +82,7 @@ class Join < Command
       if (!args.start_with?('#'))
          responseInfo.respond('Channels must start with a \'#\'.')
       else
-         responseInfo.server.sendMessage("JOIN #{args}")
+         IRCServer.instance.sendMessage("JOIN #{args}")
          responseInfo.respond("Attempting to join #{args}")
       end
    end
@@ -118,7 +118,7 @@ class Part < Command
          end
       end
 
-      responseInfo.server.sendMessage("PART #{channel} PART_command_was_issued_by_#{responseInfo.fromUser}")
+      IRCServer.instance.sendMessage("PART #{channel} PART_command_was_issued_by_#{responseInfo.fromUser}")
       responseInfo.respond("Attempting to part #{channel}")
    end
 end
