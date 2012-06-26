@@ -9,7 +9,8 @@ class Tree < Command
    def initialize
       super('TREE',
             'TREE',
-            'Check the tree status.')
+            'Check the tree status.',
+            {:aliases => ['TREE?']})
    end
 
    @@instance = Tree.new()
