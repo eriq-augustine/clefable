@@ -16,11 +16,16 @@ module TextStyle
    end
 
    def colorText(text, color, returnColor = BLACK)
-      return "#{META_COLOR_CHAR}#{styleText(text, color, META_COLOR_CHAR)}#{returnColor}"
+      #return "#{META_COLOR_CHAR}#{styleText(text, color, META_COLOR_CHAR)}#{returnColor}"
+      return normal("#{META_COLOR_CHAR}#{styleText(text, color, META_COLOR_CHAR)}")
    end
 
    def bold(text)
       return styleText(text, META_BOLD_CHAR, META_NORMAL_CHAR)
+   end
+
+   def normal(text)
+      return styleText(text, META_NORMAL_CHAR, META_NORMAL_CHAR)
    end
 
    def green(text)
