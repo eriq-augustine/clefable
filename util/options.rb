@@ -40,7 +40,7 @@ class ParsedOptions
    def errorStr
       rtn = ''
       if (@error)
-         return "Error (#{error[:char]}): #{error[:str]}"
+         return "Error (char: #{error[:char]}): #{error[:str]}"
       end
       return rtn
    end
