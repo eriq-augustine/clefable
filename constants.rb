@@ -30,4 +30,5 @@ SERVER_NAME = 'Kanto'
 REAL_NAME = 'Clefable Bot'
 
 #Most people use their email as their username, but thses people don't.
-EMAIL_MAP = {'eriq' => 'eaugusti', 'eriq_home' => 'eaugusti', 'aboodman' => 'aa', 'dcronin' => 'rdevlin.cronin'}
+EMAIL_MAP = {'eriq' => 'eaugusti', 'eriq_home' => 'eaugusti', 'aboodman' => 'aa', 'dcronin' => 'rdevlin.cronin',
+             'yaws' => 'yoz@chromium.org', 'chebert' => 'hebert.christopherj'}
