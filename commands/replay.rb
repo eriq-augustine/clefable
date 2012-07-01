@@ -5,19 +5,19 @@ class Replay < Command
 
    def initialize
       super('REPLAY',
-            'REPLAY -m <minutes> [-e <email>]',
+            'REPLAY -M <minutes> [-E <email>]',
             'Replay the last n minutes. If an email is supplied, Clefable will email you the results.')
    end
 
    @@instance = Replay.new()
    @@max_res = 100
 
-   @@option_min_schema = OptionSchema.new('m', 'minutes', OptionSchema::YES_VALUE)
-   @@option_email_schema = OptionSchema.new('e', 'email', OptionSchema::YES_VALUE)
-   @@optionSchema = {@@option_min_schema.shortForm => @@option_min_schema,
-                     @@option_min_schema.longForm => @@option_min_schema,
-                     @@option_email_schema.shortForm => @@option_email_schema,
-                     @@option_email_schema.longForm => @@option_email_schema}
+   @@option_min_schema = OptionSchema.new('M', 'MINUTES', OptionSchema::YES_VALUE)
+   @@option_email_schema = OptionSchema.new('E', 'EMAIL', OptionSchema::YES_VALUE)
+   @@optionSchema = {@@option_min_schema.shortForm.upcase => @@option_min_schema,
+                     @@option_min_schema.longForm.upcase => @@option_min_schema,
+                     @@option_email_schema.shortForm.upcase => @@option_email_schema,
+                     @@option_email_schema.longForm.upcase => @@option_email_schema}
 
    def onCommand(responseInfo, args)
       parsedOptions = parseOptions(args, @@optionSchema)

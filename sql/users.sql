@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS users;
+CREATE TABLE users (
+   `user` VARCHAR(128) PRIMARY KEY,
+   pass VARCHAR(64) NOT NULL,
+   `level` INT NOT NULL DEFAULT -1,
+   email TEXT NOT NULL DEFAULT ''
+);

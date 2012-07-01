@@ -233,6 +233,7 @@ class Clefable
             users.each_key{|nick|
                #It is common practice to append '_' or '-' to your nick if it is taken.
                realNick = nick.sub(/[_-]+$/, '')
+               # TODO: Use the registered emails instead of or in addition to the map
                if (committer == realNick || EMAIL_MAP[realNick] == committer)
                   broadcast = true
                   break

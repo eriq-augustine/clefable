@@ -37,6 +37,26 @@ class ParsedOptions
       @error = error
    end
 
+   def hasOptionSchema?(schema)
+      return @options.key?(schema.to_s)
+   end
+
+   def key?(key)
+      return @options.key?(key)
+   end
+
+   def lookupValue(schema)
+      return @options[schema.to_s]
+   end
+
+   def [](key)
+      return @options[key]
+   end
+
+   def size
+      return options.size
+   end
+
    def errorStr
       rtn = ''
       if (@error)
@@ -105,10 +125,10 @@ module Options
                i += 1
             end
 
-            if (!optionsSchema.key?(optionName))
+            if (!optionsSchema.key?(optionName.upcase))
                return ParsedOptions.new(options, '', {:char => i, :str => "'#{optionName}' is not a recognized option."})
             else
-               currentOption = optionsSchema[optionName]
+               currentOption = optionsSchema[optionName.upcase]
             end
          elsif (text[i] == "'" || text[i] == '"')
             # if there is no current option, then this must be the real args

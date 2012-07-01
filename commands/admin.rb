@@ -17,14 +17,15 @@ class Auth < Command
    @@instance = Auth.new()
 
    def getInfo(fromUser)
-      res = db.query("SELECT pass, `level`" +
-                     " FROM #{ADMIN_TABLE}" +
+      res = db.query("SELECT pass, `level`, email" +
+                     " FROM #{USERS_TABLE}" +
                      " WHERE `user` = '#{escape(fromUser)}'")
       if (res.num_rows() == 0)
          return nil
       else
          row = res.fetch_row()
-         return {:pass => row[0], :level => row[1].to_i}
+         email = row[2].empty? ? nil : row[2]
+         return {:pass => row[0], :level => row[1].to_i, :email => email}
       end
    end
 
@@ -54,6 +55,7 @@ class Auth < Command
          responseInfo.respond('You are not in the system. Please REGISTER')
       elsif (info[:pass] == hash)
          userInfo.setAdmin(info[:level])
+         userInfo.setEmail(info[:email]) if info[:email]
          userInfo.auth()
          responseInfo.respond('You are now authenticated!')
       else
@@ -98,7 +100,7 @@ class UserInfo < Command
 
    def getLevel(user)
       res = db.query("SELECT `level`" +
-                     " FROM #{ADMIN_TABLE}" +
+                     " FROM #{USERS_TABLE}" +
                      " WHERE `user` = '#{escape(user)}'")
       if (res.num_rows() == 0)
          return nil
@@ -142,13 +144,13 @@ class Register < Command
    @@instance = Register.new()
 
    def hasUser(user)
-      res = db.query("SELECT * FROM #{ADMIN_TABLE} WHERE `user` = '#{escape(user)}'")
+      res = db.query("SELECT * FROM #{USERS_TABLE} WHERE `user` = '#{escape(user)}'")
       return (res.num_rows() == 1)
    end
 
    def insertUser(user, pass)
       hash = passHash(user, pass)
-      db.query("INSERT INTO #{ADMIN_TABLE} VALUES ('#{escape(user)}', '#{hash}', -1)")
+      db.query("INSERT INTO #{USERS_TABLE} VALUES ('#{escape(user)}', '#{hash}', -1)")
       return true
    end
 
@@ -189,13 +191,13 @@ class Pass < Command
    @@instance = Pass.new()
 
    def hasUser(user)
-      res = db.query("SELECT * FROM #{ADMIN_TABLE} WHERE `user` = '#{escape(user)}'")
+      res = db.query("SELECT * FROM #{USERS_TABLE} WHERE `user` = '#{escape(user)}'")
       return (res.num_rows() == 1)
    end
 
    def updatePass(user, pass)
       hash = passHash(user, pass)
-      db.query("UPDATE #{ADMIN_TABLE} SET pass = '#{hash}' WHERE `user` = '#{escape(user)}'")
+      db.query("UPDATE #{USERS_TABLE} SET pass = '#{hash}' WHERE `user` = '#{escape(user)}'")
       return true
    end
 
@@ -244,12 +246,12 @@ class Admin < Command
    @@instance = Admin.new()
 
    def modLevel(user, level)
-      db.query("UPDATE #{ADMIN_TABLE} SET `level` = #{level} WHERE `user` = '#{escape(user)}'")
+      db.query("UPDATE #{USERS_TABLE} SET `level` = #{level} WHERE `user` = '#{escape(user)}'")
    end
 
    def getLevel(user)
       res = db.query("SELECT `level`" +
-                     " FROM #{ADMIN_TABLE}" +
+                     " FROM #{USERS_TABLE}" +
                      " WHERE `user` = '#{escape(user)}'")
       if (res.num_rows() == 0)
          return nil
@@ -363,6 +365,7 @@ class Admin < Command
 
       if (!users.has_key?(responseInfo.fromUser))
          responseInfo.respond('You are not loged into the system.')
+         return
       end
 
       requestUser = users[responseInfo.fromUser]

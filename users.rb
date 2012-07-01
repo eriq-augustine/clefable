@@ -1,13 +1,14 @@
 # TODO: Deal with ops properly.
 #  Right now, ops are seen on user lists and accounted for, but nothing beyond that.
 class User
-   attr_reader :nick, :ops, :adminLevel
+   attr_reader :nick, :ops, :adminLevel, :email
 
    def initialize(nick, ops)
       @nick = nick
       @ops = ops
       @adminLevel = -1
       @auth = false
+      @email = nil
    end
 
    def setAdmin(level)
@@ -16,6 +17,10 @@ class User
 
    def auth
       @auth = true
+   end
+
+   def setEmail(email)
+      @email = email
    end
 
    def deauth
