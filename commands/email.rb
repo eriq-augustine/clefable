@@ -7,18 +7,20 @@ class EmailCommand < Command
 
    def initialize
       super('EMAIL',
-            'EMAIL; EMAIL -R <email>; EMAIL -V <verification token>',
-            'View your currenly registered email; Register a new email; Verify an email.')
+            'EMAIL',
+            'View your currenly registered email; Register a new email; Verify an email.',
+            {:optionUsage => Options::formatOptionUsage(@@schema.values)})
    end
 
-   @@instance = EmailCommand.new()
 
-   @@option_register_schema = OptionSchema.new('R', 'REGISTER', OptionSchema::YES_VALUE)
-   @@option_verify_schema = OptionSchema.new('V', 'VERIFY', OptionSchema::YES_VALUE)
-   @@optionSchema = {@@option_register_schema.shortForm.upcase => @@option_register_schema,
-                     @@option_register_schema.longForm.upcase => @@option_register_schema,
-                     @@option_verify_schema.shortForm.upcase => @@option_verify_schema,
-                     @@option_verify_schema.longForm.upcase => @@option_verify_schema}
+   @@schema = {:register =>  OptionSchema.new('Request an email to be registerd to your current nick', 'R', 'REGISTER', OptionSchema::YES_VALUE),
+               :verify =>  OptionSchema.new('Use a verification token to verify a registered email', 'V', 'VERIFY', OptionSchema::YES_VALUE)}
+   @@optionSchema = Hash.new()
+   @@schema.each_value{|option|
+      @@optionSchema[option.shortForm.upcase] = option
+      @@optionSchema[option.longForm.upcase] = option
+   }
+   @@instance = EmailCommand.new()
 
    def generateToken()
       str = ''
@@ -62,9 +64,9 @@ class EmailCommand < Command
       # Too many options
       elsif (parsedOptions.size > 1)
          responseInfo.respond("Too many options, you can specify at most one option for EMAIL.")
-      elsif (parsedOptions.hasOptionSchema?(@@option_register_schema))
+      elsif (parsedOptions.hasOptionSchema?(@@schema[:register]))
          token = generateToken()
-         email = parsedOptions.lookupValue(@@option_register_schema)
+         email = parsedOptions.lookupValue(@@schema[:register])
          update("REPLACE INTO #{EMAIL_TABLE} (`user`, email, token) VALUES"+
                 " ('#{escape(requestUser.nick)}', '#{escape(email)}', '#{token}')")
          body = "This is your verification token:\n" +
@@ -72,8 +74,8 @@ class EmailCommand < Command
                 "Use this token with EMAIL -V <token> to verify your email.\n\n"
          sendMail("Clefable Email Verification", body, email)
          responseInfo.respond("A verification email has been sent.")
-      elsif (parsedOptions.hasOptionSchema?(@@option_verify_schema))
-         token = parsedOptions.lookupValue(@@option_verify_schema)
+      elsif (parsedOptions.hasOptionSchema?(@@schema[:verify]))
+         token = parsedOptions.lookupValue(@@schema[:verify])
          if (!(dbInfo = query("SELECT email, token FROM #{EMAIL_TABLE} WHERE `user` = '#{requestUser.nick}'")) ||
              dbInfo.num_rows() == 0)
             responseInfo.respond('Unable to find a pending email in the DB, did you EMAIL -R?')

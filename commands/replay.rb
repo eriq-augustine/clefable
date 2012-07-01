@@ -5,20 +5,22 @@ class Replay < Command
 
    def initialize
       super('REPLAY',
-            'REPLAY -M <minutes> [-E [<email>]]',
-            'Replay the last n minutes. If an email is supplied, Clefable will email you the results.' + 
-            ' If -E is supplied without an email, Clefable will used the email you registered with EMAIL')
+            'REPLAY [OPTIONS]',
+            'Replay the last n minutes.',
+            {:optionUsage => Options::formatOptionUsage(@@schema.values)})
    end
 
-   @@instance = Replay.new()
    @@max_res = 100
 
-   @@option_min_schema = OptionSchema.new('M', 'MINUTES', OptionSchema::YES_VALUE)
-   @@option_email_schema = OptionSchema.new('E', 'EMAIL', OptionSchema::MAYBE_VALUE)
-   @@optionSchema = {@@option_min_schema.shortForm.upcase => @@option_min_schema,
-                     @@option_min_schema.longForm.upcase => @@option_min_schema,
-                     @@option_email_schema.shortForm.upcase => @@option_email_schema,
-                     @@option_email_schema.longForm.upcase => @@option_email_schema}
+   @@schema = {:min => OptionSchema.new('Number of minutes to go back', 'M', 'MINUTES', OptionSchema::YES_VALUE),
+               :email => OptionSchema.new('The email to use (if no email is supplied, your registered email is used)', 'E', 'EMAIL', OptionSchema::MAYBE_VALUE),
+               :limit => OptionSchema.new('The maximum number of entries returned', 'L', 'LIMIT', OptionSchema::YES_VALUE)}
+   @@optionSchema = Hash.new()
+   @@schema.each_value{|option|
+      @@optionSchema[option.shortForm.upcase] = option
+      @@optionSchema[option.longForm.upcase] = option
+   }
+   @@instance = Replay.new()
 
    def onCommand(responseInfo, args)
       parsedOptions = parseOptions(args, @@optionSchema)
@@ -28,21 +30,30 @@ class Replay < Command
          return
       end
 
-      if (!parsedOptions.options.key?(@@option_min_schema.to_s))
+      if (!parsedOptions.hasOptionSchema?(@@schema[:min]))
          responseInfo.respond("You need to specify a number of minutes.")
          return
       else
-         min = parsedOptions.options[@@option_min_schema.to_s].to_i
+         min = parsedOptions.lookupValue(@@schema[:min]).to_i
          if (min == 0)
-            responseInfo.respond("Use a non-zero int.")
+            responseInfo.respond("Use a non-zero int for minutes.")
             return
+         end
+
+         limit = nil
+         if (parsedOptions.hasOptionSchema?(@@schema[:limit]))
+            limit = parsedOptions.lookupValue(@@schema[:limit]).to_i
+            if (limit == 0)
+               responseInfo.respond('Must specify a non-zero int for limit.')
+               return
+            end
          end
 
          startTime = Time.now().to_i() - (min * 60)
 
          email = nil
-         if (parsedOptions.hasOptionSchema?(@@option_email_schema))
-            email = parsedOptions.lookupValue(@@option_email_schema)
+         if (parsedOptions.hasOptionSchema?(@@schema[:email]))
+            email = parsedOptions.lookupValue(@@schema[:email])
             if (!email)
                user = responseInfo.server.getUsers()[responseInfo.fromUser]
                if (!user.isAuth?)
@@ -74,6 +85,10 @@ class Replay < Command
                     " ORDER BY timestamp"
          end
 
+         if (limit)
+            query += " LIMIT #{limit}"
+         end
+
          res = db.query(query)
 
          if (res.num_rows() == 0)
@@ -91,7 +106,13 @@ class Replay < Command
                res.each{|row|
                   body += "[#{Time.at(row[0].to_i)}] ^#{row[1]}: #{row[2]}\n"
                }
-               sendMail("REPLAY -m #{min}", body, email)
+               subject = "REPLAY -M #{min} "
+
+               if (limit)
+                  subject += "-L #{limit}"
+               end
+
+               sendMail(subject, body, email)
                responseInfo.respond("Email sent.")
             end
          end

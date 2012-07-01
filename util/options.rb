@@ -3,10 +3,11 @@ class OptionSchema
    YES_VALUE = 1
    MAYBE_VALUE = 2
 
-   attr_reader :shortForm, :longForm, :valuePresence
+   attr_reader :desc, :shortForm, :longForm, :valuePresence
 
    # valuePresence should be one of the above enum.
-   def initialize(shortForm, longForm, valuePresence)
+   def initialize(desc, shortForm, longForm, valuePresence)
+      @desc = desc
       @shortForm = shortForm
       @longForm = longForm
       @valuePresence = valuePresence
@@ -18,10 +19,16 @@ class OptionSchema
          rtn += "-#{@shortForm}"
 
          if (@longForm)
-            rtn += " (--#{@longForm})"
+            rtn += "/--#{@longForm}"
          end
       elsif (@longForm)
          rtn += "--#{@longForm}"
+      end
+
+      if (valuePresence == YES_VALUE)
+         rtn += " <value>"
+      elsif (valuePresence == MAYBE_VALUE)
+         rtn += " [<value>]"
       end
 
       return rtn
@@ -199,5 +206,20 @@ module Options
       args = text[i, text.length]
 
       return ParsedOptions.new(options, args, nil)
+   end
+
+   # Here the schemas should be an arry of schemas.
+   def self.formatOptionUsage(schemas)
+      rtn = ''
+      if (!schemas || schemas.size == 0)
+         rtn = 'There are no options.'
+      else
+         schemas.each{|schema|
+            rtn += "#{schema.to_s} -- #{schema.desc}; " 
+         }
+         rtn.sub!(/; $/, '')
+      end
+
+      return rtn
    end
 end

@@ -37,6 +37,9 @@ class Help < Command
          execResponse = responseInfo.fromUserInfo.canExecute?(command.requiredLevel)
          if (!command.requiredLevel || execResponse[:success])
             responseInfo.respond("USAGE: #{command.usage()}")
+            if (command.optionUsage())
+               responseInfo.respond("OPTIONS: #{command.optionUsage()}")
+            end
             responseInfo.respond("#{command.description()}")
             if (aliases = command.aliases)
                responseInfo.respond("ALIASES: #{aliases}")

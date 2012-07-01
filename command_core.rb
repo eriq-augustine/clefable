@@ -38,16 +38,22 @@ end
 class Command
    @@commands = Hash.new()
 
-   attr_reader :usage, :name, :description, :admin, :requiredLevel, :aliases
+   attr_reader :usage, :name, :description, :admin, :requiredLevel, :aliases, :optionUsage
 
    # Availble options:
    #  :adminLevel (int) both requires that a user is an admin, and that the required level is met on invocation
    #  :skipLog (bool) Do not log this entry, great for passwords
    #  :aliases (array) All the different aliases for a command.
+   #  :optionUsage (string) The correct usage for options
    def initialize(name, usage, description, options = {})
       @name = name
       @usage = usage
       @description = description
+
+      @optionUsage = nil
+      if (options.key?(:optionUsage))
+         @optionUsage = options[:optionUsage]
+      end
 
       @skipLog = false
       if (options.key?(:skipLog))
