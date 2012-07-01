@@ -105,7 +105,7 @@ module Options
                   return ParsedOptions.new(options, '', {:char => i, :str => "#{currentOption.to_s} requires a value."})
                end
 
-               options[currentOption.to_s] = true
+               options[currentOption.to_s] = nil
                currentOption = nil
             end
 
@@ -191,7 +191,7 @@ module Options
             return ParsedOptions.new(options, '', {:char => i, :str => "#{currentOption.to_s} requires a value."})
          end
 
-         options[currentOption.to_s] = true
+         options[currentOption.to_s] = nil
          currentOption = nil
       end
 
