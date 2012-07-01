@@ -31,13 +31,13 @@ class Auth < Command
 
    def onCommand(responseInfo, args)
       if (responseInfo.target != IRC_NICK)
-         responseInfo.respond('You must do this in a PM.')
+         responseInfo.respondPM('You must AUTH in a PM.')
          return
       end
 
       userInfo = responseInfo.server.getUsers()[responseInfo.fromUser]
       if (!userInfo)
-         responseInfo.respond("I don't know if you are actually on. If you are real, leave and rejoin.")
+         responseInfo.respondPM("I don't know if you are actually on. If you are real, leave and rejoin.")
          return
       end
 
