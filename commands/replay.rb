@@ -10,7 +10,7 @@ class Replay < Command
             {:optionUsage => Options::formatOptionUsage(@@schema.values)})
    end
 
-   @@max_res = 100
+   @@max_res = 10
 
    @@schema = {:min => OptionSchema.new('Number of minutes to go back', 'M', 'MINUTES', OptionSchema::YES_VALUE),
                :email => OptionSchema.new('The email to use (if no email is supplied, your registered email is used)', 'E', 'EMAIL', OptionSchema::MAYBE_VALUE),
