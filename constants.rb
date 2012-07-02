@@ -7,7 +7,7 @@ SELECT_TIMEOUT = 120
 
 #DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
 #DEFAULT_CHANNELS = ['#eriq_secret']
-DEFAULT_CHANNELS = ['#crx', '#eriq_secret', '#bestfriendsclub', '#softwareinventions']
+DEFAULT_CHANNELS = ['#crx', '#eriq_secret', '#bestfriendsclub', '#softwareinventions', '#clefable']
 #DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub', '#softwareinventions']
 
 MAX_MESSAGE_LEN = 400

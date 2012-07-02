@@ -19,21 +19,18 @@ Dir["#{COMMAND_DIR}/*.rb"].each{|file|
    require file
 }
 
-IRCServer.init(IRC_HOST, IRC_PORT, IRC_NICK)
-IRCServer.instance.connect()
+ClefableThread.init()
+
+server = Server.new(IRC_HOST, IRC_PORT, IRC_NICK)
+server.start()
 
 #Request the user list now
 DEFAULT_CHANNELS.each{|channel|
-   IRCServer.instance.join(channel)
-   IRCServer.instance.sendMessage("NAMES #{channel}")
+   Clefable.instance.join(channel)
+   OutputServer.queueMessage("NAMES #{channel}", 0)
 }
 
-begin
-   IRCServer.instance.listen()
-rescue Interrupt
-   puts '[INFO] Recieved interrupt, server shutting down...'
-rescue Exception => detail
-   puts detail.message()
-   print detail.backtrace.join("\n")
-   retry
+#TODO: Get rid of stupid sleep
+while (true)
+   sleep(999)
 end

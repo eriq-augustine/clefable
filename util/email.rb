@@ -15,5 +15,7 @@ module Email
       stdout.close
       stderr.close
       exit_status = wait_thr.value 
+
+      return exit_status
    end
 end

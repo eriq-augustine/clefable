@@ -20,7 +20,7 @@ module DB
    EMAIL_TABLE = 'pending_emails'
 
    def db
-      if (@db.nil?)
+      if (!@db || @db.nil?)
          @db = Mysql::new(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB)
          @db.reconnect = true
       end

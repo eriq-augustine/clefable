@@ -1,6 +1,97 @@
+# TODO: Merge all queuing classes into a base class.
+# TODO: This class does not handle reload gracefully.
+class ClefableThread
+   SERVER_INPUT = 0
+   STDIN_INPUT = 1
+   PERIODIC_ACTIONS = 2
+
+   @@thread = nil
+   @@die = false
+
+   @@queueLock = nil
+   @@queue = nil
+
+   def self.init()
+      @@queue = Array.new()
+      @@queueLock = Mutex.new()
+      
+      @@die = false
+      @@thread = Thread.new{
+         while (!@@die)
+            Thread.stop
+
+            begin
+               emptyQueue()
+            rescue Interrupt
+               @@die = true
+            rescue Exception => detail
+               puts detail.message()
+               print detail.backtrace.join("\n")
+               retry
+            end
+         end
+      }
+
+      #TEST
+      sleep(1)
+   end
+
+   def self.stop()
+      @@die = true
+      @@thread.exit
+   end
+
+   def self.killQueue
+      @@queueLock.synchronize{
+         @@queue.clear()
+      }
+      @@thread.exit
+   end
+
+   def self.queueTask(action, data)
+      @@queueLock.synchronize{
+         @@queue << {:action => action, :data => data}
+         if (@@thread.stop?)
+            @@thread.wakeup
+         end
+      }
+   end
+
+   private
+
+   def self.emptyQueue()
+      done = false
+      while (!done)
+         action = nil
+         data = nil
+         @@queueLock.synchronize{
+            info = @@queue.shift
+            if (!info)
+               done = true
+            else
+               action = info[:action]
+               data = info[:data]
+            end
+         }
+
+         if (!done)
+            if (action == SERVER_INPUT)
+               Clefable.instance.handleServerInput(data)
+            elsif (action == STDIN_INPUT)
+               Clefable.instance.handleStdinInput(data)
+            elsif (action == PERIODIC_ACTIONS)
+               Clefable.instance.periodicActions()
+            else
+               puts "ERROR: Unknown Clefable action: #{action}."
+            end
+         end
+      end
+   end
+end
+
 # This class should only be new()'d once.
 # If you need to relad it for some reason, use reload()
-class Clefable
+class Clefable 
    include DB
    include TextStyle
 
@@ -15,36 +106,19 @@ class Clefable
       # { target => rewrite }
       @rewriteRules = getRewriteRules()
 
-      @floodControl = Hash.new(0)
-      @lastFloodBucketReap = 0
-
       @commitFetcher = CommitFetcher.new()
       # Do the first update quietly
       @commitFetcher.updateCommits()
    end
 
-   # Get the amount of time to wait before putting out a new message.
-   # Strategy:
-   #  Get the current epoch minute
-   #  Add up five most recent buckets
-   #  Do math
-   def waitTime()
-      time = Time.now().to_i / 60
-      
-      # Cleanup once every ten minutes
-      if (@lastFloodBucketReap != time && time % 10 == 0)
-         @floodControl.delete_if{|key, val| key <= (time - 5) }
-         @lastFloodBucketReap = time
-      end
+   # Wrapper for InputQueue.queueMessage()
+   def sendMessage(message, delay = 0)
+      OutputServer.queueMessage(message, delay)
+   end
 
-      @floodControl[time] += 1
-
-      count = 0
-      for i in 0...5
-         count += (@floodControl[time - i] * (5 - i))
-      end
-
-      return 0.1 + (count * 0.0393)
+   def join(channel)
+      sendMessage("JOIN #{channel}")
+      puts "[INFO] Joined #{channel}"
    end
 
    # Available options:
@@ -59,15 +133,13 @@ class Clefable
 
       # TODO: Split better, so words are not broken.
       for i in 0..(message.length() / MAX_MESSAGE_LEN)
-         sleepTime = waitTime()
          delay = options[:delay]
-         if (delay)
-            sleepTime = (sleepTime < delay) ? delay : sleepTime
+         if (!delay)
+            delay = 0
          end
 
          part = message[i * MAX_MESSAGE_LEN, (i + 1) * MAX_MESSAGE_LEN]
-         IRCServer.instance.sendMessage("PRIVMSG #{channel} :#{part}")
-         sleep(sleepTime)
+         sendMessage("PRIVMSG #{channel} :#{part}", delay)
       end
    end
 
@@ -87,7 +159,7 @@ class Clefable
 
       # PING :<server>
       if (match = message.match(/^PING\s:(.*)$/))
-         IRCServer.instance.sendMessage("PONG :#{match[1]}")
+         sendMessage("PONG :#{match[1]}")
       # :<from user>!<from user>@<from address> PRIVMSG <to> :<message>
       # <to> is usually a channel
       elsif (match = message.match(/^:([^!]*)!([^@]*)@([^\s]*)\sPRIVMSG\s([^\s]*)\s:(.*)$/))
@@ -202,11 +274,11 @@ class Clefable
    end
 
    def giveOps(user, channel)
-      IRCServer.instance.sendMessage("MODE #{channel} +o #{user}")
+      sendMessage("MODE #{channel} +o #{user}")
    end
 
    def takeOps(user, channel)
-      IRCServer.instance.sendMessage("MODE #{channel} -o #{user}")
+      sendMessage("MODE #{channel} -o #{user}")
    end
 
    def log(fromUser, toUser, message)
@@ -248,12 +320,10 @@ class Clefable
       }
    end
 
-   def set(channels, users, rewriteRules, floodControl, lastFloodBucketReap, commitFetcher)
+   def set(channels, users, rewriteRules, commitFetcher)
       @channels = channels
       @users = users
       @rewriteRules = rewriteRules
-      @floodControl = floodControl
-      @lastFloodBucketReap = lastFloodBucketReap
       @commitFetcher = commitFetcher
    end
 
@@ -277,8 +347,7 @@ class Clefable
 
       newClef = Clefable.new()
       newClef.set(@@instance.channels, @@instance.users,
-                  @@instance.rewriteRules, @@instance.floodControl,
-                  @@instance.lastFloodBucketReap, @@instance.commitFetcher)
+                  @@instance.rewriteRules, @@instance.commitFetcher)
 
       return newClef
    end

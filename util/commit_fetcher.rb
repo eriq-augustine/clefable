@@ -95,7 +95,6 @@ class CommitFetcher
       rescue Exception => ex
          puts ex.message  
          puts ex.backtrace.inspect 
-         message = 'Sorry, there was a problem fetching the last commits.'
       end
       
       return commits
