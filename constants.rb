@@ -1,7 +1,6 @@
 IRC_HOST = 'irc.freenode.net'
 IRC_PORT = 6667
-IRC_NICK = 'Clefable_BOT_TEST'
-#IRC_NICK = 'Clefable_BOT'
+IRC_NICK = 'Clefable_BOT'
 
 #Wait for 2 mins on select
 SELECT_TIMEOUT = 120
