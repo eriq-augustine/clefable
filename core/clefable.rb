@@ -1,94 +1,3 @@
-# TODO: Merge all queuing classes into a base class.
-# TODO: This class does not handle reload gracefully.
-class ClefableThread
-   SERVER_INPUT = 0
-   STDIN_INPUT = 1
-   PERIODIC_ACTIONS = 2
-
-   @@thread = nil
-   @@die = false
-
-   @@queueLock = nil
-   @@queue = nil
-
-   def self.init()
-      @@queue = Array.new()
-      @@queueLock = Mutex.new()
-      
-      @@die = false
-      @@thread = Thread.new{
-         while (!@@die)
-            Thread.stop
-
-            begin
-               emptyQueue()
-            rescue Interrupt
-               @@die = true
-            rescue Exception => detail
-               puts detail.message()
-               print detail.backtrace.join("\n")
-               retry
-            end
-         end
-      }
-
-      #TEST
-      sleep(1)
-   end
-
-   def self.stop()
-      @@die = true
-      @@thread.exit
-   end
-
-   def self.killQueue
-      @@queueLock.synchronize{
-         @@queue.clear()
-      }
-      @@thread.exit
-   end
-
-   def self.queueTask(action, data)
-      @@queueLock.synchronize{
-         @@queue << {:action => action, :data => data}
-         if (@@thread.stop?)
-            @@thread.wakeup
-         end
-      }
-   end
-
-   private
-
-   def self.emptyQueue()
-      done = false
-      while (!done)
-         action = nil
-         data = nil
-         @@queueLock.synchronize{
-            info = @@queue.shift
-            if (!info)
-               done = true
-            else
-               action = info[:action]
-               data = info[:data]
-            end
-         }
-
-         if (!done)
-            if (action == SERVER_INPUT)
-               Clefable.instance.handleServerInput(data)
-            elsif (action == STDIN_INPUT)
-               Clefable.instance.handleStdinInput(data)
-            elsif (action == PERIODIC_ACTIONS)
-               Clefable.instance.periodicActions()
-            else
-               puts "ERROR: Unknown Clefable action: #{action}."
-            end
-         end
-      end
-   end
-end
-
 # This class should only be new()'d once.
 # If you need to relad it for some reason, use reload()
 class Clefable 
@@ -113,7 +22,7 @@ class Clefable
 
    # Wrapper for InputQueue.queueMessage()
    def sendMessage(message, delay = 0)
-      OutputServer.queueMessage(message, delay)
+      OutputThread.instance.queueMessage(message, delay)
    end
 
    def join(channel)

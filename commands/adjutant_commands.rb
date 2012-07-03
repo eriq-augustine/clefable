@@ -12,7 +12,7 @@ class DirectCommand < Command
    @@instance = DirectCommand.new()
 
    def onCommand(responseInfo, args)
-      OutputServer.queueMessage(args, 0)
+      OutputThread.instance.queueMessage(args, 0)
    end
 end
 
@@ -82,7 +82,7 @@ class Join < Command
       if (!args.start_with?('#'))
          responseInfo.respond('Channels must start with a \'#\'.')
       else
-         OutputServer.queueMessage("JOIN #{args}", 0)
+         OutputThread.instance.queueMessage("JOIN #{args}", 0)
          responseInfo.respond("Attempting to join #{args}")
       end
    end

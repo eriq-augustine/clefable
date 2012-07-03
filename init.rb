@@ -19,6 +19,11 @@ Dir["#{COMMAND_DIR}/*.rb"].each{|file|
    require file
 }
 
+# Load all the threads!
+Dir["#{THREAD_DIR}/*.rb"].each{|file|
+   require file
+}
+
 ClefableThread.init()
 
 server = Server.new(IRC_HOST, IRC_PORT, IRC_NICK)
@@ -27,7 +32,7 @@ server.start()
 #Request the user list now
 DEFAULT_CHANNELS.each{|channel|
    Clefable.instance.join(channel)
-   OutputServer.queueMessage("NAMES #{channel}", 0)
+   OutputThread.instance.queueMessage("NAMES #{channel}", 0)
 }
 
 #TODO: Get rid of stupid sleep
