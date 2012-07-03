@@ -3,6 +3,7 @@
 class Clefable 
    include DB
    include TextStyle
+   include TextSplit
 
    attr_reader :channels, :users, :rewriteRules, :floodControl, :lastFloodBucketReap, :commitFetcher
 
@@ -40,16 +41,15 @@ class Clefable
          }
       end
 
-      # TODO: Split better, so words are not broken.
-      for i in 0..(message.length() / MAX_MESSAGE_LEN)
-         delay = options[:delay]
-         if (!delay)
-            delay = 0
-         end
-
-         part = message[i * MAX_MESSAGE_LEN, (i + 1) * MAX_MESSAGE_LEN]
-         sendMessage("PRIVMSG #{channel} :#{part}", delay)
+      delay = options[:delay]
+      if (!delay)
+         delay = 0
       end
+
+      messages = splitText(message)
+      messages.each{|splitMessage|
+         sendMessage("PRIVMSG #{channel} :#{splitMessage}", delay)
+      }
    end
 
    def ensureUser(user, channel, ops)
