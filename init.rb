@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+require 'thread'
+
 require './users.rb'
 require './constants.rb'
 require './command_core.rb'
@@ -35,7 +37,11 @@ DEFAULT_CHANNELS.each{|channel|
    OutputThread.instance.queueMessage("NAMES #{channel}", 0)
 }
 
-#TODO: Get rid of stupid sleep
-while (true)
-   sleep(999)
+# Halt the main thread.
+begin
+   Thread.stop
+rescue Interrupt
+   log(INFO, 'Main thread was interrupted... shutting down server.')
+rescue
+   log(INFO, 'Main thread was resumed, which means death.')
 end
