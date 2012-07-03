@@ -5,7 +5,6 @@
 
 class Note < Command
    include DB
-   include RateLimit
 
    def initialize
       super('NOTE',
