@@ -6,11 +6,12 @@ class OptionSchema
    attr_reader :desc, :shortForm, :longForm, :valuePresence
 
    # valuePresence should be one of the above enum.
-   def initialize(desc, shortForm, longForm, valuePresence)
+   def initialize(desc, shortForm, longForm, valuePresence, valueName = 'value')
       @desc = desc
       @shortForm = shortForm
       @longForm = longForm
       @valuePresence = valuePresence
+      @valueName = valueName
    end
 
    def to_s
@@ -26,9 +27,9 @@ class OptionSchema
       end
 
       if (valuePresence == YES_VALUE)
-         rtn += " <value>"
+         rtn += " <#{@valueName}>"
       elsif (valuePresence == MAYBE_VALUE)
-         rtn += " [<value>]"
+         rtn += " [<#{@valueName}>]"
       end
 
       return rtn

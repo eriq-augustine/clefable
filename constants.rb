@@ -6,8 +6,8 @@ IRC_NICK = 'Clefable_BOT'
 SELECT_TIMEOUT = 120
 
 #DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
-DEFAULT_CHANNELS = ['#eriq_secret']
-#DEFAULT_CHANNELS = ['#crx', '#eriq_secret', '#bestfriendsclub', '#softwareinventions', '#clefable']
+#DEFAULT_CHANNELS = ['#eriq_secret', '#clefable']
+DEFAULT_CHANNELS = ['#crx', '#eriq_secret', '#bestfriendsclub', '#softwareinventions', '#clefable']
 #DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub', '#softwareinventions']
 
 MAX_MESSAGE_LEN = 400
@@ -29,7 +29,3 @@ TRIGGER = '`'
 HOST_NAME = 'Mt.Moon'
 SERVER_NAME = 'Kanto'
 REAL_NAME = 'Clefable Bot'
-
-#Most people use their email as their username, but thses people don't.
-EMAIL_MAP = {'eriq' => 'eaugusti', 'eriq_home' => 'eaugusti', 'aboodman' => 'aa', 'dcronin' => 'rdevlin.cronin',
-             'yaws' => 'yoz@chromium.org', 'chebert' => 'hebert.christopherj'}

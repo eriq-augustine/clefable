@@ -118,7 +118,7 @@ class Part < Command
          end
       end
 
-      InputSever.queueMessage("PART #{channel} PART_command_was_issued_by_#{responseInfo.fromUser}", 0)
+      OutputThread.instance.queueMessage("PART #{channel} PART_command_was_issued_by_#{responseInfo.fromUser}", 0)
       responseInfo.respond("Attempting to part #{channel}")
    end
 end

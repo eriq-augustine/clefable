@@ -18,6 +18,7 @@ module DB
    GLOSSARY_TABLE = 'glossary'
    COMMIT_TABLE = 'commits'
    EMAIL_TABLE = 'pending_emails'
+   NICK_MAP_TABLE = 'nick_map'
 
    def db
       if (!@db || @db.nil?)

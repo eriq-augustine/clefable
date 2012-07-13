@@ -5,7 +5,7 @@ class Clefable
    include TextStyle
    include TextSplit
 
-   attr_reader :channels, :users, :rewriteRules, :floodControl, :lastFloodBucketReap, :commitFetcher
+   attr_reader :channels, :users, :rewriteRules, :floodControl, :lastFloodBucketReap, :commitFetcher, :emailMap
 
    def initialize()
       # { channelName => { userName => user } }
@@ -19,6 +19,9 @@ class Clefable
       @commitFetcher = CommitFetcher.new()
       # Do the first update quietly
       @commitFetcher.updateCommits()
+
+      @emailMap = Hash.new()
+      initEmailMap()
    end
 
    # Wrapper for InputQueue.queueMessage()
@@ -215,7 +218,7 @@ class Clefable
                #It is common practice to append '_' or '-' to your nick if it is taken.
                realNick = nick.sub(/[_-]+$/, '')
                # TODO: Use the registered emails instead of or in addition to the map
-               if (committer == realNick || EMAIL_MAP[realNick] == committer)
+               if (committer == realNick || @emailMap[realNick][:email] == committer)
                   broadcast = true
                   break
                end
@@ -227,6 +230,17 @@ class Clefable
             end
          }
       }
+   end
+
+   def initEmailMap
+      @emailMap.clear()
+
+      res = query("SELECT nick, email, domain FROM #{NICK_MAP_TABLE}")
+      if (res)
+         res.each{|row|
+            @emailMap[row[0]] = {:email => row[1], :domain => row[2]}
+         }
+      end
    end
 
    def set(channels, users, rewriteRules, commitFetcher)
