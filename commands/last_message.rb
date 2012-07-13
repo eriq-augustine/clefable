@@ -1,19 +1,11 @@
 class LastMessage < Command
    include DB
+   include TimeConversions
 
    def initialize
       super('LAST-MESSAGE',
             'LAST-MESSAGE -PM [^]<user>',
             'Get the last message from given user.')
-   end
-
-   def secsToHMS(totalSecs)
-      hours = totalSecs / 3600
-      totalSecs -= hours * 3600
-      mins = totalSecs / 60
-      secs = totalSecs - mins * 60
-
-      return {:hours => hours, :mins => mins, :secs => secs}
    end
 
    def onCommand(responseInfo, args)
@@ -41,13 +33,11 @@ class LastMessage < Command
             message = "No results for ^#{user.downcase}"
          else
             row = res.fetch_row()
-            hms = secsToHMS(Time.now().to_i - row[0].to_i)
+            timeString = secsToExplodedString(Time.now().to_i - row[0].to_i)
             message = "Last message recieved from ^#{user.downcase} (" + 
-                      "#{hms[:hours]} hours, #{hms[:mins]} minutes ago in #{row[1]}): #{row[2]}"
+                      "#{timeString} ago in #{row[1]}): #{row[2]}"
             #message = "Last message recieved from ^#{user.downcase} at" + 
             #          " #{Time.at(row[0].to_i)} in #{row[1]}: #{row[2]}"
-            #message = "Last message recieved from ^#{user.downcase} at" + 
-            #          " #{Time.at(row[0].to_i)}: #{row[2]}"
          end
       end
 
