@@ -4,7 +4,8 @@ class Help < Command
    def initialize
       super('HELP',
             'HELP [command]',
-            'Get some help!')
+            'Get some help!',
+            {:aliases => ['MAN']})
    end
 
    @@instance = Help.new()

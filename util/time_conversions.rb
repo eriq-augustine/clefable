@@ -17,18 +17,19 @@ module TimeConversions
               :mins => mins, :secs => secs}
    end
 
-   def secsToExplodedString(secs)
+   def secsToExplodedString(secs, options = {:days => true, :hours => true,
+                                             :mins => true, :secs => true})
       explode = explodeSecs(secs)
       rtn = ''
 
-      if ((days = explode[:days]) != 0)
+      if (options[:days] && (days = explode[:days]) != 0)
          rtn += "#{days} day"
          if (days > 1)
             rtn += 's'
          end
       end
 
-      if ((hours = explode[:hours]) != 0)
+      if (options[:hours] && (hours = explode[:hours]) != 0)
          if (rtn != '')
             rtn += ', '
          end
@@ -39,7 +40,7 @@ module TimeConversions
          end
       end
 
-      if ((mins = explode[:mins]) != 0)
+      if (options[:mins] && (mins = explode[:mins]) != 0)
          if (rtn != '')
             rtn += ', '
          end
@@ -50,7 +51,7 @@ module TimeConversions
          end
       end
 
-      if ((secs = explode[:secs]) != 0)
+      if (options[:secs] && (secs = explode[:secs]) != 0)
          if (rtn != '')
             rtn += ', '
          end

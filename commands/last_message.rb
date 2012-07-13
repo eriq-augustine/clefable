@@ -33,7 +33,9 @@ class LastMessage < Command
             message = "No results for ^#{user.downcase}"
          else
             row = res.fetch_row()
-            timeString = secsToExplodedString(Time.now().to_i - row[0].to_i)
+            timeDiff = Time.now().to_i - row[0].to_i
+            timeOptions = {:days => true, :hours => true, :mins => true}
+            timeString = secsToExplodedString(timeDiff, timeOptions)
             message = "Last message recieved from ^#{user.downcase} (" + 
                       "#{timeString} ago in #{row[1]}): #{row[2]}"
             #message = "Last message recieved from ^#{user.downcase} at" + 
