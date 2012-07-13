@@ -5,7 +5,7 @@ class Clefable
    include TextStyle
    include TextSplit
 
-   attr_reader :channels, :users, :rewriteRules, :floodControl, :lastFloodBucketReap, :commitFetcher, :emailMap
+   attr_reader :channels, :users, :rewriteRules, :commitFetcher, :emailMap
 
    def initialize()
       # { channelName => { userName => user } }
@@ -250,11 +250,12 @@ class Clefable
       end
    end
 
-   def set(channels, users, rewriteRules, commitFetcher)
+   def set(channels, users, rewriteRules, commitFetcher, emailMap)
       @channels = channels
       @users = users
       @rewriteRules = rewriteRules
       @commitFetcher = commitFetcher
+      @emailMap = emailMap
    end
 
    def self.instance
@@ -277,7 +278,8 @@ class Clefable
 
       newClef = Clefable.new()
       newClef.set(@@instance.channels, @@instance.users,
-                  @@instance.rewriteRules, @@instance.commitFetcher)
+                  @@instance.rewriteRules, @@instance.commitFetcher,
+                  @@instance.emailMap)
 
       return newClef
    end
