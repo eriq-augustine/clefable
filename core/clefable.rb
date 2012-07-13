@@ -117,6 +117,7 @@ class Clefable
          channel = match[4]
          ensureUser(user, channel, false)
          Command.userJoined(self, channel, user)
+         log(user, channel, "** JOIN'd #{channel} **")
       # Clefable PART'ed
       # :Clefable_BOT!<something like ~Clefable_>@<from address> PART <channel>
       elsif (match = message.match(/^:#{IRC_NICK}!([^@]*)@(\S*)\sPART\s(\S*)\s*$/))
@@ -126,16 +127,19 @@ class Clefable
       # :<from user>!<from user>@<from address> QUIT :<reason>
       elsif (match = message.match(/^:([^!]*)!([^@]*)@(\S*)\sQUIT\s+:(.*)$/))
          user = match[1]
-         channel = match[4]
-         reason = match[5]
+         reason = match[4]
 
          @users.delete(user)
          @channels.each_value{|users|
             users.delete(user)
-            Command.userLeft(self, channel, user, reason)
+            Command.userLeft(self, ALL_CHANNLES, user, reason)
          }
-      # :<from user>!<from user>@<from address> PART <channel> :<reason>
-      elsif (match = message.match(/^:([^!]*)!([^@]*)@(\S*)\sPART\s(\S*)\s:(.*)$/))
+         
+         log(user, ALL_CHANNLES, "** QUIT'd Resson: #{reason} **")
+      # :eriq!~eriq@c-50-131-15-127.hsd1.ca.comcast.net PART #eriq_secret
+      # :eriq!~eriq@c-50-131-15-127.hsd1.ca.comcast.net PART #eriq_secret :"Leaving"
+      # :<from user>!<from user>@<from address> PART <channel>
+      elsif (match = message.match(/^:([^!]*)!([^@]*)@(\S*)\sPART\s(\S*)/))
          user = match[1]
          channel = match[4]
          reason = match[5]
@@ -155,6 +159,7 @@ class Clefable
          end
 
          Command.userLeft(self, channel, user, reason)
+         log(user, channel, "** PART'd #{channel}. **")
       end
    end
 
@@ -218,7 +223,9 @@ class Clefable
                #It is common practice to append '_' or '-' to your nick if it is taken.
                realNick = nick.sub(/[_-]+$/, '')
                # TODO: Use the registered emails instead of or in addition to the map
-               if (committer == realNick || @emailMap[realNick][:email] == committer)
+               if (committer == realNick || 
+                   (@emailMap[realNick] && @emailMap[realNick][:email] == committer) ||
+                   (@emailMap[nick] && @emailMap[nick][:email] == committer))
                   broadcast = true
                   break
                end

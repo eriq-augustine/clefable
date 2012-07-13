@@ -29,3 +29,5 @@ TRIGGER = '`'
 HOST_NAME = 'Mt.Moon'
 SERVER_NAME = 'Kanto'
 REAL_NAME = 'Clefable Bot'
+
+ALL_CHANNLES = 'ALL_CHANELS'
