@@ -36,7 +36,6 @@ class ThreadWrapper
          end
       }
 
-      # TODO(eriq): Look into this (bug #32).
       sleep(1)
    end
  

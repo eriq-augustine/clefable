@@ -76,13 +76,13 @@ class Replay < Command
                     " WHERE timestamp >= #{startTime}" +
                     "  AND `to` = '#{responseInfo.target}'" + 
                     "  AND `from` = '#{responseInfo.fromUser}'" + 
-                    " ORDER BY timestamp"
+                    " ORDER BY timestamp DESC"
          else
             query = "SELECT timestamp, `from`, message" + 
                     " FROM #{LOG_TABLE}" +
                     " WHERE timestamp >= #{startTime}" +
                     "  AND `to` = '#{responseInfo.target}'" + 
-                    " ORDER BY timestamp"
+                    " ORDER BY timestamp DESC"
          end
 
          if (limit)
@@ -99,12 +99,14 @@ class Replay < Command
          else
             if (!email)
                res.each{|row|
-                  responseInfo.respondPM("[#{Time.at(row[0].to_i)}] ^#{row[1]}: #{row[2]}")
+                  responseInfo.respondPM("[#{Time.at(row[0].to_i).to_s.sub(/\s-\d\d\d\d$/, '')}] #{row[1]}: #{row[2]}")
                }
             else
-               body = ''
+               time = Time.now()
+               body = "All times are recorded in #{time.zone()} (#{time.gmt_offset() / 3600}).\n"
+
                res.each{|row|
-                  body += "[#{Time.at(row[0].to_i)}] ^#{row[1]}: #{row[2]}\n"
+                  body += "[#{Time.at(row[0].to_i).to_s.sub(/\s-\d\d\d\d$/, '')}] #{row[1]}: #{row[2]}\n"
                }
                subject = "REPLAY -M #{min} "
 
