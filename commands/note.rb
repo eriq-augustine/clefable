@@ -1,3 +1,5 @@
+require './core/logging.rb'
+
 #TODO: Better tag matching
 # Right now it tries to match all the tags
 
@@ -34,7 +36,7 @@ class Note < Command
          db.query("DELETE FROM #{NOTE_TAGS_TABLE} WHERE note_id = #{id}")
          return true
       rescue Exception => ex
-         puts ex.message
+         log(ERROR, ex.message)
          return false
       end
       return false
@@ -69,7 +71,7 @@ class Note < Command
          db.query(insert)
          return true
       rescue Exception => ex
-         puts ex.message
+         log(ERROR, ex.message)
          return false
       end
       return false

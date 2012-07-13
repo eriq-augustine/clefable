@@ -29,8 +29,7 @@ class ThreadWrapper
             rescue Interrupt
                @die = true
             rescue Exception => detail
-               puts detail.message()
-               print detail.backtrace.join("\n")
+               log(ERROR, (detail.message() + "\n" + detail.backtrace.join("\n")))
                retry
             end
          end

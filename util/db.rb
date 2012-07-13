@@ -1,3 +1,5 @@
+require './core/logging.rb'
+
 require 'mysql'
 
 module DB
@@ -52,7 +54,7 @@ module DB
          res = db.query(queryStr)
          return res
       rescue Exception => ex
-         puts ex.message
+         log(ERROR, ex.message)
          return nil
       end
       return nil
@@ -63,7 +65,7 @@ module DB
          db.query(statement)
          return true
       rescue Exception => ex
-         puts ex.message
+         log(ERROR, ex.message)
          return false
       end
       return false

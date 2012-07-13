@@ -1,3 +1,5 @@
+require './core/logging.rb'
+
 # This class should only be new()'d once.
 # If you need to relad it for some reason, use reload()
 class Clefable 
@@ -31,7 +33,7 @@ class Clefable
 
    def join(channel)
       sendMessage("JOIN #{channel}")
-      puts "[INFO] Joined #{channel}"
+      log(INFO, "Joined #{channel}")
    end
 
    # Available options:
@@ -67,7 +69,7 @@ class Clefable
 
    def handleServerInput(message)
       message.strip!
-      #puts "[INFO] Server says: #{message}"
+      log(DEBUG, "Server says: #{message}")
 
       # PING :<server>
       if (match = message.match(/^PING\s:(.*)$/))
@@ -117,7 +119,7 @@ class Clefable
          channel = match[4]
          ensureUser(user, channel, false)
          Command.userJoined(self, channel, user)
-         log(user, channel, "** JOIN'd #{channel} **")
+         logChat(user, channel, "** JOIN'd #{channel} **")
       # Clefable PART'ed
       # :Clefable_BOT!<something like ~Clefable_>@<from address> PART <channel>
       elsif (match = message.match(/^:#{IRC_NICK}!([^@]*)@(\S*)\sPART\s(\S*)\s*$/))
@@ -135,7 +137,7 @@ class Clefable
             Command.userLeft(self, ALL_CHANNLES, user, reason)
          }
          
-         log(user, ALL_CHANNLES, "** QUIT'd Resson: #{reason} **")
+         logChat(user, ALL_CHANNLES, "** QUIT'd Resson: #{reason} **")
       # :eriq!~eriq@c-50-131-15-127.hsd1.ca.comcast.net PART #eriq_secret
       # :eriq!~eriq@c-50-131-15-127.hsd1.ca.comcast.net PART #eriq_secret :"Leaving"
       # :<from user>!<from user>@<from address> PART <channel>
@@ -159,7 +161,7 @@ class Clefable
          end
 
          Command.userLeft(self, channel, user, reason)
-         log(user, channel, "** PART'd #{channel}. **")
+         logChat(user, channel, "** PART'd #{channel}. **")
       end
    end
 
@@ -167,7 +169,7 @@ class Clefable
       command.strip!
 
       if (command.length() > 0)
-         #puts "[INFO] Recieved command: #{command}"
+         log(DEBUG, "Recieved command: #{command}")
          Command.invoke(ResponseInfo.new(self, CONSOLE, CONSOLE, CONSOLE_USER), command)
       end
    end
@@ -198,7 +200,7 @@ class Clefable
       sendMessage("MODE #{channel} -o #{user}")
    end
 
-   def log(fromUser, toUser, message)
+   def logChat(fromUser, toUser, message)
       db.query("INSERT INTO #{LOG_TABLE} (timestamp, `to`, `from`, message)" + 
                " VALUES (#{Time.now().to_i()}, '#{toUser}', '#{fromUser}', '#{db.escape_string(message)}')")
    end

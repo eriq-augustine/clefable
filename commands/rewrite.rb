@@ -1,3 +1,5 @@
+require './core/logging.rb'
+
 class Rewrite < Command
    include DB
    def initialize
@@ -17,7 +19,7 @@ class Rewrite < Command
                   " VALUES ('#{escape(target)}', '#{escape(rewrite)}')")
          return true
       rescue Exception => ex
-         puts ex.message
+         log(ERROR, ex.message)
          return false
       end
       return false
@@ -28,7 +30,7 @@ class Rewrite < Command
          db.query("DELETE FROM #{REWRITE_TABLE} WHERE target = '#{escape(target)}'")
          return true
       rescue Exception => ex
-         puts ex.message
+         log(ERROR, ex.message)
          return false
       end
       return false

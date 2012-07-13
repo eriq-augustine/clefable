@@ -22,6 +22,7 @@ COMMAND_DIR = './commands'
 UTIL_DIR = './util'
 CORE_DIR = './core'
 THREAD_DIR = './thread'
+LOG_DIR = './logs'
 
 USER_NAME = IRC_NICK
 SHORT_NICK = 'CLEF'

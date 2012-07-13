@@ -1,3 +1,5 @@
+require './core/logging.rb'
+
 require 'net/http'
 require 'net/https'
 require 'json'
@@ -55,7 +57,7 @@ class ChangeLog < Command
             responseInfo.respond(message)
          }
       rescue Exception => ex
-         #puts ex.message
+         log(ERROR, ex.message)
          message = 'Sorry, there was a problem fetching the commit messages.'
       end
    end

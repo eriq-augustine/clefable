@@ -1,3 +1,5 @@
+require './core/logging.rb'
+
 require 'net/http'
 require 'json'
 
@@ -34,8 +36,8 @@ class Tree < Command
 
          message = "#{bold(state)} -- #{status['message']}"
       rescue Exception => ex
-         #puts ex.message  
-         #puts ex.backtrace.inspect 
+         log(ERROR, ex.message)
+         log(ERROR, ex.backtrace.inspect)
          message = 'Sorry, there was a problem fetching the tree status.'
       end
       

@@ -4,6 +4,7 @@ require 'rexml/document'
 require 'time'
 
 # This should be loaded by core, but require it here just in case order is wrong
+require './core/logging.rb'
 require './util/db.rb'
 
 #'http://git.chromium.org/gitweb/?p=chromium/src.git;a=log'
@@ -93,8 +94,8 @@ class CommitFetcher
 
          insertCommits(commits)
       rescue Exception => ex
-         puts ex.message  
-         puts ex.backtrace.inspect 
+         log(ERROR, ex.message)
+         log(ERROR, ex.backtrace.inspect) 
       end
       
       return commits

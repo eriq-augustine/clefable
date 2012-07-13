@@ -1,3 +1,5 @@
+require './core/logging.rb'
+
 require 'digest/sha2'
 
 class EmailCommand < Command
@@ -95,7 +97,7 @@ class EmailCommand < Command
             responseInfo.respond("Your email has been registered!")
          end
       else
-         puts "UNREACHABLE -- email"
+         log(ERROR, "UNREACHABLE -- email")
          responseInfo.respond("What? Try HELP EMAIL")
       end
    end
