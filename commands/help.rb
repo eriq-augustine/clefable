@@ -5,7 +5,7 @@ class Help < Command
       super('HELP',
             'HELP [command]',
             'Get some help!',
-            {:aliases => ['MAN']})
+            {:aliases => ['MAN', 'HALP']})
    end
 
    @@instance = Help.new()
