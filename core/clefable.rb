@@ -93,7 +93,7 @@ class Clefable
          end
 
          if (logMessage)
-            log(fromUser, target, content)
+            logChat(fromUser, target, content)
          end
       # Recieving user names from the server
       # ones with ops names are prepended with '@'
