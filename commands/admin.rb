@@ -150,7 +150,7 @@ class Register < Command
 
    def insertUser(user, pass)
       hash = passHash(user, pass)
-      db.query("INSERT INTO #{USERS_TABLE} VALUES ('#{escape(user)}', '#{hash}', -1)")
+      db.query("INSERT INTO #{USERS_TABLE} VALUES ('#{escape(user)}', '#{hash}', -1, '')")
       return true
    end
 
