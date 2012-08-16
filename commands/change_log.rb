@@ -58,7 +58,7 @@ class ChangeLog < Command
          }
       rescue Exception => ex
          log(ERROR, ex.message)
-         message = 'Sorry, there was a problem fetching the commit messages.'
+         responseInfo.respond('Sorry, there was a problem fetching the commit messages.')
       end
    end
 
