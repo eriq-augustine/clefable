@@ -21,7 +21,7 @@ class FeatureRequest < Command
       args.strip!
       if (match = args.match(/(.*)!(.*)$/i))
          title = match[1].strip()
-         description = match[2].strip()
+         description = "Reported by #{responseInfo.fromUser}.\n\n#{match[2].strip()}"
 
          begin
             http = Net::HTTP.new('api.github.com', 443)
