@@ -15,9 +15,7 @@ class ChangeLog < Command
             'Get the commit messages for Clefable. The number of commits to look back defaults to 5.')
    end
 
-   # Should be constant, but using class instance instead to avoid redef warning.
-   @@oauthToken = 'b9ba31976e5c04528743eb5b3644f38f7e233788'
-   @@uri = URI('https://api.github.com/repos/eriq-augustine/clefable/commits' + "?access_token=#{@@oauthToken}")
+   @@uri = URI('https://api.github.com/repos/eriq-augustine/clefable/commits' + "?access_token=#{OAUTH2_TOKEN}")
    @@defaultCommits = 5
 
    def onCommand(responseInfo, args)
@@ -34,7 +32,7 @@ class ChangeLog < Command
 
       begin
          http = Net::HTTP.new('api.github.com', 443)
-         req = Net::HTTP::Get.new('/repos/eriq-augustine/clefable/commits' + "?access_token=#{@@oauthToken}")
+         req = Net::HTTP::Get.new('/repos/eriq-augustine/clefable/commits' + "?access_token=#{OAUTH2_TOKEN}")
          http.use_ssl = true
          response = http.request(req)
          commits = JSON.parse(response.body)

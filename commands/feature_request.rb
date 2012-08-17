@@ -15,8 +15,6 @@ class FeatureRequest < Command
             })
    end
 
-   @@oauthToken = 'b9ba31976e5c04528743eb5b3644f38f7e233788'
-
    def onCommand(responseInfo, args)
       args.strip!
       if (match = args.match(/(.*)!(.*)$/i))
@@ -25,7 +23,7 @@ class FeatureRequest < Command
 
          begin
             http = Net::HTTP.new('api.github.com', 443)
-            request = Net::HTTP::Post.new('/repos/eriq-augustine/clefable/issues' + "?access_token=#{@@oauthToken}")
+            request = Net::HTTP::Post.new('/repos/eriq-augustine/clefable/issues' + "?access_token=#{OAUTH2_TOKEN}")
             body = {
             'title' => title,
             'body' => description,
