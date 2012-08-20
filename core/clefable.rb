@@ -134,10 +134,10 @@ class Clefable
          @users.delete(user)
          @channels.each_value{|users|
             users.delete(user)
-            Command.userLeft(self, ALL_CHANNLES, user, reason)
+            Command.userLeft(self, ALL_CHANNELS, user, reason)
          }
          
-         logChat(user, ALL_CHANNLES, "** QUIT'd Resson: #{reason} **")
+         logChat(user, ALL_CHANNELS, "** QUIT'd Resson: #{reason} **")
       # :eriq!~eriq@c-50-131-15-127.hsd1.ca.comcast.net PART #eriq_secret
       # :eriq!~eriq@c-50-131-15-127.hsd1.ca.comcast.net PART #eriq_secret :"Leaving"
       # :<from user>!<from user>@<from address> PART <channel>
