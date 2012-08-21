@@ -23,6 +23,8 @@ class Server
       InputThread.init(@ircSocket, @lock)
       OutputThread.init(@ircSocket, @lock)
 
+      DBThread.init()
+
       InputThread.instance.start()
       
       OutputThread.instance.queueMessage("USER #{USER_NAME} 0 * :#{REAL_NAME}", 0)

@@ -1,6 +1,9 @@
 require './core/logging.rb'
+require './thread/db_thread.rb'
 
 require 'mysql'
+
+# Callbacks (lambda) should not do any mutations.
 
 # Reopen the DB module
 module DB
@@ -31,25 +34,43 @@ module DB
       return rtn
    end
 
-   def query(queryStr)
-      begin
-         res = db.query(queryStr)
-         return res
-      rescue Exception => ex
-         log(ERROR, ex.message)
-         return nil
+   # If present, |callback| will even be invoked if |async| is false.
+   def query(queryStr, async = false, callback = lambda{|param|})
+      if (async)
+         DBThread::instance().queueQuery(queryStr, callback)
+      else
+         rtn = nil
+
+         begin
+            res = db.query(queryStr)
+            rtn = res
+         rescue Exception => ex
+            log(ERROR, ex.message)
+         end
+         
+         callback.call(rtn)
+         
+         return rtn
       end
-      return nil
    end
 
-   def update(statement)
-      begin
-         db.query(statement)
-         return true
-      rescue Exception => ex
-         log(ERROR, ex.message)
-         return false
+   # If present, |callback| will even be invoked if |async| is false.
+   def update(statement, async = false, callback = lambda{|param|})
+      if (async)
+         DBThread::instance().queueUpdate(statement, callback)
+      else
+         rtn = false
+
+         begin
+            db.query(statement)
+            rtn = true
+         rescue Exception => ex
+            log(ERROR, ex.message)
+         end
+
+         callback.call(rtn)
+   
+         return rtn
       end
-      return false
    end
 end

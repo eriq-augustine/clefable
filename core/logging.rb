@@ -64,3 +64,9 @@ end
 def notreached(message = nil)
    logFatal("NOT REACHED -- #{message}")
 end
+
+def check(val)
+   if (!val)
+      logFatal("Check Failed")
+   end
+end

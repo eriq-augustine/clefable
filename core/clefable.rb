@@ -201,8 +201,9 @@ class Clefable
    end
 
    def logChat(fromUser, toUser, message)
-      db.query("INSERT INTO #{LOG_TABLE} (timestamp, `to`, `from`, message)" + 
-               " VALUES (#{Time.now().to_i()}, '#{toUser}', '#{fromUser}', '#{db.escape_string(message)}')")
+      update("INSERT INTO #{LOG_TABLE} (timestamp, `to`, `from`, message)" + 
+             " VALUES (#{Time.now().to_i()}, '#{toUser}', '#{fromUser}', '#{db.escape_string(message)}')",
+             true) #async
    end
 
    # Inform Clefable that she should perform its periodic actions
