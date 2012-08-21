@@ -1,30 +1,9 @@
 # encoding: utf-8
 
+# Start the loading process.
+require './load.rb'
+
 require 'thread'
-
-require './users.rb'
-require './constants.rb'
-require './command_core.rb'
-
-# Load all the utilities
-Dir["#{UTIL_DIR}/*.rb"].each{|file|
-   require file
-}
-
-# Load all the core
-Dir["#{CORE_DIR}/*.rb"].each{|file|
-   require file
-}
-
-# Load all the commands from COMMAND_DIR
-Dir["#{COMMAND_DIR}/*.rb"].each{|file|
-   require file
-}
-
-# Load all the threads!
-Dir["#{THREAD_DIR}/*.rb"].each{|file|
-   require file
-}
 
 ClefableThread.init()
 
