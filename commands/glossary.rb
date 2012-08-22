@@ -10,15 +10,15 @@ class Glossary < Command
    end
 
    def insertWord(word, desc, user)
-      return update("REPLACE INTO #{GLOSSARY_TABLE} (word, description, `user`) VALUES ('#{escape(word)}', '#{escape(desc)}', '#{escape(user)}')")
+      return dbUpdate("REPLACE INTO #{GLOSSARY_TABLE} (word, description, `user`) VALUES ('#{escape(word)}', '#{escape(desc)}', '#{escape(user)}')")
    end
 
    def removeWord(word)
-      return update("DELETE FROM #{GLOSSARY_TABLE} WHERE word = '#{escape(word)}'")
+      return dbUpdate("DELETE FROM #{GLOSSARY_TABLE} WHERE word = '#{escape(word)}'")
    end
 
    def getDesc(word)
-      res = query("SELECT description FROM #{GLOSSARY_TABLE} WHERE word = '#{escape(word)}'")
+      res = dbQuery("SELECT description FROM #{GLOSSARY_TABLE} WHERE word = '#{escape(word)}'")
       if (!res || res.num_rows() == 0)
          return nil
       end

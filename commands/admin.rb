@@ -17,9 +17,9 @@ class Auth < Command
    @@instance = Auth.new()
 
    def getInfo(fromUser)
-      res = db.query("SELECT pass, `level`, email" +
-                     " FROM #{USERS_TABLE}" +
-                     " WHERE `user` = '#{escape(fromUser)}'")
+      res = dbQuery("SELECT pass, `level`, email" +
+                    " FROM #{USERS_TABLE}" +
+                    " WHERE `user` = '#{escape(fromUser)}'")
       if (res.num_rows() == 0)
          return nil
       else
@@ -99,9 +99,9 @@ class UserInfo < Command
    @@instance = UserInfo.new()
 
    def getLevel(user)
-      res = db.query("SELECT `level`" +
-                     " FROM #{USERS_TABLE}" +
-                     " WHERE `user` = '#{escape(user)}'")
+      res = dbQuery("SELECT `level`" +
+                    " FROM #{USERS_TABLE}" +
+                    " WHERE `user` = '#{escape(user)}'")
       if (res.num_rows() == 0)
          return nil
       else
@@ -144,13 +144,13 @@ class Register < Command
    @@instance = Register.new()
 
    def hasUser(user)
-      res = db.query("SELECT * FROM #{USERS_TABLE} WHERE `user` = '#{escape(user)}'")
+      res = dbQuery("SELECT * FROM #{USERS_TABLE} WHERE `user` = '#{escape(user)}'")
       return (res.num_rows() == 1)
    end
 
    def insertUser(user, pass)
       hash = passHash(user, pass)
-      db.query("INSERT INTO #{USERS_TABLE} VALUES ('#{escape(user)}', '#{hash}', -1, '')")
+      dbQuery("INSERT INTO #{USERS_TABLE} VALUES ('#{escape(user)}', '#{hash}', -1, '')")
       return true
    end
 
@@ -191,13 +191,13 @@ class Pass < Command
    @@instance = Pass.new()
 
    def hasUser(user)
-      res = db.query("SELECT * FROM #{USERS_TABLE} WHERE `user` = '#{escape(user)}'")
+      res = dbQuery("SELECT * FROM #{USERS_TABLE} WHERE `user` = '#{escape(user)}'")
       return (res.num_rows() == 1)
    end
 
    def updatePass(user, pass)
       hash = passHash(user, pass)
-      db.query("UPDATE #{USERS_TABLE} SET pass = '#{hash}' WHERE `user` = '#{escape(user)}'")
+      dbQuery("UPDATE #{USERS_TABLE} SET pass = '#{hash}' WHERE `user` = '#{escape(user)}'")
       return true
    end
 
@@ -246,13 +246,13 @@ class Admin < Command
    @@instance = Admin.new()
 
    def modLevel(user, level)
-      db.query("UPDATE #{USERS_TABLE} SET `level` = #{level} WHERE `user` = '#{escape(user)}'")
+      dbQuery("UPDATE #{USERS_TABLE} SET `level` = #{level} WHERE `user` = '#{escape(user)}'")
    end
 
    def getLevel(user)
-      res = db.query("SELECT `level`" +
-                     " FROM #{USERS_TABLE}" +
-                     " WHERE `user` = '#{escape(user)}'")
+      res = dbQuery("SELECT `level`" +
+                    " FROM #{USERS_TABLE}" +
+                    " WHERE `user` = '#{escape(user)}'")
       if (res.num_rows() == 0)
          return nil
       else

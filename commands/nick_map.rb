@@ -55,12 +55,12 @@ class NickMap < Command
          email = match[1]
          domain = match[2]
 
-         update("REPLACE INTO #{NICK_MAP_TABLE} (nick, email, domain) VALUES ('#{escape(nick)}', '#{escape(email)}', '#{escape(domain)}')")
+         dbUpdate("REPLACE INTO #{NICK_MAP_TABLE} (nick, email, domain) VALUES ('#{escape(nick)}', '#{escape(email)}', '#{escape(domain)}')")
          Clefable.instance.emailMap[nick] = {:email => email, :domain => domain}
          responseInfo.respond("Mapping added.")
       elsif (parsedOptions.hasOptionSchema?(@@schema[:remove]))
          Clefable.instance.emailMap.delete(nick)
-         update("DELETE FROM #{NICK_MAP_TABLE} WHERE nick = '#{escape(nick)}'")
+         dbUpdate("DELETE FROM #{NICK_MAP_TABLE} WHERE nick = '#{escape(nick)}'")
          responseInfo.respond("Mapping removed.")
       elsif (parsedOptions.hasOptionSchema?(@@schema[:query]))
          email = Clefable.instance.emailMap[nick]

@@ -15,8 +15,8 @@ class Rewrite < Command
 
    def insertRule(target, rewrite)
       begin
-         db.query("INSERT INTO #{REWRITE_TABLE} (target, rewrite)" + 
-                  " VALUES ('#{escape(target)}', '#{escape(rewrite)}')")
+         dbQuery("INSERT INTO #{REWRITE_TABLE} (target, rewrite)" + 
+                 " VALUES ('#{escape(target)}', '#{escape(rewrite)}')")
          return true
       rescue Exception => ex
          log(ERROR, ex.message)
@@ -27,7 +27,7 @@ class Rewrite < Command
 
    def removeRule(target)
       begin
-         db.query("DELETE FROM #{REWRITE_TABLE} WHERE target = '#{escape(target)}'")
+         dbQuery("DELETE FROM #{REWRITE_TABLE} WHERE target = '#{escape(target)}'")
          return true
       rescue Exception => ex
          log(ERROR, ex.message)

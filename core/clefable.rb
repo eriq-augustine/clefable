@@ -201,9 +201,9 @@ class Clefable
    end
 
    def logChat(fromUser, toUser, message)
-      update("INSERT INTO #{LOG_TABLE} (timestamp, `to`, `from`, message)" + 
-             " VALUES (#{Time.now().to_i()}, '#{toUser}', '#{fromUser}', '#{db.escape_string(message)}')",
-             true) #async
+      dbUpdate("INSERT INTO #{LOG_TABLE} (timestamp, `to`, `from`, message)" + 
+               " VALUES (#{Time.now().to_i()}, '#{toUser}', '#{fromUser}', '#{escape(message)}')",
+               true) #async
    end
 
    # Inform Clefable that she should perform its periodic actions
@@ -245,7 +245,7 @@ class Clefable
    def initEmailMap
       @emailMap.clear()
 
-      res = query("SELECT nick, email, domain FROM #{NICK_MAP_TABLE}")
+      res = dbQuery("SELECT nick, email, domain FROM #{NICK_MAP_TABLE}")
       if (res)
          res.each{|row|
             @emailMap[row[0]] = {:email => row[1], :domain => row[2]}

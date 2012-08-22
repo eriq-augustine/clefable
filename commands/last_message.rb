@@ -22,12 +22,12 @@ class LastMessage < Command
       if (user.length() == 0)
          message = 'You have to specify a user.'
       else
-         res = db.query("SELECT timestamp, `to`, message" +
-                        " FROM #{LOG_TABLE}" +
-                        " WHERE `from` = '#{user}'" +
-                        "  AND `to` LIKE '#%'" +
-                        " ORDER BY timestamp DESC" +
-                        " LIMIT 1")
+         res = dbQuery("SELECT timestamp, `to`, message" +
+                       " FROM #{LOG_TABLE}" +
+                       " WHERE `from` = '#{user}'" +
+                       "  AND `to` LIKE '#%'" +
+                       " ORDER BY timestamp DESC" +
+                       " LIMIT 1")
 
          if (!res || res.num_rows() == 0)
             message = "No results for ^#{user.downcase}"

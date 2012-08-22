@@ -13,7 +13,7 @@ class LastCommit < Command
 
    def getCommits(n)
       rtn = Array.new()
-      res = query("SELECT rev, author, time, summary FROM #{COMMIT_TABLE}" + 
+      res = dbQuery("SELECT rev, author, time, summary FROM #{COMMIT_TABLE}" + 
                   " ORDER BY rev DESC LIMIT #{n}")
       if (res)
          res.each{|row|

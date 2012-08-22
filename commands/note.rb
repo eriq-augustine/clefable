@@ -19,7 +19,7 @@ class Note < Command
    @@instance = Note.new()
 
    def getTags()
-      res = db.query("SELECT DISTINCT(tag) FROM #{NOTE_TAGS_TABLE} ORDER BY tag")
+      res = dbQuery("SELECT DISTINCT(tag) FROM #{NOTE_TAGS_TABLE} ORDER BY tag")
       tags = Array.new()
       if (res)
          res.each{|row|
@@ -32,8 +32,8 @@ class Note < Command
 
    def removeNote(id)
       begin
-         db.query("DELETE FROM #{NOTES_TABLE} WHERE id = #{id}")
-         db.query("DELETE FROM #{NOTE_TAGS_TABLE} WHERE note_id = #{id}")
+         dbQuery("DELETE FROM #{NOTES_TABLE} WHERE id = #{id}")
+         dbQuery("DELETE FROM #{NOTE_TAGS_TABLE} WHERE note_id = #{id}")
          return true
       rescue Exception => ex
          log(ERROR, ex.message)
@@ -43,8 +43,8 @@ class Note < Command
    end
 
    def insertNote(note, tags)
-      res = db.query("INSERT INTO #{NOTES_TABLE} (id, note) VALUES (NULL, '#{escape(note)}')")
-      id = db.insert_id()
+      res = dbQuery("INSERT INTO #{NOTES_TABLE} (id, note) VALUES (NULL, '#{escape(note)}')")
+      id = dbInsertId()
 
       insert = "INSERT IGNORE INTO #{NOTE_TAGS_TABLE} (note_id, tag) VALUES "
       tags.each{|tag|
@@ -52,15 +52,15 @@ class Note < Command
       }
       insert.sub!(/, $/, '')
 
-      db.query(insert)
+      dbQuery(insert)
 
       return true
    end
 
    def replaceNote(id, note, tags)
       begin
-         db.query("REPLACE INTO #{NOTES_TABLE} (id, note) VALUES (#{id}, '#{escape(note)}')")
-         db.query("DELETE FROM #{NOTE_TAGS_TABLE} WHERE note_id = #{id}")
+         dbQuery("REPLACE INTO #{NOTES_TABLE} (id, note) VALUES (#{id}, '#{escape(note)}')")
+         dbQuery("DELETE FROM #{NOTE_TAGS_TABLE} WHERE note_id = #{id}")
 
          insert = "INSERT IGNORE INTO #{NOTE_TAGS_TABLE} (note_id, tag) VALUES "
          tags.each{|tag|
@@ -68,7 +68,7 @@ class Note < Command
          }
          insert.sub!(/, $/, '')
 
-         db.query(insert)
+         dbQuery(insert)
          return true
       rescue Exception => ex
          log(ERROR, ex.message)
@@ -84,20 +84,20 @@ class Note < Command
       }
       tagStr.sub!(/, $/, '')
 
-      res = db.query("SELECT n.id, n.note, tags.tags, n.author, n.timestamp" +
-                     " FROM" +
-                     " #{NOTES_TABLE} n JOIN (" +
-                     "   SELECT note_id, COUNT(*) as tag_count" +
-                     "   FROM #{NOTE_TAGS_TABLE}" +  
-                     "   WHERE tag IN (#{tagStr})" + 
-                     "   GROUP BY note_id" +  
-                     " ) counts ON n.id = counts.note_id" +
-                     " JOIN (" +
-                     "   SELECT note_id, GROUP_CONCAT(tag ORDER BY tag SEPARATOR ', ') as tags" +
-                     "   FROM #{NOTE_TAGS_TABLE}" + 
-                     "   GROUP BY note_id" +
-                     " ) tags ON tags.note_id = n.id" +
-                     " ORDER BY counts.tag_count DESC")
+      res = dbQuery("SELECT n.id, n.note, tags.tags, n.author, n.timestamp" +
+                    " FROM" +
+                    " #{NOTES_TABLE} n JOIN (" +
+                    "   SELECT note_id, COUNT(*) as tag_count" +
+                    "   FROM #{NOTE_TAGS_TABLE}" +  
+                    "   WHERE tag IN (#{tagStr})" + 
+                    "   GROUP BY note_id" +  
+                    " ) counts ON n.id = counts.note_id" +
+                    " JOIN (" +
+                    "   SELECT note_id, GROUP_CONCAT(tag ORDER BY tag SEPARATOR ', ') as tags" +
+                    "   FROM #{NOTE_TAGS_TABLE}" + 
+                    "   GROUP BY note_id" +
+                    " ) tags ON tags.note_id = n.id" +
+                    " ORDER BY counts.tag_count DESC")
       notes = Array.new()
 
       if (res)
@@ -111,15 +111,15 @@ class Note < Command
    end
 
    def getNote(id)
-      res = db.query("SELECT n.id, n.note, tags.tags, n.author, n.timestamp" +
-                     " FROM" +
-                     " #{NOTES_TABLE} n" +
-                     " JOIN (" +
-                     "   SELECT note_id, GROUP_CONCAT(tag ORDER BY tag SEPARATOR ', ') as tags" +
-                     "   FROM #{NOTE_TAGS_TABLE}" + 
-                     "   WHERE note_id = #{id}" + 
-                     "   GROUP BY note_id" +
-                     " ) tags ON tags.note_id = n.id")
+      res = dbQuery("SELECT n.id, n.note, tags.tags, n.author, n.timestamp" +
+                    " FROM" +
+                    " #{NOTES_TABLE} n" +
+                    " JOIN (" +
+                    "   SELECT note_id, GROUP_CONCAT(tag ORDER BY tag SEPARATOR ', ') as tags" +
+                    "   FROM #{NOTE_TAGS_TABLE}" + 
+                    "   WHERE note_id = #{id}" + 
+                    "   GROUP BY note_id" +
+                    " ) tags ON tags.note_id = n.id")
       
       if (!res || res.num_rows() == 0)
          return nil

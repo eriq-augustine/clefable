@@ -21,11 +21,11 @@ class DBThread < WorkerThread
    end
 
    def queueQuery(query, callback = lambda{|param|})
-      queueTask(lambda{return query(query)}, callback)
+      queueTask(lambda{return dbQuery(query)}, callback)
    end
 
    def queueUpdate(statement, callback = lambda{|param|})
-      queueTask(lambda{return update(statement)}, callback)
+      queueTask(lambda{return dbUpdate(statement)}, callback)
    end
 
    private

@@ -7,15 +7,6 @@ require 'mysql'
 
 # Reopen the DB module
 module DB
-   def db
-      if (!@db || @db.nil?)
-         @db = Mysql::new(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB)
-         @db.reconnect = true
-      end
-      
-      return @db
-   end
-
    def escape(str)
       return Mysql::escape_string(str)
    end
@@ -23,7 +14,7 @@ module DB
    def getRewriteRules()
       rtn = Hash.new()
 
-      res = db.query("SELECT target, rewrite FROM #{REWRITE_TABLE}")
+      res = mysqlDb.query("SELECT target, rewrite FROM #{REWRITE_TABLE}")
 
       if (res)
          res.each{|row|
@@ -35,14 +26,14 @@ module DB
    end
 
    # If present, |callback| will even be invoked if |async| is false.
-   def query(queryStr, async = false, callback = lambda{|param|})
+   def dbQuery(queryStr, async = false, callback = lambda{|param|})
       if (async)
          DBThread::instance().queueQuery(queryStr, callback)
       else
          rtn = nil
 
          begin
-            res = db.query(queryStr)
+            res = mysqlDb.query(queryStr)
             rtn = res
          rescue Exception => ex
             log(ERROR, ex.message)
@@ -55,14 +46,14 @@ module DB
    end
 
    # If present, |callback| will even be invoked if |async| is false.
-   def update(statement, async = false, callback = lambda{|param|})
+   def dbUpdate(statement, async = false, callback = lambda{|param|})
       if (async)
          DBThread::instance().queueUpdate(statement, callback)
       else
          rtn = false
 
          begin
-            db.query(statement)
+            mysqlDb.query(statement)
             rtn = true
          rescue Exception => ex
             log(ERROR, ex.message)
@@ -72,5 +63,20 @@ module DB
    
          return rtn
       end
+   end
+
+   def dbInsertId()
+      return mysqlDb.insert_id()
+   end
+
+   private 
+
+   def mysqlDb
+      if (!@mysqlDb || @mysqlDb.nil?)
+         @mysqlDb = Mysql::new(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB)
+         @mysqlDb.reconnect = true
+      end
+      
+      return @mysqlDb
    end
 end

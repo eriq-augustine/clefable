@@ -23,7 +23,7 @@ class CommitFetcher
    def getLastCommit()
       rtn = 0
 
-      res = query("SELECT MAX(rev) FROM #{COMMIT_TABLE}")
+      res = dbQuery("SELECT MAX(rev) FROM #{COMMIT_TABLE}")
 
       if (res && res.num_rows() == 1)
          rtn = res.fetch_row()[0].to_i
@@ -47,7 +47,7 @@ class CommitFetcher
                       " '#{escape(commit[:summary])}'), "
       }
 
-      update(insertStr.sub(/, $/, ''))
+      dbUpdate(insertStr.sub(/, $/, ''))
    end
 
    # returns the new commits

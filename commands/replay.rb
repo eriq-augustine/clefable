@@ -89,7 +89,7 @@ class Replay < Command
             query += " LIMIT #{limit}"
          end
 
-         res = db.query(query)
+         res = dbQuery(query)
 
          if (res.num_rows() == 0)
                responseInfo.respond("No results.")

@@ -69,8 +69,8 @@ class EmailCommand < Command
       elsif (parsedOptions.hasOptionSchema?(@@schema[:register]))
          token = generateToken()
          email = parsedOptions.lookupValue(@@schema[:register])
-         update("REPLACE INTO #{EMAIL_TABLE} (`user`, email, token) VALUES"+
-                " ('#{escape(requestUser.nick)}', '#{escape(email)}', '#{token}')")
+         dbUpdate("REPLACE INTO #{EMAIL_TABLE} (`user`, email, token) VALUES"+
+                  " ('#{escape(requestUser.nick)}', '#{escape(email)}', '#{token}')")
          body = "This is your verification token:\n" +
                 "#{token}\n" +
                 "Use this token with EMAIL -V <token> to verify your email.\n\n"
@@ -78,7 +78,7 @@ class EmailCommand < Command
          responseInfo.respond("A verification email has been sent.")
       elsif (parsedOptions.hasOptionSchema?(@@schema[:verify]))
          token = parsedOptions.lookupValue(@@schema[:verify])
-         if (!(dbInfo = query("SELECT email, token FROM #{EMAIL_TABLE} WHERE `user` = '#{requestUser.nick}'")) ||
+         if (!(dbInfo = dbQuery("SELECT email, token FROM #{EMAIL_TABLE} WHERE `user` = '#{requestUser.nick}'")) ||
              dbInfo.num_rows() == 0)
             responseInfo.respond('Unable to find a pending email in the DB, did you EMAIL -R?')
             return
@@ -92,8 +92,8 @@ class EmailCommand < Command
             responseInfo.respond('Incorrect Token.')
          else
             requestUser.setEmail(email)
-            update("UPDATE #{USERS_TABLE} SET email = '#{escape(email)}' WHERE `user` = '#{escape(requestUser.nick)}'")
-            update("DELETE FROM #{EMAIL_TABLE} WHERE `user` = '#{escape(requestUser.nick)}'")
+            dbUpdate("UPDATE #{USERS_TABLE} SET email = '#{escape(email)}' WHERE `user` = '#{escape(requestUser.nick)}'")
+            dbUpdate("DELETE FROM #{EMAIL_TABLE} WHERE `user` = '#{escape(requestUser.nick)}'")
             responseInfo.respond("Your email has been registered!")
          end
       else

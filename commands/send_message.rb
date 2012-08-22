@@ -3,7 +3,7 @@ class SendMessage < Command
    include DB
 
    def loadMessages()
-      res = db.query("SELECT to_user, message FROM #{MESSAGES_TABLE}")
+      res = dbQuery("SELECT to_user, message FROM #{MESSAGES_TABLE}")
       if (res)
          res.each{|row|
             if (!@messageQueue.key?(row[0]))
@@ -34,12 +34,12 @@ class SendMessage < Command
 
       @messageQueue[toUser] << message
 
-      db.query("INSERT INTO #{MESSAGES_TABLE} (to_user, message) VALUES ('#{toUser}', '#{escape(message)}')")
+      dbQuery("INSERT INTO #{MESSAGES_TABLE} (to_user, message) VALUES ('#{toUser}', '#{escape(message)}')")
    end
 
    def removeAllMessages(toUser)
       @messageQueue.delete(toUser)
-      db.query("DELETE FROM #{MESSAGES_TABLE} WHERE to_user = '#{toUser}'")
+      dbQuery("DELETE FROM #{MESSAGES_TABLE} WHERE to_user = '#{toUser}'")
    end
 
    def onCommand(responseInfo, args)

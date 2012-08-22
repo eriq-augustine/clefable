@@ -44,7 +44,7 @@ class Dance < Command
             return
          else
             @@dances.delete(name)
-            if (!update("DELETE FROM #{DANCE_TABLE} WHERE name = '#{escape(name)}'"))
+            if (!dbUpdate("DELETE FROM #{DANCE_TABLE} WHERE name = '#{escape(name)}'"))
                responseInfo.respond("There was a problem removing the '#{name}' dance from the DB,"+
                                     " it was still removed from memory.")
             else
@@ -65,7 +65,7 @@ class Dance < Command
    def loadDBDances
       @@dances.clear();
 
-      res = db.query("SELECT name, step FROM #{DANCE_TABLE} ORDER BY name, ordinal")
+      res = dbQuery("SELECT name, step FROM #{DANCE_TABLE} ORDER BY name, ordinal")
 
       res.each{|row|
          if (!@@dances.has_key?(row[0]))
@@ -88,8 +88,8 @@ class Dance < Command
       }
       insert.sub!(/, $/, '')
 
-      db.query("DELETE FROM #{DANCE_TABLE} WHERE name = '#{escape(name)}'")
-      db.query(insert)
+      dbQuery("DELETE FROM #{DANCE_TABLE} WHERE name = '#{escape(name)}'")
+      dbQuery(insert)
    end
    
    @@dances = Hash.new()
