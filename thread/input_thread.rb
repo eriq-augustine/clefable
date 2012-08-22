@@ -45,6 +45,7 @@ class InputThread < ThreadWrapper
                   @lock.synchronize{
                      data = @socket.gets()
                   }
+
                   ClefableThread.instance.queueTask(ClefableThread::SERVER_INPUT, data)
                elsif (ioStream == $stdin)
                   ClefableThread.instance.queueTask(ClefableThread::STDIN_INPUT, $stdin.gets())

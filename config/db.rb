@@ -19,4 +19,7 @@ module DB
    COMMIT_TABLE = 'commits'
    EMAIL_TABLE = 'pending_emails'
    NICK_MAP_TABLE = 'nick_map'
+
+   # Settings
+   QUERY_AGGREGATE_MAX = 1000
 end

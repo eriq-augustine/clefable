@@ -200,12 +200,6 @@ class Clefable
       sendMessage("MODE #{channel} -o #{user}")
    end
 
-   def logChat(fromUser, toUser, message)
-      dbUpdate("INSERT INTO #{LOG_TABLE} (timestamp, `to`, `from`, message)" + 
-               " VALUES (#{Time.now().to_i()}, '#{toUser}', '#{fromUser}', '#{escape(message)}')",
-               true) #async
-   end
-
    # Inform Clefable that she should perform its periodic actions
    def periodicActions
       # Check for new commits
