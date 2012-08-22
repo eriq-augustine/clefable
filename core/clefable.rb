@@ -132,8 +132,8 @@ class Clefable
          reason = match[4]
 
          @users.delete(user)
-         @channels.each_value{|users|
-            users.delete(user)
+         @channels.each_value{|channelUsers|
+            channelUsers.delete(user)
             Command.userLeft(self, ALL_CHANNELS, user, reason)
          }
          
@@ -149,8 +149,8 @@ class Clefable
          @channels[channel].delete(user)
 
          found = false
-         @channels.each_value{|users|
-            if (users.has_key?(user))
+         @channels.each_value{|channelUsers|
+            if (channelUsers.has_key?(user))
                found = true
                break
             end

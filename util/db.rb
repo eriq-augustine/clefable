@@ -72,7 +72,7 @@ module DB
    private 
 
    def mysqlDb
-      if (!@mysqlDb || @mysqlDb.nil?)
+      if (!defined?(@mysqlDb) || !@mysqlDb || @mysqlDb.nil?)
          @mysqlDb = Mysql::new(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB)
          @mysqlDb.reconnect = true
       end

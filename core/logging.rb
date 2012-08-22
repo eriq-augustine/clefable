@@ -49,8 +49,6 @@ def writeLog(logFileSuffix, message)
 end
 
 def logFatal(message)
-   fullMessage = message + "\n"
-
    stack = caller()
    puts "[FATAL] #{message}"
    stack.each{|frame|

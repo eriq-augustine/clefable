@@ -26,9 +26,9 @@ class EmailCommand < Command
 
    def generateToken()
       str = ''
-      for i in 0..10
+      10.times{
          str += "#{Random.rand()}"
-      end
+      }
 
       return Digest::SHA2.new().update(str).to_s[0, 40]
    end

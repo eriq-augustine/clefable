@@ -23,7 +23,7 @@ class ChangeLog < Command
 
       if (args.length() == 0)
          numberOfCommits = @@defaultCommits
-      elsif (match = args.match(/^\d+$/))
+      elsif (args.match(/^\d+$/))
          numberOfCommits = args.to_i
       else
          responseInfo.respond("I don't understand that number, use an int.")

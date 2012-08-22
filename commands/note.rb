@@ -43,7 +43,7 @@ class Note < Command
    end
 
    def insertNote(note, tags)
-      res = dbQuery("INSERT INTO #{NOTES_TABLE} (id, note) VALUES (NULL, '#{escape(note)}')")
+      dbQuery("INSERT INTO #{NOTES_TABLE} (id, note) VALUES (NULL, '#{escape(note)}')")
       id = dbInsertId()
 
       insert = "INSERT IGNORE INTO #{NOTE_TAGS_TABLE} (note_id, tag) VALUES "
