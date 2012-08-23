@@ -1,7 +1,6 @@
 require './core/logging.rb'
 
 require 'net/http'
-require 'json'
 
 #'http://chromium-status.appspot.com/current?format=json'
 

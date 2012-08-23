@@ -11,6 +11,8 @@ Dir["#{CONFIG_DIR}/*.rb"].each{|file|
    require file
 }
 
+require "#{LIB_DIR}/json/pure.rb"
+
 # Load all the utilities
 Dir["#{UTIL_DIR}/*.rb"].each{|file|
    require file

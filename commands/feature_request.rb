@@ -2,7 +2,6 @@ require './core/logging.rb'
 
 require 'net/http'
 require 'net/https'
-require 'json'
 
 class FeatureRequest < Command
    def initialize

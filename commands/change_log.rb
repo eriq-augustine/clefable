@@ -2,7 +2,6 @@ require './core/logging.rb'
 
 require 'net/http'
 require 'net/https'
-require 'json'
 
 #TODO: Cache results and somehow check laters version first
 
