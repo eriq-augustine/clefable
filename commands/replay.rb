@@ -13,6 +13,8 @@ class Replay < Command
    @@max_res = 10
 
    @@schema = {:min => OptionSchema.new('Number of minutes to go back', 'M', 'MINUTES', OptionSchema::YES_VALUE),
+               :asc => OptionSchema.new('Sort in ascending order by time', 'A', 'ASC', OptionSchema::MAYBE_VALUE),
+               :desc => OptionSchema.new('Sort in descending order by time (default order)', 'D', 'DESC', OptionSchema::MAYBE_VALUE),
                :email => OptionSchema.new('The email to use (if no email is supplied, your registered email is used)', 'E', 'EMAIL', OptionSchema::MAYBE_VALUE),
                :limit => OptionSchema.new('The maximum number of entries returned', 'L', 'LIMIT', OptionSchema::YES_VALUE)}
    @@optionSchema = Hash.new()
@@ -34,6 +36,16 @@ class Replay < Command
          responseInfo.respond("You need to specify a number of minutes.")
          return
       else
+         order = 'DESC'
+         if (parsedOptions.hasOptionSchema?(@@schema[:asc]))
+            if (parsedOptions.hasOptionSchema?(@@schema[:desc]))
+               responseInfo.respond("You can't do both ASC and DESC!")
+               return
+            end
+
+            order = 'ASC'
+         end
+
          min = parsedOptions.lookupValue(@@schema[:min]).to_i
          if (min == 0)
             responseInfo.respond("Use a non-zero int for minutes.")
@@ -76,13 +88,13 @@ class Replay < Command
                     " WHERE timestamp >= #{startTime}" +
                     "  AND `to` = '#{responseInfo.target}'" + 
                     "  AND `from` = '#{responseInfo.fromUser}'" + 
-                    " ORDER BY timestamp DESC"
+                    " ORDER BY timestamp #{order}"
          else
             query = "SELECT timestamp, `from`, message" + 
                     " FROM #{LOG_TABLE}" +
                     " WHERE timestamp >= #{startTime}" +
                     "  AND `to` = '#{responseInfo.target}'" + 
-                    " ORDER BY timestamp DESC"
+                    " ORDER BY timestamp #{order}"
          end
 
          if (limit)
@@ -108,7 +120,7 @@ class Replay < Command
                res.each{|row|
                   body += "[#{Time.at(row[0].to_i).to_s.sub(/\s-\d\d\d\d$/, '')}] #{row[1]}: #{row[2]}\n"
                }
-               subject = "REPLAY -M #{min} "
+               subject = "REPLAY -M #{min} #{order}"
 
                if (limit)
                   subject += "-L #{limit}"
