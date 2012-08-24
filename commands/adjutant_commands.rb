@@ -6,7 +6,8 @@ class DirectCommand < Command
       super('DIRECT-COMMAND',
             'DIRECT-COMMAND <command>',
             'Puts a command directly through to the server.',
-            {:adminLevel => 0})
+            {:adminLevel => 0,
+             :aliases => ['DIRECT-MESSAGE', 'DIRECT']})
    end
 
    @@instance = DirectCommand.new()
@@ -21,7 +22,8 @@ class ListUsers < Command
       super('LIST-USERS',
             'LIST-USERS',
             'List all the users that the server knows about.',
-            {:adminLevel => 0})
+            {:adminLevel => 0,
+             :aliases => ['WHO', 'W']})
    end
 
    @@instance = ListUsers.new()
@@ -54,7 +56,8 @@ class LoadCommands < Command
       super('LOAD-COMMANDS',
             'LOAD-COMMANDS <command file path>',
             'Loads a command file.',
-            {:adminLevel => 0})
+            {:adminLevel => 0,
+             :aliases => ['LOAD-COMMAND', 'LD', 'LOAD']})
    end
 
    @@instance = LoadCommands.new()
@@ -128,7 +131,8 @@ class Channels < Command
       super('CHANNELS',
             'CHANNELS',
             'List all channels that Clefable is in.',
-            {:adminLevel => 0})
+            {:adminLevel => 0,
+             :aliases => ['LIST-CHANNELS']})
    end
 
    @@instance = Channels.new()

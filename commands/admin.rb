@@ -93,7 +93,7 @@ class UserInfo < Command
       super('USER-INFO',
             'USER-INFO [[^]user]',
             'Get info about a user, or yourself if no user is given.',
-            {:aliases => ['WHO', 'WHOIS']})
+            {:aliases => ['WHOIS']})
    end
 
    @@instance = UserInfo.new()
