@@ -17,6 +17,22 @@ class DirectCommand < Command
    end
 end
 
+class SendDirectMessage < Command
+   def initialize
+      super('SEND-DIRECT-MESSAGE',
+            'SEND-DIRECT-MESSGAE <target> <message>',
+            'Sends a message as Clefable to |target|. Becareful, format is not even checked.',
+            {:adminLevel => 0,
+             :aliases => ['TALK', 'MESSAGE', 'MSG']})
+   end
+
+   @@instance = SendDirectMessage.new()
+
+   def onCommand(responseInfo, args)
+      OutputThread.instance.queueMessage("PRIVMSG #{args}", 0)
+   end
+end
+
 class ListUsers < Command
    def initialize
       super('LIST-USERS',
