@@ -1,5 +1,4 @@
-require './core/logging.rb'
-require './thread/queue_thread.rb'
+require './core/thread/queue_thread.rb'
 
 # All output to the server should go through this thread.
 # This class will also handle the sleeping involved with flood control.
@@ -60,14 +59,14 @@ class OutputThread < QueueThread
       end
 
       @lock.synchronize{
-        @socket.send("#{message}\n", 0) 
+        @socket.send("#{message}\n", 0)
       }
 
       sleep(sleepTime)
    end
-   
+
    private
-   
+
    def initialize(socket, lock)
       super()
 

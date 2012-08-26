@@ -1,5 +1,4 @@
-require './core/logging.rb'
-require './thread/queue_thread.rb'
+require './core/thread/queue_thread.rb'
 
 # Worker threads do async tasks (lambdas) with optional callbacks.
 # Callbacks should take a single param.

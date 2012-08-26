@@ -1,8 +1,7 @@
 # The class is responsible for doing the select and all input.
 # All input is passed onto the ClefableThread
 
-require './core/logging.rb'
-require './thread/thread_wrapper.rb'
+require './core/thread/thread_wrapper.rb'
 
 class InputThread < ThreadWrapper
    @@instance = nil
@@ -64,9 +63,9 @@ class InputThread < ThreadWrapper
          end
       end
    end
-   
+
    private
-   
+
    def initialize(socket, lock)
       super()
 

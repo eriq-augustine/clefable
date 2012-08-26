@@ -2,10 +2,6 @@ require 'net/http'
 require 'rexml/document'
 require 'time'
 
-# This should be loaded by core, but require it here just in case order is wrong
-require './core/logging.rb'
-require './util/db.rb'
-
 #'http://git.chromium.org/gitweb/?p=chromium/src.git;a=log'
 
 class CommitFetcher
@@ -18,7 +14,7 @@ class CommitFetcher
 
    # Should be constant, but using class instance instead to avoid redef warning.
    @@commitsUri = URI('http://git.chromium.org/gitweb/?p=chromium/src.git;a=log')
-   
+
    def getLastCommit()
       rtn = 0
 

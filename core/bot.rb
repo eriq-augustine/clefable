@@ -1,26 +1,20 @@
-require './core/logging.rb'
-
 # This class should only be new()'d once.
 # If you need to relad it for some reason, use reload()
-class Clefable 
+class Bot
    include DB
-   include TextStyle
    include TextSplit
 
-   attr_reader :channels, :users, :rewriteRules, :commitFetcher, :emailMap
+   attr_reader :channels, :users, :rewriteRules, :emailMap
 
    def initialize()
       # { channelName => { userName => user } }
       @channels = Hash.new{|hash, key| hash[key] = Hash.new() }
+
       # { userName => user }
       @users = Hash.new()
-   
+
       # { target => rewrite }
       @rewriteRules = getRewriteRules()
-
-      @commitFetcher = CommitFetcher.new()
-      # Do the first update quietly
-      @commitFetcher.updateCommits()
 
       @emailMap = Hash.new()
       initEmailMap()
@@ -136,7 +130,7 @@ class Clefable
             channelUsers.delete(user)
             Command.userLeft(self, ALL_CHANNELS, user, reason)
          }
-         
+
          logChat(user, ALL_CHANNELS, "** QUIT'd Resson: #{reason} **")
       # :eriq!~eriq@c-50-131-15-127.hsd1.ca.comcast.net PART #eriq_secret
       # :eriq!~eriq@c-50-131-15-127.hsd1.ca.comcast.net PART #eriq_secret :"Leaving"
@@ -200,40 +194,8 @@ class Clefable
       sendMessage("MODE #{channel} -o #{user}")
    end
 
-   # Inform Clefable that she should perform its periodic actions
+   # Inform  the bot that it should perform its periodic actions
    def periodicActions
-      # Check for new commits
-      newCommits = @commitFetcher.updateCommits()
-      if (!newCommits.empty?)
-         #Check all the channels for the committers
-         notifyAboutCommits(newCommits)
-      end
-   end
-
-   def notifyAboutCommits(newCommits)
-      newCommits.each{|commit|
-         committer = commit[:author].sub(/@.*$/, '')
-
-         @channels.each_pair{|channel, users|
-            broadcast = false
-            users.each_key{|nick|
-               #It is common practice to append '_' or '-' to your nick if it is taken.
-               realNick = nick.sub(/[_-]+$/, '')
-               # TODO: Use the registered emails instead of or in addition to the map
-               if (committer == realNick || 
-                   (@emailMap[realNick] && @emailMap[realNick][:email] == committer) ||
-                   (@emailMap[nick] && @emailMap[nick][:email] == committer))
-                  broadcast = true
-                  break
-               end
-            }
-
-            if (broadcast)
-               chat(channel, "#{purple("http://crrev.com/#{commit[:rev]}")}" +
-                             " ^#{commit[:author]} -- #{commit[:summary]}")
-            end
-         }
-      }
    end
 
    def initEmailMap
@@ -246,40 +208,4 @@ class Clefable
          }
       end
    end
-
-   def set(channels, users, rewriteRules, commitFetcher, emailMap)
-      @channels = channels
-      @users = users
-      @rewriteRules = rewriteRules
-      @commitFetcher = commitFetcher
-      @emailMap = emailMap
-   end
-
-   def self.instance
-      if (!@@instance)
-         @@instance = Clefable.new()
-      end
-
-      return @@instance
-   end
-
-   def self.reload
-      @@insatnce = reinit()
-   end
-
-   # These lines allows Clefable to be dynamically reloaded without losing state.
-   def self.reinit()
-      if (!defined?(@@instance) || !@@instance)
-         return nil
-      end
-
-      newClef = Clefable.new()
-      newClef.set(@@instance.channels, @@instance.users,
-                  @@instance.rewriteRules, @@instance.commitFetcher,
-                  @@instance.emailMap)
-
-      return newClef
-   end
-   
-   @@instance = reinit()
 end

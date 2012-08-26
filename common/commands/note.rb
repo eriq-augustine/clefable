@@ -1,5 +1,3 @@
-require './core/logging.rb'
-
 #TODO: Better tag matching
 # Right now it tries to match all the tags
 

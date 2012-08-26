@@ -1,5 +1,3 @@
-require './core/logging.rb'
-
 require 'net/http'
 require 'net/https'
 

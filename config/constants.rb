@@ -1,16 +1,11 @@
 IRC_HOST = 'irc.freenode.net'
 IRC_PORT = 6667
-IRC_NICK = 'Clefable_BOT'
-#IRC_NICK = 'TEST_BOT'
+IRC_NICK = 'Default_BOT'
 
 #Wait for 2 mins on select
 SELECT_TIMEOUT = 120
 
-#DEFAULT_CHANNELS = ['#eriq_secret']
-#DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
-#DEFAULT_CHANNELS = ['#eriq_secret', '#clefable']
-DEFAULT_CHANNELS = ['#crx', '#eriq_secret', '#bestfriendsclub', '#softwareinventions', '#clefable']
-#DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub', '#softwareinventions']
+DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
 
 MAX_MESSAGE_LEN = 400
 
@@ -24,12 +19,11 @@ THREAD_DIR = './thread'
 LOG_DIR = './logs'
 LIB_DIR = './lib'
 
-USER_NAME = IRC_NICK
-SHORT_NICK = 'CLEF'
+SHORT_NICK = 'BOT'
 TRIGGER = '`'
-HOST_NAME = 'Mt.Moon'
-SERVER_NAME = 'Kanto'
-REAL_NAME = 'Clefable Bot'
+HOST_NAME = 'Host'
+SERVER_NAME = 'Server'
+REAL_NAME = 'Default Bot'
 
 ALL_CHANNELS = 'ALL_CHANNELS'
 

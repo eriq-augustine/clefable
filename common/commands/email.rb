@@ -1,5 +1,3 @@
-require './core/logging.rb'
-
 require 'digest/sha2'
 
 class EmailCommand < Command

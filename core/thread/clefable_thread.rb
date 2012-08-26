@@ -1,5 +1,4 @@
-require './thread/queue_thread.rb'
-require './core/logging.rb'
+require './core/thread/queue_thread.rb'
 
 # Handle all commands.
 class ClefableThread < QueueThread

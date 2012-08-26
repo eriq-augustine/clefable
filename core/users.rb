@@ -54,3 +54,8 @@ class User
       return {:success => true}
    end
 end
+
+# Add the console user.
+CONSOLE_USER = User.new(CONSOLE, false)
+CONSOLE_USER.auth
+CONSOLE_USER.setAdmin(0)

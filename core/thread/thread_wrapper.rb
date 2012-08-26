@@ -2,8 +2,6 @@
 
 require 'thread'
 
-require './core/logging.rb'
-
 # Children must implement: run().
 # run() is the starting and re-entry point for the thread.
 #  A thread that accidently throws an exception will be restarted on run().

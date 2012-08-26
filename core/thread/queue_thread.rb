@@ -1,5 +1,4 @@
-require './core/logging.rb'
-require './thread/thread_wrapper.rb'
+require './core/thread/thread_wrapper.rb'
 
 # A wrapper around a thread that provides queuing semantics.
 # Child classes need to provide the functionality for dealing with a dequeued record.

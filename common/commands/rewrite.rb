@@ -1,5 +1,3 @@
-require './core/logging.rb'
-
 class Rewrite < Command
    include DB
    def initialize

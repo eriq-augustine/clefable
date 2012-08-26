@@ -1,6 +1,6 @@
-require 'json/common'
-require 'json/pure/parser'
-require 'json/pure/generator'
+require './lib/json/common'
+require './lib/json/pure/parser'
+require './lib/json/pure/generator'
 
 module JSON
   # This module holds all the modules/classes that implement JSON's

@@ -1,5 +1,3 @@
-require './core/logging.rb'
-
 # TODO: Information is deiplayed about a command if they try and invoke it and it
 #  requires admin. Should this info be hidden?
 

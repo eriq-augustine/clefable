@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 # Start the loading process.
-require './load.rb'
+require './LOAD.rb'
 
 require 'thread'
 

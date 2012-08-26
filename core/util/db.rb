@@ -1,6 +1,3 @@
-require './core/logging.rb'
-require './thread/db_thread.rb'
-
 require 'mysql'
 
 # Callbacks (lambda) should not do any mutations.
@@ -38,9 +35,9 @@ module DB
          rescue Exception => ex
             log(ERROR, ex.message)
          end
-         
+
          callback.call(rtn)
-         
+
          return rtn
       end
    end
@@ -60,7 +57,7 @@ module DB
          end
 
          callback.call(rtn)
-   
+
          return rtn
       end
    end
@@ -89,7 +86,7 @@ module DB
       end
    end
 
-   private 
+   private
 
    def emptyChatQueue()
       chats = nil
@@ -99,7 +96,7 @@ module DB
 
       while (chats.size() > 0)
          insert = "INSERT INTO #{LOG_TABLE} (timestamp, `to`, `from`, message) VALUES "
-         
+
          chats.each{|chat|
             insert += "(#{chat[:timestamp]}, '#{chat[:toUser]}', '#{chat[:fromUser]}', '#{escape(chat[:message])}'), "
          }
@@ -120,7 +117,7 @@ module DB
          @mysqlDb = Mysql::new(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB)
          @mysqlDb.reconnect = true
       end
-      
+
       return @mysqlDb
    end
 

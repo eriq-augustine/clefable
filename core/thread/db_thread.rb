@@ -1,6 +1,4 @@
-require './core/logging.rb'
-require './thread/worker_thread.rb'
-require './util/db.rb'
+require './core/thread/worker_thread.rb'
 
 # BD callbacks should be very quick.
 class DBThread < WorkerThread
@@ -29,7 +27,7 @@ class DBThread < WorkerThread
    end
 
    private
-   
+
    def initialize()
       super()
    end

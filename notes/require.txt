@@ -1,0 +1,51 @@
+Require Structure
+
+Keep in mind: Everything will need to be loaded into memory in the end and 'require' does not double include.
+              Double including can be done with 'load', but should only be done when a module needs to be replaced at runtime.
+              Unless explicitly stated, every file should be able to be reloaded ('load') and show the new functionality.
+
+If a directory has a 'LOAD.rb', then that file will be used to load that directory and all sub directories.
+Otherwise, all the files will just be loaded in lexicographic order.
+
+All paths are specified realitive to the project base.
+
+Currently, sub-directories are not loaded by the top level loader. They will have to be handled by the local LOAD.rb.
+
+Subclasses are allowed to require their parent classes if they are in the same directory.
+This allows for files to not need to use a loader for simple class heierarchy.
+
+The following directories are listed in the order they are required.
+
+config
+   This should contain only configuration constants.
+   Everything is allowed to depend on these files, but this directory should depend on nothing.
+
+lib
+   External dependencies should be placed here. This direcotry is synanamous with "third_party".
+   Since these are third pary, they should never depend on files from this project.
+
+core
+   All files vital to base bot life.
+   Nothing in core should depend on any other directories.
+
+core/util
+    Core utilites like DB access and splitting text.
+
+core/thread
+    All the threads.
+
+common
+   Any files that can be shared by all types of bots, but are not fundimental to the life of the bot.
+   Common is allowed to implicitly depend on core.
+   Common should never depend on any other directories.
+
+common/util
+   Utilities that other parts can share.
+   util files should VERY rarely depend on any non-system files.
+
+common/commands
+   Commands that are natural to all sorts of bots.
+   Commands should not be dependent upon any other commands.
+
+clefable
+   All files specific to clefable's chromiums features.

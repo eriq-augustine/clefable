@@ -1,11 +1,8 @@
-require './thread/clefable_thread.rb'
-require './thread/output_thread.rb'
-
 class Flush < Command
    def initialize
       super('FLUSH',
             'FLUSH',
-            'FLUSH the Clefable pipeline. This will flush all the commands and output in the queue.' + 
+            'FLUSH the Clefable pipeline. This will flush all the commands and output in the queue.' +
             ' Be aware, the commands were probably already executed and only the ouput will be flushed',
             {:adminLevel => 10, :aliases => ['INT', 'KILL', 'INTERRUPT', '!']})
    end
