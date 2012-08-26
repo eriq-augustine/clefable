@@ -1,5 +1,5 @@
 # The class is responsible for doing the select and all input.
-# All input is passed onto the ClefableThread
+# All input is passed to every InputHandler
 
 require './core/thread/thread_wrapper.rb'
 
@@ -27,8 +27,6 @@ class InputThread < ThreadWrapper
       lastTime = Time.now().to_i
 
       while (true)
-         # TODO: Do it right so we can listen on $stdin and put in bg and such
-         #  It may already be right, but just needs to be tested
          selectRes = IO.select([@socket, $stdin], nil, nil, SELECT_TIMEOUT)
          if (selectRes)
             # Check the read ios
@@ -45,9 +43,9 @@ class InputThread < ThreadWrapper
                      data = @socket.gets()
                   }
 
-                  ClefableThread.instance.queueTask(ClefableThread::SERVER_INPUT, data)
+                  InputHandler::queueTask(InputHandler::SERVER_INPUT, data)
                elsif (ioStream == $stdin)
-                  ClefableThread.instance.queueTask(ClefableThread::STDIN_INPUT, $stdin.gets())
+                  InputHandler::queueTask(InputHandler::STDIN_INPUT, $stdin.gets())
                else
                   # Got some crazy io stream
                   log(ERROR, "Got bad io stream #{ioStream}")
@@ -59,7 +57,7 @@ class InputThread < ThreadWrapper
          if (now - lastTime >= SELECT_TIMEOUT)
             #Do periodic stuff
             lastTime = now
-            ClefableThread.instance.queueTask(ClefableThread::PERIODIC_ACTIONS, nil)
+            InputHandler::queueTask(InputHandler::PERIODIC_ACTIONS, nil)
          end
       end
    end

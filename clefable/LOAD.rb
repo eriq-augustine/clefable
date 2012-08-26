@@ -1,15 +1,4 @@
-Dir['./clefable/config/*.rb'].each{|file|
-   require file
-}
-
-Dir['./clefable/util/*.rb'].each{|file|
-   require file
-}
-
-Dir['./clefable/commands/*.rb'].each{|file|
-   require file
-}
-
-Dir['./clefable/*.rb'].each{|file|
-   require file
-}
+Loader::loadDir('./clefable/config')
+Loader::loadDir('./clefable/util')
+Loader::loadDir('./clefable/commands')
+Loader::loadAllInDir('./clefable')

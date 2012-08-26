@@ -5,14 +5,28 @@
 # Every dir to load in proper order.
 DIRS_TO_LOAD = ['config', 'lib', 'core', 'common', 'clefable']
 
+module Loader
+   # Load a directory.
+   #  First look for a 'LOAD.rb'. If it exists, then let it handle the loading for the directory.
+   #  Else, just load all the files in lexicographic order.
+   # |dir| should be an absolute path from the project root.
+   def self.loadDir(dir)
+      # Use the loader if it exists
+      if (File::exists?("#{dir}/LOAD.rb"))
+         require "#{dir}/LOAD.rb"
+      else
+         # No loader, load every file in lexicographical order.
+         Loader::loadAllInDir(dir)
+      end
+   end
+
+   def self.loadAllInDir(dir)
+      Dir["#{dir}/*.rb"].each{|file|
+         require file
+      }
+   end
+end
+
 DIRS_TO_LOAD.each{|dir|
-  # Use the loader if it exists
-  if (File::exists?("./#{dir}/LOAD.rb"))
-    require "./#{dir}/LOAD.rb"
-  else
-    # No loader, load every file in lexicographical order.
-    Dir["./#{dir}/*.rb"].each{|file|
-      require file
-    }
-  end
+   Loader::loadDir("./#{dir}")
 }

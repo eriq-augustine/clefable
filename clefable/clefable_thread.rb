@@ -1,11 +1,5 @@
-require './core/thread/queue_thread.rb'
-
 # Handle all commands.
-class ClefableThread < QueueThread
-   SERVER_INPUT = 0
-   STDIN_INPUT = 1
-   PERIODIC_ACTIONS = 2
-
+class ClefableThread < InputHandler
    @@instance = nil
 
    def self.init()
