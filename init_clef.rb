@@ -1,11 +1,14 @@
 # encoding: utf-8
 
+# Additional directories for the top level loader to load.
+ADDITIONAL_LOAD_DIRS = ['clefable']
+
 # Start the loading process.
 require './LOAD.rb'
 
 require 'thread'
 
-ClefableThread.init()
+BotThread.init()
 
 server = Server.new(IRC_HOST, IRC_PORT, IRC_NICK)
 server.start()

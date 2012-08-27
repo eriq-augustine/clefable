@@ -10,7 +10,7 @@ class Flush < Command
    @@instance = Flush.new()
 
    def onCommand(responseInfo, args)
-      ClefableThread.instance.killQueue
+      BotThread.instance.killQueue
       OutputThread.instance.killQueue
       responseInfo.respond('Pipeline flushed.')
    end

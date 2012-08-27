@@ -1,9 +1,16 @@
 # The top level loader.
 # Handle all the loading of all files.
 # For more info on load order, dependencies, and best practices, see notes/require.txt
+#
+# Before the top level loader is called, ADDITIONAL_LOAD_DIRS can be defined to
+# list additional loads.
+
+if (!defined?(ADDITIONAL_LOAD_DIRS))
+   ADDITIONAL_LOAD_DIRS = []
+end
 
 # Every dir to load in proper order.
-DIRS_TO_LOAD = ['config', 'lib', 'core', 'common', 'clefable']
+DIRS_TO_LOAD = ['config', 'lib', 'core', 'common'] + ADDITIONAL_LOAD_DIRS
 
 module Loader
    # Load a directory.

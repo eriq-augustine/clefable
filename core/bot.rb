@@ -6,6 +6,14 @@ class Bot
 
    attr_reader :channels, :users, :rewriteRules, :emailMap
 
+   # This is the currently active bot.
+   # It may actually be something like a ClefableBot.
+   @@instance = nil
+
+   def self.instance
+      return @@instance
+   end
+
    def initialize()
       # { channelName => { userName => user } }
       @channels = Hash.new{|hash, key| hash[key] = Hash.new() }
@@ -18,6 +26,8 @@ class Bot
 
       @emailMap = Hash.new()
       initEmailMap()
+
+      @@instance = self
    end
 
    # Wrapper for InputQueue.queueMessage()
