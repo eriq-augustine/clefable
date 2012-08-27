@@ -29,7 +29,15 @@ class SendDirectMessage < Command
    @@instance = SendDirectMessage.new()
 
    def onCommand(responseInfo, args)
-      OutputThread.instance.queueMessage("PRIVMSG #{args}", 0)
+      if (!(match = args.strip.match(/^(#?\S+)\s+(.*)$/)))
+         responseInfo.respond('You need a target (channel or user) and text to send a message.')
+         return
+      end
+
+      target = match[1]
+      text = match[2]
+
+      OutputThread.instance.queueMessage("PRIVMSG #{target} :#{text}", 0)
    end
 end
 
