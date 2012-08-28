@@ -11,11 +11,11 @@ class Object
   __send__(:remove_const, 'REAL_NAME')
 end
 
-#IRC_NICK = 'TEST_REF'
-#DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
+IRC_NICK = 'TEST_REF'
+DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
 
-IRC_NICK = 'The_Referee'
-DEFAULT_CHANNELS = ['#crx', '#eriq_secret', '#bestfriendsclub', '#softwareinventions', '#clefable']
+#IRC_NICK = 'The_Referee'
+#DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
 
 SHORT_NICK = 'REF'
 TRIGGER = '~'

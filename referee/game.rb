@@ -36,23 +36,59 @@ class Game
       return @@gameSchemas
    end
 
-   # Does |pendingPlayer| have a pending game with |otherPlayer|.
-   def self.hasPendingGame(pendingPlayer, otherPlayer)
-      return @@pendingGames.has_key?(pendingPlayer) && @@pendingGames[pendingPlayer].has_key?(otherPlayer)
+   # Order of players does not matter.
+   def self.getPendingGame(player1, player2)
+      if (@@pendingGames.has_key?(player1))
+         if (@@pendingGames[player1].has_key?(player2))
+            return @@pendingGames[player1][player2]
+         end
+      end
+      
+      if (@@pendingGames.has_key?(player2))
+         if (@@pendingGames[player2].has_key?(player1))
+            return @@pendingGames[player2][player1]
+         end
+      end
+
+      return nil
    end
 
-   # |pendingPlayer| declines the game with |otherPlayer|.
-   def self.declineGame(pendingPlayer, otherPlayer)
-      return @@pendingGames[pendingPlayer].delete(otherPlayer)
+   # |player1| declines the game with |player2|.
+   def self.declineGame(player1, player2)
+      game = removePendingGame(player1, player2)
+
+      if (!game)
+         LOG(ERROR, "Non-existant game declined between #{player1} and #{player2}.")
+      end
+
+      return game
+   end
+   
+   # TODO(eriq): This should be private.
+   def self.removePendingGame(player1, player2)
+      if (@@pendingGames.has_key?(player1))
+         if (@@pendingGames[player1].has_key?(player2))
+            return @@pendingGames[player1].delete(player2)
+         end
+      end
+      
+      if (@@pendingGames.has_key?(player2))
+         if (@@pendingGames[player2].has_key?(player1))
+            return @@pendingGames[player2].delete(player1)
+         end
+      end
+
+      return nil
    end
 
-   # |pendingPlayer| accepts the game with |otherPlayer|.
-   def self.ackGame(pendingPlayer, otherPlayer)
-      game = @@pendingGames[pendingPlayer][otherPlayer]
+   def self.ackGame(player1, player2)
+      game = removePendingGame(player1, player2)
 
       if (game)
-         @@activeGames[pendingPlayer] = game
-         @@activeGames[otherPlayer] = game
+         @@activeGames[player1] = game
+         @@activeGames[player2] = game
+      else
+         LOG(ERROR, "Non-existant game ack'd between #{player1} and #{player2}.")
       end
 
       return game
@@ -100,6 +136,10 @@ class Game
    
    def takeTurn(responseInfo, args)
       notreached("takeTurn() is not implemented.")
+   end
+
+   def otherPlayer(player)
+      return player == @player1 ? @player2 : @player1
    end
 
    # Check win conditions.
