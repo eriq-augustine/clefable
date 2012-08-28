@@ -19,47 +19,72 @@ module TimeConversions
 
    def secsToExplodedString(secs, options = {:days => true, :hours => true,
                                              :mins => true, :secs => true})
-      explode = explodeSecs(secs)
       rtn = ''
+      smallestUnit = 'days'
 
-      if (options[:days] && (days = explode[:days]) != 0)
-         rtn += "#{days} day"
-         if (days > 1)
-            rtn += 's'
+      if (options[:days])
+         days = secs / 86400
+         secs -= days * 86400
+
+         if (days != 0)
+            rtn += "#{days} day"
+            if (days > 1)
+               rtn += 's'
+            end
          end
       end
 
-      if (options[:hours] && (hours = explode[:hours]) != 0)
-         if (rtn != '')
-            rtn += ', '
+      if (options[:hours])
+         hours = secs / 3600
+         secs -= hours * 3600
+
+         if (hours != 0)
+            if (rtn != '')
+               rtn += ', '
+            end
+
+            rtn += "#{hours} hour"
+            if (hours > 1)
+               rtn += 's'
+            end
          end
 
-         rtn += "#{hours} hour"
-         if (hours > 1)
-            rtn += 's'
-         end
+         smallestUnit = 'hours'
       end
 
-      if (options[:mins] && (mins = explode[:mins]) != 0)
-         if (rtn != '')
-            rtn += ', '
+      if (options[:mins])
+         mins = secs / 60
+         secs -= mins * 60
+
+         if (mins != 0)
+            if (rtn != '')
+               rtn += ', '
+            end
+
+            rtn += "#{mins} minute"
+            if (mins > 1)
+               rtn += 's'
+            end
          end
 
-         rtn += "#{mins} minute"
-         if (mins > 1)
-            rtn += 's'
-         end
+         smallestUnit = 'minutes'
       end
 
-      if (options[:secs] && (secs = explode[:secs]) != 0)
+      if (options[:secs])
          if (rtn != '')
             rtn += ', '
          end
 
          rtn += "#{secs} second"
-         if (secs > 1)
+         if (secs > 1 || secs == 0)
             rtn += 's'
          end
+
+         smallestUnit = 'seconds'
+      end
+
+      if (rtn.length == 0)
+         rtn = "0 #{smallestUnit}"
       end
 
       return rtn
