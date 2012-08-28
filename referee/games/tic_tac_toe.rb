@@ -57,7 +57,7 @@ class TicTacToe < Game
          col = match[2].to_i
 
          if (row < 0 || row > 2 || col < 0 || col > 2)
-            responseInfo.repspond("(#{row},#{col}) is not a valid location." +
+            responseInfo.respond("(#{row},#{col}) is not a valid location." +
                                   " The valid range is (0,0) to (2,2).")
             return
          end
