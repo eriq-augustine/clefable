@@ -1,7 +1,7 @@
 require 'open3'
 
 module Email
-   CONFIG_FILE = './config/clefable_ssmtp.conf'
+   CONFIG_FILE = './clefable/config/clefable_ssmtp.conf'
    SSMTP_COMMAND = '/usr/sbin/ssmtp'
 
    def sendMail(subject, body, address)
