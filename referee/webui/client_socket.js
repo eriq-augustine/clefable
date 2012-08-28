@@ -12,9 +12,9 @@ function loadSocket() {
 }
 
 function onMessage(messageEvent) {
-   data = JSON.parse(messageEvent.data);
-
    console.log("OnMessage: " + messageEvent.data);
+   
+   data = JSON.parse(messageEvent.data);
 
    if (data.type == 'gameList') {
       loadGameList(data.games);
@@ -40,15 +40,27 @@ function onError(messageEvent) {
 }
 
 function loadGameList(gameList) {
-   var text = '<ul>'
-   for (var i = 0; i < gameList.length; ++i) {
-      text += '<li onclick="watchGame(' + gameList[i].id + ');">' +
-              gameList[i].gameType + ': ' + gameList[i].player1 +
-              ' vs. ' + gameList[i].player2 + '</li>';
-   }
-   text += '</ul>'
+   var activeList = '<ul>';
+   var pendingList = '<ul>';
+   var element = '';
 
-   document.getElementById('main').innerHTML = text;
+   for (var i = 0; i < gameList.length; ++i) {
+      element = '<li onclick="watchGame(' + gameList[i].id + ');">' +
+                gameList[i].gameType + ': ' + gameList[i].player1 +
+                ' vs. ' + gameList[i].player2 + '</li>';
+      if (gameList[i].pending)
+         pendingList += element;
+      else
+         activeList += element;
+   }
+
+   activeList += '</ul>'
+   pendingList += '</ul>'
+
+   document.getElementById('main').innerHTML = '<h1>Active Games</h1>' +
+                                               activeList +
+                                               '<h1>Pending Games</h1>' +
+                                               pendingList;
 }
 
 function watchGame(id) {
