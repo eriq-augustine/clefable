@@ -1,0 +1,19 @@
+body {
+  margin-left: 50px;
+}
+
+table {
+  border: solid 2px;
+  margin: 10px 0px 0px 0px;
+  -webkit-transform: skew(-25deg);
+  -ms-transform: skew(-25deg);
+  -moz-transform: skew(-25deg);
+  -o-transform: skew(-25deg);
+}
+
+td {
+  border: solid 1px;
+  text-align: center;
+  height: 50px;
+  width: 50px
+}
