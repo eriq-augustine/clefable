@@ -4,3 +4,4 @@ Loader::loadDir('./referee/commands')
 require './referee/game.rb'
 Loader::loadDir('./referee/games')
 Loader::loadAllInDir('./referee')
+Loader::loadDir('./referee/webui')

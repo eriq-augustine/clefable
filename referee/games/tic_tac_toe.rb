@@ -101,5 +101,12 @@ class TicTacToe < Game
               (@board[0][2] + @board[1][2] + @board[2][2]).abs == 3)
    end
 
+   def getState
+      return "{\"turn\": \"#{currentPlayerName()}\"," +
+             " \"player1\": \"#{@player1}\"," +
+             " \"player2\": \"#{@player2}\"," +
+             " \"board\": #{JSON.dump(@board)}}"
+   end
+
    Game::addSchema('tic-tac-toe', TicTacToe, 'The standard 3x3 Tic-Tac-Toe.', '(row,col)')
 end

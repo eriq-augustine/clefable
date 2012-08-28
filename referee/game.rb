@@ -17,6 +17,12 @@ class Game
 
    @@gameId = (defined?(@@gameId)) ? @@gameId : 0
 
+   # Keyed by id
+   @@allGames = (defined?(@@allGames)) ? @@allGames : Hash.new()
+
+   # All of these get updated when a move is made.
+   @@watchers = (defined?(@@watchers)) ? @@watchers : Array.new()
+
    def self.addSchema(gameName, gameClass, gameDesc, moveSyntax)
       @@gameSchemas[gameName] = {:class => gameClass,
                                  :name => gameName,
@@ -56,6 +62,7 @@ class Game
    # |player1| declines the game with |player2|.
    def self.declineGame(player1, player2)
       game = removePendingGame(player1, player2)
+      @@allGames.delete(game.id)
 
       if (!game)
          LOG(ERROR, "Non-existant game declined between #{player1} and #{player2}.")
@@ -105,6 +112,10 @@ class Game
       end
 
       game.takeTurn(responseInfo, args)
+
+      @@watchers.each{|watcher|
+         watcher.gameUpdated(game.id)
+      }
    end
 
    # Tell the game to finish and remove it from the active games map.
@@ -114,6 +125,7 @@ class Game
 
       @@activeGames.delete(game.player1)
       @@activeGames.delete(game.player2)
+      @@allGames.delete(game.id)
 
       return game
    end
@@ -122,16 +134,29 @@ class Game
       return @@activeGames[player]
    end
 
+   def self.getActiveGames()
+      return @@activeGames.values()
+   end
+
+   def self.getGameById(id)
+      return @@allGames[id]
+   end
+
+   def self.registerGameWatcher(gameWatcher)
+      @@watchers << gameWatcher
+   end
+
    attr_reader :player1, :player2, :id
 
    def initialize(startingPlayer, pendingPlayer)
+      @@gameId += 1
+      @id = @@gameId
+      
       @@pendingGames[pendingPlayer][startingPlayer] = self
+      @@allGames[@id] = self
 
       @player1 = startingPlayer
       @player2 = pendingPlayer
-
-      @@gameId += 1
-      @id = @@gameId
    end
    
    def takeTurn(responseInfo, args)
@@ -149,5 +174,10 @@ class Game
 
    # Do any cleanup.
    def finish()
+   end
+
+   # Get the state of the game. This will be directly passed as a to the webui.
+   def getState
+      return "{}"
    end
 end
