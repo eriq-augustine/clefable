@@ -140,6 +140,7 @@ class TicTacToe3D < Game
            " \"player1\": \"#{@player1}\"," +
            " \"player2\": \"#{@player2}\"," +
            " \"board\": #{JSON.dump(@board)}}"
+  end
 
   Game::addSchema('tic-tac-toe-3d', TicTacToe3D, 'Tic-Tac-Toe 3D.', '(level,row,col)')
 end
