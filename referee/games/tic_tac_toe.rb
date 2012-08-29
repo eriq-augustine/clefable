@@ -49,7 +49,7 @@ class TicTacToe < Game
    def takeTurn(responseInfo, args)
       if (responseInfo.fromUser != currentPlayerName())
          responseInfo.respond("^#{responseInfo.fromUser}: It is not your turn.")
-         return
+         return false
       end
 
       if (match = args.strip.match(/\(?\s*(\d)\s*,?\s*(\d)\s*\)?/))
@@ -59,25 +59,27 @@ class TicTacToe < Game
          if (row < 0 || row > 2 || col < 0 || col > 2)
             responseInfo.respond("(#{row},#{col}) is not a valid location." +
                                   " The valid range is (0,0) to (2,2).")
-            return
+            return false
          end
 
          if (@board[row][col] != EMPTY)
             responseInfo.respond("(#{row},#{col}) is already taken. Choose another spot.")
-            return
+            return false
          end
 
          @board[row][col] = currentPlayerToken()
 
          if (gameOver?())
             responseInfo.respond("Congrats #{responseInfo.fromUser}! You Won!")
+            @gameOverStatus = (@turnCounter % 2 == 1) ? GAME_OVER_PLAYER1 : GAME_OVER_PLAYER2
             Game::finishGame(responseInfo.fromUser)
-            return
+            return true
          # Cat's game.
          elsif (@turnCounter == 9)
             responseInfo.respond("#{responseInfo.fromUser}, #{otherPlayerName()}: Cat's game.")
+            @gameOverStatus = GAME_OVER_TIE
             Game::finishGame(responseInfo.fromUser)
-            return
+            return true
          else
             @turnCounter += 1
             responseInfo.respond("^#{responseInfo.fromUser} you have moved to (#{row},#{col}).")
@@ -85,8 +87,10 @@ class TicTacToe < Game
       else
          responseInfo.respond("^#{responseInfo.fromUser}: Your move is not properly formatted." +
                               " Try '([row],[col])', where the top left is '(0,0)'.")
-         return
+         return false
       end
+   
+      return false
    end
 
    # Player tokens are 1 and -1, so just to some math on each possible line.

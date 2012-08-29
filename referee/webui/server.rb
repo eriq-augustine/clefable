@@ -1,4 +1,5 @@
 require 'em-websocket'
+require 'set'
 
 # Note ws.signature is enough to uniquely identify the connection.
 
@@ -6,17 +7,26 @@ class WebSocketServer
    def initialize(host, port)
       @host = host
       @port = port
+
+      # { socketSig => {:socket => socket, :watching => 'list'|gameId} }
       @sockets = Hash.new()
 
+      # All the games that people are watching.
       # { gameId => [socketIds] }
       @watchingGames = Hash.new{|hash, key| hash[key] = Array.new()}
+
+      # All the sockets watching the main list.
+      @socketsOnGameList = Set.new()
+
+      # The current list of all games (already in JSON)
+      @currentGameList = '[]'
 
       Game::registerGameWatcher(self)
 
       # Heads-up: This call blocks until the EM dies.
       EventMachine::WebSocket.start(:host => host, :port => port){|ws|
          ws.onopen{
-            onOpen(ws.signature)
+            onOpen(ws, ws.signature)
          }
 
          ws.onmessage{|message|
@@ -30,9 +40,30 @@ class WebSocketServer
          ws.onerror{|error|
             onError(ws.signature, error)
          }
-
-         @sockets[ws.signature] = ws
       }
+   end
+
+   # TODO(eriq): This is pretty inefficient. Deltas could probably be commuinicated.
+   # A game was added or subtracted.
+   def gameListChanged()
+      games = Game::getAllGames()
+
+      if (games.size() > 0)
+         @currentGameList = '['
+
+         games.each{|game|
+            @currentGameList += "{\"id\": #{game.id}," + 
+                                " \"player1\": \"#{game.player1}\"," +
+                                " \"player2\": \"#{game.player2}\"," +
+                                " \"pending\": #{game.pending}," +
+                                " \"gameType\": \"#{game.class}\"}, "
+         }
+         @currentGameList.sub!(/, $/, ']')
+      else
+         @currentGameList = '[]'
+      end
+
+      sendGameListToAllListeners()
    end
 
    def gameUpdated(gameId)
@@ -50,32 +81,30 @@ class WebSocketServer
          sendGameState(socketSig, gameId, gameState, gameType)
       }
    end
+
+   def gameDone(game)
+      # TODO(eriq)
+   end
    
    def sendMessage(socketSig, message)
       #puts "Sending Message: " + message
 
-      @sockets[socketSig].send(message)
+      @sockets[socketSig][:socket].send(message)
    end
 
-   def onOpen(socketSig)
-      games = Game::getAllGames()
-      gameList = ''
-
-      games.each{|game|
-         gameList += "{\"id\": #{game.id}," + 
-                     " \"player1\": \"#{game.player1}\"," +
-                     " \"player2\": \"#{game.player2}\"," +
-                     " \"pending\": #{game.pending}," +
-                     " \"gameType\": \"#{game.class}\"}"
-      }
-      gameList.sub!(/, $/, '')
-
-      message = "{\"type\": \"gameList\", \"games\": [#{gameList}]}"
-
-      sendMessage(socketSig, message)
+   def onOpen(socket, socketSig)
+      @sockets[socketSig] = {:socket => socket, :watching => 'list'}
+      @socketsOnGameList.add(socketSig)
+      sendGameList(socketSig)
    end
 
    def onClose(socketSig)
+      if (@sockets[socketSig][:watching] != 'list')
+         @watchingGames[@sockets[socketSig][:watching]].delete(socketSig)
+      else
+         @socketsOnGameList.delete(socketSig)
+      end
+
       @sockets.delete(socketSig)
    end
 
@@ -84,6 +113,7 @@ class WebSocketServer
          obj = JSON.parse(message)
          
          if (obj['type'] == 'watchGame')
+            @socketsOnGameList.delete(socketSig)
             @watchingGames[obj['gameId'].to_i] << socketSig
             sendGameState(socketSig, obj['gameId'].to_i)
          else
@@ -97,6 +127,16 @@ class WebSocketServer
 
    def onError(socketSig, error)
       log(ERROR, "Socket error: #{error}")
+   end
+
+   def sendGameList(socketSig)
+      sendMessage(socketSig, "{\"type\": \"gameList\", \"games\": #{@currentGameList}}")
+   end
+
+   def sendGameListToAllListeners()
+      @socketsOnGameList.each{|socketSig|
+         sendGameList(socketSig)
+      }
    end
 
    def sendGameState(socketSig, gameId, gameState = nil, gameType = nil)
