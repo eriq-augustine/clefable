@@ -13,6 +13,7 @@ class WebSocketServer
 
       Game::registerGameWatcher(self)
 
+      # Heads-up: This call blocks until the EM dies.
       EventMachine::WebSocket.start(:host => host, :port => port){|ws|
          ws.onopen{
             onOpen(ws.signature)
@@ -57,14 +58,15 @@ class WebSocketServer
    end
 
    def onOpen(socketSig)
-      games = Game::getActiveGames()
+      games = Game::getAllGames()
       gameList = ''
 
       games.each{|game|
          gameList += "{\"id\": #{game.id}," + 
                      " \"player1\": \"#{game.player1}\"," +
                      " \"player2\": \"#{game.player2}\"," +
-                     " \"gameType\": \"#{game.class}\"}, "
+                     " \"pending\": #{game.pending}," +
+                     " \"gameType\": \"#{game.class}\"}"
       }
       gameList.sub!(/, $/, '')
 

@@ -98,6 +98,7 @@ class Game
          LOG(ERROR, "Non-existant game ack'd between #{player1} and #{player2}.")
       end
 
+      game.pending = false
       return game
    end
 
@@ -134,8 +135,8 @@ class Game
       return @@activeGames[player]
    end
 
-   def self.getActiveGames()
-      return @@activeGames.values()
+   def self.getAllGames()
+      return @@allGames.values()
    end
 
    def self.getGameById(id)
@@ -147,14 +148,17 @@ class Game
    end
 
    attr_reader :player1, :player2, :id
+   # TODO(eriq): Should be private.
+   attr_accessor :pending
 
    def initialize(startingPlayer, pendingPlayer)
       @@gameId += 1
       @id = @@gameId
-      
+     
       @@pendingGames[pendingPlayer][startingPlayer] = self
       @@allGames[@id] = self
 
+      @pending = true
       @player1 = startingPlayer
       @player2 = pendingPlayer
    end
