@@ -21,7 +21,7 @@ class SendDirectMessage < Command
    def initialize
       super('SEND-DIRECT-MESSAGE',
             'SEND-DIRECT-MESSGAE <target> <message>',
-            'Sends a message as Clefable to |target|. Becareful, format is not even checked.',
+            'Sends a message as Clefable to |target|. Be careful, format is not even checked.',
             {:adminLevel => 0,
              :aliases => ['TALK', 'MESSAGE', 'MSG']})
    end
