@@ -115,17 +115,3 @@ class WebSocketServer
       sendMessage(socketSig, message)
    end
 end
-
-#serverInstance = Server.new('localhost', '7070')
-#serverInstance = Server.new('192.168.1.169', '7070')
-# TODO(eriq): Make an official thread for this.
-@@webuiThread = Thread.new{
-   #serverInstance = WebSocketServer.new('0.0.0.0', '7070')
-   begin
-      #serverInstance = WebSocketServer.new('localhost', '7070')
-      serverInstance = WebSocketServer.new('0.0.0.0', '7070')
-   rescue Exception => detail
-      log(ERROR, (detail.message() + "\n" + detail.backtrace.join("\n")))
-      retry
-   end
-}

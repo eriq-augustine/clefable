@@ -13,6 +13,10 @@ BotThread.init()
 server = Server.new(IRC_HOST, IRC_PORT, IRC_NICK)
 server.start()
 
+# Start the websocket server.
+webserver = WebSocketThread.new()
+webserver.start()
+
 #Request the user list now
 DEFAULT_CHANNELS.each{|channel|
    Referee.instance.join(channel)
