@@ -40,6 +40,10 @@ class Bot
       log(INFO, "Joined #{channel}")
    end
 
+   def whois(nick)
+      sendMessage("WHOIS #{nick}")
+   end
+
    # Available options:
    #  :rewrite: whether to invoke the rewrite engine (default: true)
    #  :delay: ensure a delay of at least this much, may be more because of flood control (default: 0)
@@ -74,6 +78,9 @@ class Bot
    def handleServerInput(message)
       message.strip!
       log(DEBUG, "Server says: #{message}")
+
+      #TEST
+      puts message
 
       # PING :<server>
       if (match = message.match(/^PING\s:(.*)$/))
@@ -117,6 +124,22 @@ class Bot
 
             ensureUser(user, channel, ops)
          }
+      # :pratchett.freenode.net 311 TEST_BOT eriq_home ~eriq_home c-50-131-15-127.hsd1.ca.comcast.net * :eaugusti@chromium.org
+      # :<requester irc server> 311 <requester name> <target user> ~<target nick (again?)> <address> * :<extra user info>
+      elsif (match = message.match(/^:(\S+)\s+311\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+\*\s+:(.*)$/))
+         user = match[3]
+         address = match[5]
+         extraInfo = match[6]
+
+         puts "User: #{user}, Address: #{address}, Info: #{extraInfo}"
+
+         if (@users[user])
+            @users[user].address = address
+            @users[user].extraInfo = extraInfo
+            Command.userInfo(user, 'WHOIS', nil)
+         else
+            log(WARN, "Got userinfo on an unknown user: #{user}.")
+         end
       # :<from user>!<from user>@<from address> JOIN <channel>
       elsif (match = message.match(/^:([^!]*)!([^@]*)@(\S*)\sJOIN\s(\S*)$/))
          user = match[1]
@@ -194,6 +217,10 @@ class Bot
 
    def getUsers()
       return @users
+   end
+
+   def getUser(nick)
+      return @users[nick]
    end
 
    def giveOps(user, channel)

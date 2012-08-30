@@ -128,6 +128,12 @@ class Command
          command.onUserLeave(server, channel, user, reason)
       }
    end
+   
+   def self.userInfo(user, infoType, info)
+      @@commands.each_value{|command|
+         command.onUserInfo(user, infoType, info)
+      }
+   end
 
    # Invoked when the command is used in chat
    def onCommand(responseInfo, args)
@@ -143,5 +149,11 @@ class Command
 
    # Invoked if a user leaves
    def onUserLeave(server, channel, user, reason)
+   end
+   
+   # This is just for general user info that is published.
+   # The information is blind passed (can be nil).
+   # It is up to the specific command to look for the info it wants.
+   def onUserInfo(user, infoType, info)
    end
 end
