@@ -1,0 +1,5 @@
+# Ignore all the logs. 
+*.log
+
+# Ignore all the swaps
+.*.sw?
