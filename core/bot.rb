@@ -79,9 +79,6 @@ class Bot
       message.strip!
       log(DEBUG, "Server says: #{message}")
 
-      #TEST
-      puts message
-
       # PING :<server>
       if (match = message.match(/^PING\s:(.*)$/))
          sendMessage("PONG :#{match[1]}")
@@ -130,8 +127,6 @@ class Bot
          user = match[3]
          address = match[5]
          extraInfo = match[6]
-
-         puts "User: #{user}, Address: #{address}, Info: #{extraInfo}"
 
          if (@users[user])
             @users[user].address = address

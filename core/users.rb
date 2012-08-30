@@ -2,7 +2,7 @@
 #  Right now, ops are seen on user lists and accounted for, but nothing beyond that.
 class User
    attr_reader :nick, :ops, :adminLevel, :email
-   attr_accessor :address, :extraInfo
+   attr_accessor :address, :extraInfo, :geo
 
    def initialize(nick, ops)
       @nick = nick
@@ -13,6 +13,8 @@ class User
 
       @address = nil
       @extraInfo = nil
+      # A hash
+      @geo = nil
    end
 
    def setAdmin(level)
