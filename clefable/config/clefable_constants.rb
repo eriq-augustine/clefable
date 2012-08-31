@@ -11,11 +11,11 @@ class Object
   __send__(:remove_const, 'REAL_NAME')
 end
 
-#IRC_NICK = 'TEST_BOT'
-#DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
+IRC_NICK = 'TEST_BOT'
+DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
 
-IRC_NICK = 'Clefable_BOT'
-DEFAULT_CHANNELS = ['#crx', '#eriq_secret', '#bestfriendsclub', '#softwareinventions', '#clefable']
+#IRC_NICK = 'Clefable_BOT'
+#DEFAULT_CHANNELS = ['#crx', '#eriq_secret', '#bestfriendsclub', '#softwareinventions', '#clefable']
 
 SHORT_NICK = 'CLEF'
 TRIGGER = '`'
