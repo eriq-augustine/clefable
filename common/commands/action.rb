@@ -4,7 +4,7 @@ class ClefableAction < Command
       super('CLEFABLE-ACTION',
             'CLEFABLE-ACTION <action>',
             "Have #{REAL_NAME} do an action. Equivilant of /me",
-            {:aliases => ['CLEF-ACTION', 'ACTION']})
+            {:aliases => ['CLEF-ACTION', 'ACTION', 'ME']})
    end
 
    @@instance = ClefableAction.new()
