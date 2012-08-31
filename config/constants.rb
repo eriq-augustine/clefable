@@ -9,6 +9,9 @@ DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
 
 MAX_MESSAGE_LEN = 400
 
+MAX_PING_CORRECTION_DISTANCE = 2
+MAX_LEVENSHTEIN_DISTANCE = 2
+
 CONSOLE = '_CONSOLE_'
 
 CONFIG_DIR = './config'

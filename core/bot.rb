@@ -3,6 +3,7 @@
 class Bot
    include DB
    include TextSplit
+   include Levenshtein
 
    attr_reader :channels, :users, :rewriteRules, :emailMap
 
@@ -98,6 +99,19 @@ class Bot
          # If message was sent in a PM
          elsif (target == IRC_NICK)
             logMessage = Command.invoke(responseInfo, content)
+         # If it looks like a ping, but the target of the ping is not in the room.
+         elsif (pingMatch = content.match(/^(\S+):\s+.*$/))
+            # Note, we cannot be in a PM because of the previous case.
+            pingTarget = pingMatch[1]
+
+            # If channel exists, but the ping target does not, maybe they mistyped.
+            if (@channels.has_key?(target) && !@channels[target][pingTarget])
+               minInfo = minDistanceNoEquals(pingTarget, @channels[target].keys)
+
+               if (minInfo && minInfo[:dist] <= MAX_PING_CORRECTION_DISTANCE)
+                  chat(target, "Automatic Ping Correction -- #{minInfo[:word]}: ^")
+               end
+            end
          end
 
          if (logMessage)
