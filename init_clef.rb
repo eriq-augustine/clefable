@@ -8,7 +8,7 @@ require './LOAD.rb'
 
 require 'thread'
 
-BotThread.init()
+BotThread.instance()
 
 server = Server.new(IRC_HOST, IRC_PORT, IRC_NICK)
 server.start()

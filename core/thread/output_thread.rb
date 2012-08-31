@@ -3,18 +3,9 @@ require './core/thread/queue_thread.rb'
 # All output to the server should go through this thread.
 # This class will also handle the sleeping involved with flood control.
 class OutputThread < QueueThread
-   @@instance = nil
-
    def self.init(socket, lock)
-      @@instance = OutputThread.new(socket, lock)
-   end
-
-   def self.instance
-      if (!@@instance)
-         LOG(FATAL, 'OutputThread was not init() before use.')
-      end
-
-      return @@instance
+      @@socket = socket
+      @@lock = lock
    end
 
    def queueMessage(message, delay = 0)
@@ -58,8 +49,8 @@ class OutputThread < QueueThread
          sleepTime = delay
       end
 
-      @lock.synchronize{
-        @socket.send("#{message}\n", 0)
+      @@lock.synchronize{
+        @@socket.send("#{message}\n", 0)
       }
 
       sleep(sleepTime)
@@ -67,12 +58,13 @@ class OutputThread < QueueThread
 
    private
 
-   def initialize(socket, lock)
+   def initialize()
       super()
 
-      @socket = socket
-      @lock = lock
-      
+      if (!defined?(@@socket) || !@@socket)
+         LOG(FATAL, 'OutputThread was not init() before use.')
+      end
+
       @floodControl = Hash.new(0)
       @lastFloodBucketReap = 0
    end

@@ -20,7 +20,7 @@ class Server
       InputThread.init(@ircSocket, @lock)
       OutputThread.init(@ircSocket, @lock)
 
-      DBThread.init()
+      DBThread.instance()
 
       InputThread.instance.start()
 

@@ -4,30 +4,21 @@
 require './core/thread/thread_wrapper.rb'
 
 class InputThread < ThreadWrapper
-   @@instance = nil
-
    def self.init(socket, lock)
-      @@instance = InputThread.new(socket, lock)
-   end
-
-   def self.instance
-      if (!@@instance)
-         LOG(FATAL, 'InputThread was not init() before use.')
-      end
-
-      return @@instance
+      @@socket = socket
+      @@lock = lock
    end
 
    protected
 
    # The main listening loop
-   # Listents on @socket and $stdin
+   # Listents on @@socket and $stdin
    def run()
       #Keep track of time so the periodic things can be done
       lastTime = Time.now().to_i
 
       while (true)
-         selectRes = IO.select([@socket, $stdin], nil, nil, SELECT_TIMEOUT)
+         selectRes = IO.select([@@socket, $stdin], nil, nil, SELECT_TIMEOUT)
          if (selectRes)
             # Check the read ios
             selectRes[0].each{|ioStream|
@@ -37,10 +28,10 @@ class InputThread < ThreadWrapper
                   return
                end
 
-               if (ioStream == @socket)
+               if (ioStream == @@socket)
                   data = ''
-                  @lock.synchronize{
-                     data = @socket.gets()
+                  @@lock.synchronize{
+                     data = @@socket.gets()
                   }
 
                   InputHandler::queueTask(InputHandler::SERVER_INPUT, data)
@@ -64,10 +55,11 @@ class InputThread < ThreadWrapper
 
    private
 
-   def initialize(socket, lock)
+   def initialize()
       super()
 
-      @socket = socket
-      @lock = lock
+      if (!defined?(@@socket) || !@@socket)
+         LOG(FATAL, 'InputThread was not init() before use.')
+      end
    end
 end

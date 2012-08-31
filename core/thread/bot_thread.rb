@@ -2,20 +2,6 @@ require './core/thread/input_handler.rb'
 
 # Handle all commands.
 class BotThread < InputHandler
-   @@instance = nil
-
-   def self.init()
-      @@instance = BotThread.new()
-   end
-
-   def self.instance
-      if (!@@instance)
-         LOG(FATAL, 'BotThread was not init() before use.')
-      end
-
-      return @@instance
-   end
-
    def queueTask(action, data)
       queue({:action => action, :data => data})
    end
