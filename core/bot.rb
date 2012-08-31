@@ -161,6 +161,8 @@ class Bot
       elsif (match = message.match(/^:#{IRC_NICK}!([^@]*)@(\S*)\sPART\s(\S*)\s*$/))
          channel = match[3]
          @channels.delete(channel)
+         
+         logChat(user, channel, "** PART'd #{channel} **")
       # :eriq_home!~eriq_home@c-50-131-15-127.hsd1.ca.comcast.net QUIT :Quit: Leaving
       # :<from user>!<from user>@<from address> QUIT :<reason>
       elsif (match = message.match(/^:([^!]*)!([^@]*)@(\S*)\sQUIT\s+:(.*)$/))
