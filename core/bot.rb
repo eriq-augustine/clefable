@@ -131,8 +131,6 @@ class Bot
 
       @emailMap = Hash.new()
       initEmailMap()
-
-      @@instance = self
    end
 
    # Wrapper for InputQueue.queueMessage()

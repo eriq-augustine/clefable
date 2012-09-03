@@ -1,7 +1,11 @@
 class Clefable < Bot
    include TextStyle
-   
+
+ public
+
    attr_reader :commitFetcher
+
+ protected
 
    def initialize()
       super()
@@ -20,6 +24,8 @@ class Clefable < Bot
          notifyAboutCommits(newCommits)
       end
    end
+
+ private
 
    def notifyAboutCommits(newCommits)
       newCommits.each{|commit|
@@ -45,13 +51,5 @@ class Clefable < Bot
             end
          }
       }
-   end
-
-   def self.instance
-      if (!defined?(@@instance) || !@@instance)
-         @@instance = Clefable.new()
-      end
-
-      return @@instance
    end
 end
