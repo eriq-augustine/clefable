@@ -3,9 +3,11 @@ require './core/thread/queue_thread.rb'
 # InputHandlers take input from the InputThread.
 # All InputHandlers are automatically registered to recieve input upon creation.
 class InputHandler < QueueThread
-   SERVER_INPUT = 0
-   STDIN_INPUT = 1
-   PERIODIC_ACTIONS = 2
+   include ClassUtil
+
+   RELOADABLE_CONSTANT('SERVER_INPUT', 0)
+   RELOADABLE_CONSTANT('STDIN_INPUT', 1)
+   RELOADABLE_CONSTANT('PERIODIC_ACTIONS', 2)
 
    def self.handlers()
       return @@handlers
@@ -21,7 +23,7 @@ class InputHandler < QueueThread
    protected
    
    # Support reinit
-   @@handlers = (defined?(@@handlers)) ? @@handlers : Array.new()
+   RELOADABLE_CLASS_VARIABLE('@@handlers', Array.new())
 
    def initialize()
       super()
