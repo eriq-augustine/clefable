@@ -100,7 +100,7 @@ class Bot
          elsif (target == IRC_NICK)
             logMessage = Command.invoke(responseInfo, content)
          # If it looks like a ping, but the target of the ping is not in the room.
-         elsif (pingMatch = content.match(/^\^?(\S+)\^?:(\s+.*$)?/))
+         elsif (pingMatch = content.match(/^\^?(\S+)\^?:(\s+.*)?$/))
             # Note, we cannot be in a PM because of the previous case.
             pingTarget = pingMatch[1]
 
