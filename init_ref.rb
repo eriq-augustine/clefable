@@ -14,7 +14,7 @@ server = Server.new(IRC_HOST, IRC_PORT, IRC_NICK)
 server.start()
 
 # Start the websocket server.
-webserver = WebSocketThread.new()
+webserver = WebSocketThread.instance()
 webserver.start()
 
 #Request the user list now

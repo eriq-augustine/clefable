@@ -1,8 +1,4 @@
-body {
-  margin-left: 50px;
-}
-
-table {
+#tic-tac-toe-3d-table {
   border: solid 2px;
   margin: 10px 0px 0px 0px;
   -webkit-transform: skew(-25deg);
@@ -11,7 +7,7 @@ table {
   -o-transform: skew(-25deg);
 }
 
-td {
+.tic-tac-toe-3d-td {
   border: solid 1px;
   text-align: center;
   height: 50px;

@@ -89,7 +89,13 @@ class WebSocketServer
    def sendMessage(socketSig, message)
       #puts "Sending Message: " + message
 
-      @sockets[socketSig][:socket].send(message)
+      #TEST
+      # TODO(eriq): I think this may be hapening. Remove this guard when it is fixed.
+      if (!@sockets[socketSig])
+         LOG(ERROR, "Closed socket is being referenced")
+      else
+         @sockets[socketSig][:socket].send(message)
+      end
    end
 
    def onOpen(socket, socketSig)

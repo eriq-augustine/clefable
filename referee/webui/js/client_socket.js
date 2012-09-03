@@ -16,7 +16,7 @@ function loadSocket() {
 }
 
 function onMessage(messageEvent) {
-   console.log("OnMessage: " + messageEvent.data);
+   //console.log("OnMessage: " + messageEvent.data);
    
    data = JSON.parse(messageEvent.data);
 
@@ -31,12 +31,12 @@ function onMessage(messageEvent) {
 
 function onClose(messageEvent) {
    //console.log("Connection to server closed: " + JSON.stringify(messageEvent));
-   console.log("Connection to server closed.");
+   //console.log("Connection to server closed.");
 }
 
 function onOpen(messageEvent) {
    //console.log("Connection to server opened: " + JSON.stringify(messageEvent));
-   console.log("Connection to server opened.");
+   //console.log("Connection to server opened.");
 }
 
 function onError(messageEvent) {
@@ -77,6 +77,8 @@ function loadGameState(gameType, state) {
       loadTicTacToe(state);
    } else if (gameType == 'TicTacToe3D') {
      loadTicTacToe3D(state);
+   } else if (gameType == 'Battleship') {
+     loadBattleship(state);
    } else {
       console.log("Error: Unknown game type: " + gameType);
    }
