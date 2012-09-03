@@ -92,7 +92,7 @@ class WebSocketServer
       #TEST
       # TODO(eriq): I think this may be hapening. Remove this guard when it is fixed.
       if (!@sockets[socketSig])
-         LOG(ERROR, "Closed socket is being referenced")
+         Log(ERROR, "Closed socket is being referenced")
       else
          @sockets[socketSig][:socket].send(message)
       end
