@@ -3,7 +3,7 @@ require './core/thread/queue_thread.rb'
 # InputHandlers take input from the InputThread.
 # All InputHandlers are automatically registered to recieve input upon creation.
 class InputHandler < QueueThread
-   include ClassUtil
+   extend ClassUtil
 
    RELOADABLE_CONSTANT('SERVER_INPUT', 0)
    RELOADABLE_CONSTANT('STDIN_INPUT', 1)
