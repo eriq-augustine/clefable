@@ -3,5 +3,6 @@ CREATE TABLE users (
    `user` VARCHAR(128) PRIMARY KEY,
    pass VARCHAR(64) NOT NULL,
    `level` INT NOT NULL DEFAULT -1,
-   email TEXT NOT NULL DEFAULT ''
+   email TEXT NOT NULL DEFAULT '',
+   executable BOOL NOT NULL DEFAULT TRUE
 );

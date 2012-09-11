@@ -15,7 +15,7 @@ class Help < Command
       commandsToPrint = SortedSet.new()
 
       @@commands.values.each{|command|
-         execResponse = responseInfo.fromUserInfo.canExecute?(command.requiredLevel)
+         execResponse = responseInfo.fromUserInfo.canExecuteAtLevel?(command.requiredLevel)
          if (!command.requiredLevel || execResponse[:success])
             commandsToPrint << command.name
          end
@@ -35,7 +35,7 @@ class Help < Command
       if (commandStr.length() > 0 && @@commands.has_key?(commandStr))
          command = @@commands[commandStr]
          
-         execResponse = responseInfo.fromUserInfo.canExecute?(command.requiredLevel)
+         execResponse = responseInfo.fromUserInfo.canExecuteAtLevel?(command.requiredLevel)
          if (!command.requiredLevel || execResponse[:success])
             responseInfo.respond("USAGE: #{command.usage()}")
             if (command.optionUsage())

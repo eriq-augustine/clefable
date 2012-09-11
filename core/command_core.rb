@@ -1,4 +1,4 @@
-# TODO: Information is deiplayed about a command if they try and invoke it and it
+# TODO: Information is displayed about a command if they try and invoke it and it
 #  requires admin. Should this info be hidden?
 
 class ResponseInfo
@@ -85,29 +85,47 @@ class Command
       return @skipLog
    end
 
+   # Check to see if logging should be skipped for this supposed invocation.
+   # The log is only skipped if the command exists, and it has skipLog? return true.
+   def self.skipLog?(line)
+      if (!(match = line.match(/^(\S+)\s*(.*)$/)))
+         return false
+      end
+
+      commandName = match[1].upcase
+      if (!@@commands.has_key?(commandName))
+         return false
+      end
+
+      return command.skipLog?()
+   end
+
    # Return true if the command should be logged, false if it should not be logged.
    # target is usually a channel
    def self.invoke(responseInfo, line)
-      message = "Unrecognized command: [#{line}]. Try: HELP [command]"
-      log = true
-
-      if (match = line.match(/^(\S+)\s*(.*)$/))
-         commandName = match[1].upcase
-         if (@@commands.has_key?(commandName))
-            command = @@commands[commandName]
-            execResponse = responseInfo.fromUserInfo.canExecute?(command.requiredLevel)
-            if (!command.requiredLevel || execResponse[:success])
-               command.onCommand(responseInfo, match[2])
-               return !command.skipLog?
-            else
-               log = !command.skipLog?
-               message = execResponse[:error]
-            end
-         end
+      if (!(match = line.match(/^(\S+)\s*(.*)$/)))
+         responseInfo.respond("Unrecognized command: [#{line}]. Try: HELP [command]")
+         return true
       end
 
-      responseInfo.respond(message)
-      return log
+      commandName = match[1].upcase
+      if (!@@commands.has_key?(commandName))
+         responseInfo.respond("Unrecognized command: [#{line}]. Try: HELP [command]")
+         return true
+      end
+
+      command = @@commands[commandName]
+      execLevelResponse = responseInfo.fromUserInfo.canExecuteAtLevel?(command.requiredLevel)
+      
+      if (command.requiredLevel && !execLevelResponse[:success])
+         responseInfo.respond(execLevelResponse[:error])
+         return !command.skipLog?
+      end
+      
+      # TODO(eriq): User API goes here.
+
+      command.onCommand(responseInfo, match[2])
+      return !command.skipLog?
    end
 
    def self.userPresentOnJoin(server, channel, user)

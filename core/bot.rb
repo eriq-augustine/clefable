@@ -117,6 +117,10 @@ class Bot
       sendMessage("WHOIS #{nick}")
    end
 
+   # Inform  the bot that it should perform its periodic actions
+   def periodicActions
+   end
+
  protected
 
    def initialize()
@@ -138,10 +142,6 @@ class Bot
       OutputThread.instance.queueMessage(message, delay)
    end
 
-   # Inform  the bot that it should perform its periodic actions
-   def periodicActions
-   end
-
  private
 
    def ensureUser(user, channel, ops)
@@ -156,14 +156,15 @@ class Bot
 
    def handlePrivmsg(fullMessage, fromUser, target, content)
       responseInfo = ResponseInfo.new(self, fromUser, target, @users[fromUser])
-
       logMessage = true
+      command = nil
+
       # If sent message is started with "#{IRC_NICK}:" or "#{SHORT_NICK}:" or "#{TRIGGER}"
       if (commandMatch = content.strip.match(/^((?:#{IRC_NICK}:)|(?:#{SHORT_NICK}:)|(?:#{TRIGGER}))\s*(.+)$/i))
-         logMessage = Command.invoke(responseInfo, commandMatch[2])
+         command = commandMatch[2]
       # If message was sent in a PM
       elsif (target == IRC_NICK)
-         logMessage = Command.invoke(responseInfo, content)
+         command = content
       # If it looks like a ping, but the target of the ping is not in the room.
       elsif (pingMatch = content.match(/^\^?([^\s\^]+)\^?:(\s+.*)?$/))
          # Note, we cannot be in a PM because of the previous case.
@@ -175,6 +176,18 @@ class Bot
 
             if (minInfo && minInfo[:dist] <= MAX_PING_CORRECTION_DISTANCE)
                chat(target, "Automatic Ping Correction -- #{minInfo[:word]}: ^")
+            end
+         end
+      end
+
+      if (command)
+         # This can happen at the beginning before all users are loaded.
+         if (@users[fromUser])
+            if (@users[fromUser].canExecute?())
+               logMessage = Command.invoke(responseInfo, command)
+            else
+               # We are skipping this invocation, but we still may need to log.
+               logMessage = !Command::skipLog?(content)
             end
          end
       end

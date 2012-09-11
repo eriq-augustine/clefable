@@ -1,6 +1,8 @@
 # TODO: Deal with ops properly.
 #  Right now, ops are seen on user lists and accounted for, but nothing beyond that.
 class User
+   include DB
+
    attr_reader :nick, :ops, :adminLevel, :email
    attr_accessor :address, :extraInfo, :geo
 
@@ -15,6 +17,9 @@ class User
       @extraInfo = nil
       # A hash
       @geo = nil
+
+      # This will be lazily retrieved from the db.
+      @executable = nil
    end
 
    def setAdmin(level)
@@ -38,8 +43,29 @@ class User
       return @auth
    end
 
+   # Is this user allowed to execute commands at all?
+   def canExecute?()
+      if (@executable == nil)
+         res = dbQuery("SELECT executable FROM #{USERS_TABLE} where `user` = '#{@nick}'")
+
+         if (!res || res.num_rows() > 1)
+            log(ERROR, "There was some error getting #{@nick}'s executable.")
+            return false
+         end
+
+         # This user does not have an entry, let them execute.
+         if (res.num_rows() == 0)
+            @executable = true
+         else
+            @executable = res.fetch_row()[0].to_i == 1
+         end
+      end
+
+      return @executable
+   end
+
    # Can the user execute the command with |level|
-   def canExecute?(level)
+   def canExecuteAtLevel?(level)
       # If there are no level requirements
       if (!level)
          return {:success => true}

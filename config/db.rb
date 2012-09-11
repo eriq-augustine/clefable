@@ -1,7 +1,7 @@
 module DB
    # Connection info
-   #MYSQL_HOST = 'localhost'
-   MYSQL_HOST = '50.131.15.127'
+   MYSQL_HOST = 'localhost'
+   #MYSQL_HOST = '50.131.15.127'
    MYSQL_USER = 'clefable'
    MYSQL_PASS = 'KantoMtMoon'
    MYSQL_DB = 'clefable_bot'

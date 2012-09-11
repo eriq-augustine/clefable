@@ -17,7 +17,7 @@ class Alias < Command
          responseInfo.respond("That command doesn't exist.")
       else 
          command = @@commands[commandStr]
-         execResponse = responseInfo.fromUserInfo.canExecute?(command.requiredLevel)
+         execResponse = responseInfo.fromUserInfo.canExecuteAtLevel?(command.requiredLevel)
          if (!command.requiredLevel || execResponse[:success])
             if (aliases = command.aliases)
                responseInfo.respond("#{command.name} has the following aliases: #{aliases}")

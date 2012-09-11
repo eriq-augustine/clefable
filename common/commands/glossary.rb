@@ -34,7 +34,7 @@ class Glossary < Command
          user = responseInfo.fromUser
          userInfo = responseInfo.fromUserInfo
 
-         execResponse = userInfo.canExecute?(@@level)
+         execResponse = userInfo.canExecuteAtLevel?(@@level)
          if (!execResponse[:success])
             responseInfo.respond(execResponse[:error])
             return
@@ -49,7 +49,7 @@ class Glossary < Command
          user = responseInfo.fromUser
          userInfo = responseInfo.fromUserInfo
 
-         execResponse = userInfo.canExecute?(@@level)
+         execResponse = userInfo.canExecuteAtLevel?(@@level)
          if (!execResponse[:success])
             responseInfo.respond(execResponse[:error])
             return
