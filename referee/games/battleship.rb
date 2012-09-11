@@ -153,6 +153,8 @@ class Battleship < Game
       end
    end
 
+   # TODO(eriq): Overlapping positions are not checked.
+
    # Ex of good schema:
    #  { "C":  {"start": {"row": 0, "col": 0}, "end": {"row": 0, "col": 4}},
    #    "B":  {"start": {"row": 1, "col": 0}, "end": {"row": 1, "col": 3}},
