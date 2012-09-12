@@ -52,6 +52,12 @@ class Bot
    #  :rewrite: whether to invoke the rewrite engine (default: true)
    #  :delay: ensure a delay of at least this much, may be more because of flood control (default: 0)
    def chat(channel, message, options = {})
+      # This is the last reasonable place that taking to yourself can be detected.
+      if (channel == IRC_NICK)
+         log(ERROR, "Attempt to send message to self: #{message}.")
+         return
+      end
+
       if (!options[:rewrite] || options[:rewrite])
          @rewriteRules.each_pair{|target, rewrite|
             message.gsub!(/#{target}/i, rewrite)
@@ -159,8 +165,11 @@ class Bot
       logMessage = true
       command = nil
 
+      # Log, but do not respond to messages from self.
+      if (fromUser == IRC_NICK)
+         logMessage = true
       # If sent message is started with "#{IRC_NICK}:" or "#{SHORT_NICK}:" or "#{TRIGGER}"
-      if (commandMatch = content.strip.match(/^((?:#{IRC_NICK}:)|(?:#{SHORT_NICK}:)|(?:#{TRIGGER}))\s*(.+)$/i))
+      elsif (commandMatch = content.strip.match(/^((?:#{IRC_NICK}:)|(?:#{SHORT_NICK}:)|(?:#{TRIGGER}))\s*(.+)$/i))
          command = commandMatch[2]
       # If message was sent in a PM
       elsif (target == IRC_NICK)

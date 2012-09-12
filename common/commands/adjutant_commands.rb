@@ -37,7 +37,7 @@ class SendDirectMessage < Command
       target = match[1]
       text = match[2]
 
-      OutputThread.instance.queueMessage("PRIVMSG #{target} :#{text}", 0)
+      Bot::instance.chat(target, text)
    end
 end
 
