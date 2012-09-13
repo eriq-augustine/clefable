@@ -123,8 +123,16 @@ class Bot
       sendMessage("WHOIS #{nick}")
    end
 
+   # Register a lambda (with no parameters) as an action during periodic actions.
+   def registerPeriodicAction(callback)
+      @periodicActions << callback
+   end
+
    # Inform  the bot that it should perform its periodic actions
    def periodicActions
+      @periodicActions.each{|action|
+         action.call()
+      }
    end
 
  protected
@@ -141,6 +149,8 @@ class Bot
 
       @emailMap = Hash.new()
       initEmailMap()
+      
+      @periodicActions = Array.new()
    end
 
    # Wrapper for InputQueue.queueMessage()

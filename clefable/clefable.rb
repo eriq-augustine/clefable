@@ -13,10 +13,13 @@ class Clefable < Bot
       @commitFetcher = CommitFetcher.new()
       # Do the first update quietly
       @commitFetcher.updateCommits()
+
+      registerPeriodicAction(lambda{ checkForCommits() })
    end
 
-   # OVERRIDE
-   def periodicActions
+ private
+
+   def checkForCommits
       # Check for new commits
       newCommits = @commitFetcher.updateCommits()
       if (!newCommits.empty?)
@@ -25,13 +28,13 @@ class Clefable < Bot
       end
    end
 
- private
-
    def notifyAboutCommits(newCommits)
       newCommits.each{|commit|
          committer = commit[:author].sub(/@.*$/, '')
 
-         @channels.each_pair{|channel, users|
+         # TODO(eriq): I should be able ti use @channels
+         # @channels.each_pair{|channel, users|
+         Bot::instance::getChannels().each_pair{|channel, users|
             broadcast = false
             users.each_key{|nick|
                #It is common practice to append '_' or '-' to your nick if it is taken.
