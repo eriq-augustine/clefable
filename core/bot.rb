@@ -1,13 +1,32 @@
 # The base bot behavior.
+#
+# A note about singleton behavior.
+# The Bot should be a singleton to rhe runtime.
+# However, it should not be a singleton per subclass.
+# The Bot is a singleton per this base class. This means that
+# there will only ever by one Bot, but the type of this bot could vary.
+# It could be a Clefable, or any other type of bot.
+# The hook for this singleton behavior happens on initialize(). Therefore,
+# the type of bot you want should be new()'d before you call Bot::instance().
+# However, you will then be able to call Bot::instance() anytime to get the current bot.
 class Bot
    include DB
    include TextSplit
    include Levenshtein
-   include Singleton
+
+   extend ClassUtil
 
  public
 
    attr_reader :channels, :users, :rewriteRules, :emailMap
+
+   def self.instance()
+      if (!@@singleton_instance_)
+         notreached('A Bot subclass has not been new\'d yet.')
+      end
+
+      return @@singleton_instance_
+   end
 
    def handleServerInput(message)
       message.strip!
@@ -138,6 +157,10 @@ class Bot
  protected
 
    def initialize()
+      check(!@@singleton_instance_, 'Cannot have multiple versions of Bot active at once.')
+
+      @@singleton_instance_ = self
+
       # { channelName => { userName => user } }
       @channels = Hash.new{|hash, key| hash[key] = Hash.new() }
 
@@ -159,6 +182,8 @@ class Bot
    end
 
  private
+
+   RELOADABLE_CLASS_VARIABLE('@@singleton_instance_', nil)
 
    def ensureUser(user, channel, ops)
       if (!@users.has_key?(user))

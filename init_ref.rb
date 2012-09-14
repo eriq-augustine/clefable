@@ -8,6 +8,9 @@ require './LOAD.rb'
 
 require 'thread'
 
+# Choose the Referee as the active Bot.
+Referee.new()
+
 BotThread.instance()
 
 server = Server.new(IRC_HOST, IRC_PORT, IRC_NICK)

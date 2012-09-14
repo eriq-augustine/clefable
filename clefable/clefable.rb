@@ -17,8 +17,6 @@ class Clefable < Bot
       registerPeriodicAction(lambda{ checkForCommits() })
    end
 
- private
-
    def checkForCommits
       # Check for new commits
       newCommits = @commitFetcher.updateCommits()
@@ -28,13 +26,13 @@ class Clefable < Bot
       end
    end
 
+ private
+
    def notifyAboutCommits(newCommits)
       newCommits.each{|commit|
          committer = commit[:author].sub(/@.*$/, '')
 
-         # TODO(eriq): I should be able ti use @channels
-         # @channels.each_pair{|channel, users|
-         Bot::instance::getChannels().each_pair{|channel, users|
+         @channels.each_pair{|channel, users|
             broadcast = false
             users.each_key{|nick|
                #It is common practice to append '_' or '-' to your nick if it is taken.
