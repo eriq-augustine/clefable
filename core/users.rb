@@ -43,13 +43,17 @@ class User
       return @auth
    end
 
+   def rename(newNick)
+      @nick = newNick
+   end
+
    # Is this user allowed to execute commands at all?
    def canExecute?()
       if (@executable == nil)
          res = dbQuery("SELECT executable FROM #{USERS_TABLE} where `user` = '#{@nick}'")
 
          if (!res || res.num_rows() > 1)
-            log(ERROR, "There was some error getting #{@nick}'s executable.")
+            log(ERROR, "There was some error getting #{@nick}'s executable bit.")
             return false
          end
 

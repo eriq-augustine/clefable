@@ -64,6 +64,11 @@ class Bot
       # :<from user>!<from user>@<from address> PART <channel>
       elsif (match = message.match(/^:([^!]*)!([^@]*)@(\S*)\sPART\s(\S*)/))
          handleUserPart(message, match[1], match[4], match[5])
+      # :eriq_home!~eriq_home@24-176-224-131.dhcp.snlo.ca.charter.com NICK :eriq
+      # :eriq!~eriq_home@24-176-224-131.dhcp.snlo.ca.charter.com NICK :eriq_home
+      # :<old nick>!~<user>@<address> NICK :<new nick>
+      elsif (match = message.match(/^:([^!]*)!([^@]*)@(\S*)\s+NICK\s+:(.*)$/))
+         handleRename(message, match[1], match[4])
       end
    end
 
@@ -308,6 +313,11 @@ class Bot
       logChat(user, channel, "** PART'd #{channel}. **")
    end
 
+   def handleRename(fullMessage, oldNick, newNick)
+      renameUser(oldNick, newNick)
+      logChat(oldNick, ALL_CHANNELS, "** RENAME'd #{oldNick} -> #{newNick}")
+   end
+
    def initEmailMap
       @emailMap.clear()
 
@@ -315,6 +325,20 @@ class Bot
       if (res)
          res.each{|row|
             @emailMap[row[0]] = {:email => row[1], :domain => row[2]}
+         }
+      end
+   end
+
+   def renameUser(oldNick, newNick)
+      # Remember: both @channels and @users hash use the same User object as the value.
+      if (@users.has_key?(oldNick))
+         @users[oldNick].rename(newNick)
+         @users[newNick] = @users.delete(oldNick)
+
+         @channels.each_value{|users|
+            if (users.has_key?(oldNick))
+               users[newNick] = users.delete(oldNick)
+            end
          }
       end
    end
