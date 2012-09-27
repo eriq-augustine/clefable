@@ -90,9 +90,9 @@ class CommitFetcher
          insertCommits(commits)
       rescue Exception => ex
          log(ERROR, ex.message)
-         log(ERROR, ex.backtrace.inspect) 
+         log(ERROR, ex.backtrace.inspect)
       end
-      
+
       return commits
    end
 end

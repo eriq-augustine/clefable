@@ -3,7 +3,7 @@ IRC_PORT = 6667
 IRC_NICK = 'Default_BOT'
 
 #Wait for 2 mins on select
-SELECT_TIMEOUT = 120
+SELECT_TIMEOUT = 40
 
 DEFAULT_CHANNELS = ['#eriq_secret', '#bestfriendsclub']
 

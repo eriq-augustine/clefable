@@ -176,6 +176,7 @@ class Bot
       @rewriteRules = getRewriteRules()
 
       @emailMap = Hash.new()
+      @revEmailMap = Hash.new()
       initEmailMap()
       
       @periodicActions = Array.new()
@@ -320,11 +321,13 @@ class Bot
 
    def initEmailMap
       @emailMap.clear()
+      @revEmailMap.clear()
 
       res = dbQuery("SELECT nick, email, domain FROM #{NICK_MAP_TABLE}")
       if (res)
          res.each{|row|
             @emailMap[row[0]] = {:email => row[1], :domain => row[2]}
+            @revEmailMap["#{row[1]}@#{row[2]}"] = row[0]
          }
       end
    end
