@@ -1,2 +1,0 @@
-class Referee < Bot
-end
