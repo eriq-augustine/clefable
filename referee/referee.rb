@@ -1,0 +1,2 @@
+class Referee < Bot
+end
