@@ -104,24 +104,27 @@ class Command
    # target is usually a channel
    def self.invoke(responseInfo, line)
       if (!(match = line.match(/^(\S+)\s*(.*)$/)))
-         responseInfo.respond("Unrecognized command: [#{line}]. Try: HELP [command]")
+         responseInfo.respond("#{responseInfo.fromUser}: Please say something when talking to me.")
          return true
       end
 
       commandName = match[1].upcase
       if (!@@commands.has_key?(commandName))
-         responseInfo.respond("Unrecognized command: [#{line}]. Try: HELP [command]")
+         # The command was not found. In the NLP context, this is a standard utterance.
+         # In NLP, there are no unrecognized commands.
+         NlpBot.instance.handleUtterance(responseInfo, line.strip)
          return true
+      else
       end
 
       command = @@commands[commandName]
       execLevelResponse = responseInfo.fromUserInfo.canExecuteAtLevel?(command.requiredLevel)
-      
+
       if (command.requiredLevel && !execLevelResponse[:success])
          responseInfo.respond(execLevelResponse[:error])
          return !command.skipLog?
       end
-      
+
       # TODO(eriq): User API goes here.
 
       command.onCommand(responseInfo, match[2])
@@ -146,7 +149,7 @@ class Command
          command.onUserLeave(server, channel, user, reason)
       }
    end
-   
+
    def self.userInfo(user, infoType, info)
       @@commands.each_value{|command|
          command.onUserInfo(user, infoType, info)
@@ -168,7 +171,7 @@ class Command
    # Invoked if a user leaves
    def onUserLeave(server, channel, user, reason)
    end
-   
+
    # This is just for general user info that is published.
    # The information is blind passed (can be nil).
    # It is up to the specific command to look for the info it wants.
