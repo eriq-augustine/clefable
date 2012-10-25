@@ -5,8 +5,8 @@ class NickMap < Command
    def initialize
       super('NICK-MAP',
             'NICK-MAP [OPTIONS] [^]<nick>',
-            'Work with the mapping between nicks and emails.' + 
-            ' This map is not related to `EMAIL.' + 
+            'Work with the mapping between nicks and emails.' +
+            ' This map is not related to `EMAIL.' +
             ' This map is mainly used when checking for commits.',
             {:adminLevel => 5,
              :optionUsage => Options::formatOptionUsage(@@schema.values),
@@ -56,14 +56,14 @@ class NickMap < Command
          domain = match[2]
 
          dbUpdate("REPLACE INTO #{NICK_MAP_TABLE} (nick, email, domain) VALUES ('#{escape(nick)}', '#{escape(email)}', '#{escape(domain)}')")
-         Clefable.instance.emailMap[nick] = {:email => email, :domain => domain}
+         Bot.instance.emailMap[nick] = {:email => email, :domain => domain}
          responseInfo.respond("Mapping added.")
       elsif (parsedOptions.hasOptionSchema?(@@schema[:remove]))
-         Clefable.instance.emailMap.delete(nick)
+         Bot.instance.emailMap.delete(nick)
          dbUpdate("DELETE FROM #{NICK_MAP_TABLE} WHERE nick = '#{escape(nick)}'")
          responseInfo.respond("Mapping removed.")
       elsif (parsedOptions.hasOptionSchema?(@@schema[:query]))
-         email = Clefable.instance.emailMap[nick]
+         email = Bot.instance.emailMap[nick]
          if (email)
             responseInfo.respond("^#{nick} => #{email[:email]}@#{email[:domain]}")
             return

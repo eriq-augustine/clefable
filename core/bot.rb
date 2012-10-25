@@ -178,7 +178,7 @@ class Bot
       @emailMap = Hash.new()
       @revEmailMap = Hash.new()
       initEmailMap()
-      
+
       @periodicActions = Array.new()
    end
 

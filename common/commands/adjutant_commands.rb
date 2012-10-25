@@ -21,7 +21,7 @@ class SendDirectMessage < Command
    def initialize
       super('SEND-DIRECT-MESSAGE',
             'SEND-DIRECT-MESSGAE <target> <message>',
-            'Sends a message as Clefable to |target|. Be careful, format is not even checked.',
+            "Sends a message as #{IRC_NICK} to |target|. Be careful, format is not even checked.",
             {:adminLevel => 0,
              :aliases => ['TALK', 'MESSAGE', 'MSG']})
    end
@@ -97,7 +97,7 @@ class Join < Command
    def initialize
       super('JOIN',
             'JOIN <channel>',
-            'Make Clefable join a channel. If the channel is protected, the join may fail.',
+            "Make #{IRC_NICK} join a channel. If the channel is protected, the join may fail.",
             {:adminLevel => 0})
    end
 
@@ -119,7 +119,7 @@ class Part < Command
    def initialize
       super('PART',
             'PART [<channel>]',
-            'Make Clefable leave a channel. If the channel is missing, the current channel is assumed.',
+            "Make #{IRC_NICK} leave a channel. If the channel is missing, the current channel is assumed.",
             {:adminLevel => 0})
    end
 
@@ -138,7 +138,7 @@ class Part < Command
          end
       else
          channel = args
-         
+
          if (!channel.start_with?('#'))
             responseInfo.respond('Channels must start with a \'#\'.')
             return
@@ -154,7 +154,7 @@ class Channels < Command
    def initialize
       super('CHANNELS',
             'CHANNELS',
-            'List all channels that Clefable is in.',
+            "List all channels that #{IRC_NICK} is in.",
             {:adminLevel => 0,
              :aliases => ['LIST-CHANNELS']})
    end

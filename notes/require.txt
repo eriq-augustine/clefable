@@ -47,5 +47,5 @@ common/commands
    Commands that are natural to all sorts of bots.
    Commands should not be dependent upon any other commands.
 
-clefable
+chromium
    All files specific to clefable's chromiums features.
