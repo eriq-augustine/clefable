@@ -6,7 +6,7 @@ WARN = 2
 ERROR = 3
 FATAL = 4
 
-LOG_BASE = 'clefable'
+LOG_BASE = SHORT_NICK.downcase()
 LOG_EXT = 'log'
 
 def log(level, message)
