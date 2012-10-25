@@ -1,4 +1,4 @@
-Loader::loadDir('./clefable/config')
-Loader::loadDir('./clefable/util')
-Loader::loadDir('./clefable/commands')
-Loader::loadAllInDir('./clefable')
+Loader::loadDir('./chromium/config')
+Loader::loadDir('./chromium/util')
+Loader::loadDir('./chromium/commands')
+Loader::loadAllInDir('./chromium')
