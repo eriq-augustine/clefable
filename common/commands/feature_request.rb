@@ -5,7 +5,7 @@ class FeatureRequest < Command
    def initialize
       super('FEATURE-REQUEST',
             'FEATURE-REQUEST <name/title of feature> ! <Description>',
-            'Request a new feature for Clefable. Specifically it adds an issue to the github repository at https://github.com/eriq-augustine/clefable.',
+            "Request a new feature for #{IRC_NICK}. Specifically it adds an issue to the github repository at https://github.com/eriq-augustine/clefable.",
             {
                :adminLevel => 10,
                :aliases => ['BUG', 'BUG-REPORT', 'FEATURE']
