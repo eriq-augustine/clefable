@@ -12,7 +12,9 @@ class NlpBot < Bot
          return
       end
 
-      puts "CHAT TIME: #{utterance}"
+      if (match = utterance.match(/^((?:hi)|(?:hello))/i))
+         responseInfo.respond("#{responseInfo.fromUser}: #{match[1].capitalize()} there.")
+      end
    end
 
    def enterChatMode()

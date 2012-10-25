@@ -11,7 +11,7 @@ class Object
   __send__(:remove_const, 'REAL_NAME')
 end
 
-IRC_NICK = 'TEST-bot'
+IRC_NICK = 'eriq-TEST-bot'
 DEFAULT_CHANNELS = ['#eriq_secret']
 
 SHORT_NICK = 'TEST'
