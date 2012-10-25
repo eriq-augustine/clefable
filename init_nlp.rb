@@ -9,7 +9,7 @@ require './LOAD.rb'
 require 'thread'
 
 # Choose Nlp as the active bot
-Nlp.new()
+NlpBot.new()
 
 BotThread.instance()
 
@@ -18,7 +18,7 @@ server.start()
 
 # Request the user list now
 DEFAULT_CHANNELS.each{|channel|
-   Clefable.instance.join(channel)
+   NlpBot.instance.join(channel)
    OutputThread.instance.queueMessage("NAMES #{channel}", 0)
 }
 

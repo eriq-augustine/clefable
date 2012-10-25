@@ -1,4 +1,4 @@
-Loader::loadDir('./clefable/config')
-Loader::loadDir('./clefable/util')
-Loader::loadDir('./clefable/commands')
-Loader::loadAllInDir('./clefable')
+Loader::loadDir('./nlp/config')
+Loader::loadDir('./nlp/util')
+Loader::loadDir('./nlp/commands')
+Loader::loadAllInDir('./nlp')
