@@ -4,8 +4,8 @@ class BotAction < Command
       super("BOT-ACTION",
             "BOT-ACTION <action>",
             "Have #{REAL_NAME} do an action. Equivilant of /me",
-            {:aliases => ["#{IRC_NICK.sub(/_BOT$/, ''}-ACTION",
-                          "#{SHORT_NICK.sub(/_BOT$/, ''}-ACTION",
+            {:aliases => ["#{IRC_NICK.sub(/_BOT$/, '')}-ACTION",
+                          "#{SHORT_NICK.sub(/_BOT$/, '')}-ACTION",
                           'ACTION', 'ME']})
    end
 
