@@ -3,7 +3,7 @@ class Whois < Command
    def initialize
       super('WHOIS',
             'WHOIS [[^]user]',
-            'Get some info on a nick. This is not for user of Clefable. For that, use USER-INFO.',
+            "Get some info on a nick. This is not for info on a user of #{IRC_NICK}. For that, use USER-INFO.",
             {:aliases => ['IP']})
 
       # { target_nick => [ responseInfo to respond to ] }

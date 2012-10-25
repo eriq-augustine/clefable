@@ -1,19 +1,21 @@
 # TODO(eriq): Enable for any channel.
-class ClefableAction < Command
+class BotAction < Command
    def initialize
-      super('CLEFABLE-ACTION',
-            'CLEFABLE-ACTION <action>',
+      super("BOT-ACTION",
+            "BOT-ACTION <action>",
             "Have #{REAL_NAME} do an action. Equivilant of /me",
-            {:aliases => ['CLEF-ACTION', 'ACTION', 'ME']})
+            {:aliases => ["#{IRC_NICK.sub(/_BOT$/, ''}-ACTION",
+                          "#{SHORT_NICK.sub(/_BOT$/, ''}-ACTION",
+                          'ACTION', 'ME']})
    end
 
-   @@instance = ClefableAction.new()
+   @@instance = BotAction.new()
 
    def onCommand(responseInfo, args)
       args.strip!
 
       if (args.length() == 0)
-         responseInfo.respond("You need some action for clef to do. See HELP #{@name}.")
+         responseInfo.respond("You need some action for #{SHORT_NICK} to do. See HELP #{@name}.")
          return
       end
 
