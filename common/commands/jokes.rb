@@ -4,8 +4,7 @@ class Joke < Command
    def initialize
       super('JOKE',
             'JOKE [<joke number>]',
-            'Get a "funny" joke. If no number is provided, a random one is picked.',
-            {:adminLevel => 10})
+            'Get a "funny" joke. If no number is provided, a random one is picked.')
    end
 
    @@instance = Joke.new()
@@ -13,7 +12,7 @@ class Joke < Command
    def onCommand(responseInfo, args)
       args.strip!
       if (args.match(/^\d+$/))
-         res = dbQuery("SELECT joke" + 
+         res = dbQuery("SELECT joke" +
                        " FROM #{JOKES_TABLE}" +
                        " WHERE id = #{args}")
          if (!res || res.num_rows() == 0)
@@ -22,7 +21,7 @@ class Joke < Command
             responseInfo.respond("Joke ##{args}: #{res.fetch_row()[0]}")
          end
       else
-         res = dbQuery("SELECT id, joke" + 
+         res = dbQuery("SELECT id, joke" +
                        " FROM #{JOKES_TABLE}" +
                        " ORDER BY RAND() LIMIT 1")
          row = res.fetch_row()

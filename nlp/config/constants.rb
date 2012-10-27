@@ -11,13 +11,13 @@ class Object
   __send__(:remove_const, 'REAL_NAME')
 end
 
-IRC_NICK = 'eriq-TEST-bot'
-DEFAULT_CHANNELS = ['#eriq_secret']
+IRC_NICK = 'P_Rainicorn-bot'
+DEFAULT_CHANNELS = ['#eriq_secret', '#csc580']
 
-SHORT_NICK = 'TEST'
+SHORT_NICK = 'PRINCESS'
 TRIGGER = '~'
 HOST_NAME = 'CalPoly'
 SERVER_NAME = 'SLO'
-REAL_NAME = "Eriq's NLP Bot"
+REAL_NAME = "Princess Rainicorn"
 
 ## END Redefining constants ##
