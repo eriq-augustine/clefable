@@ -15,16 +15,9 @@ class ChatHandler
       @@handlers << handler
    end
 
-   #TEST
-   @@sm = StoryMachine.new()
-
    # A single utterance may be handled by multiple TextHandlers,
    #  but will not be handled by the same one more than once.
    def self.handleChat(text, responseInfo)
-      #TEST
-      responseInfo.respond(@@sm.getNext())
-      return
-
       modText = text.strip()
 
       fullResponse = ''
@@ -58,8 +51,13 @@ class ChatHandler
       end
    end
 
+   # If there are any current conversations, continue them.
+   def self.continueConverasations()
+   end
+
    def self.reset()
       @@conversations.clear()
+      #TODO(eriq): Make sure to reset the StoryMachines
    end
 end
 

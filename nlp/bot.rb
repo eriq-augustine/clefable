@@ -4,6 +4,8 @@ class NlpBot < Bot
    def initialize()
       super()
 
+      registerPeriodicAction(lambda{ChatHandler::continueConverasations()})
+
       @chatMode = false
    end
 
@@ -20,6 +22,7 @@ class NlpBot < Bot
    end
 
    def leaveChatMode()
+      ChatHandler::reset()
       @chatMode = false
    end
 
