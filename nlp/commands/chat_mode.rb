@@ -3,7 +3,7 @@ class EnterChat < Command
       super('ENTER-CHAT-MODE',
             'ENTER-CHAT-MODE',
             "Tell #{IRC_NICK} to enter chat mode.",
-            {:aliases => ['ENTER-CHAT']})
+            {:aliases => ['ENTER-CHAT', 'CHAT', 'CHAT-MODE']})
    end
 
    @@instance = EnterChat.new()

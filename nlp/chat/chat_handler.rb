@@ -15,9 +15,16 @@ class ChatHandler
       @@handlers << handler
    end
 
+   #TEST
+   @@sm = StoryMachine.new()
+
    # A single utterance may be handled by multiple TextHandlers,
    #  but will not be handled by the same one more than once.
    def self.handleChat(text, responseInfo)
+      #TEST
+      responseInfo.respond(@@sm.getNext())
+      return
+
       modText = text.strip()
 
       fullResponse = ''
