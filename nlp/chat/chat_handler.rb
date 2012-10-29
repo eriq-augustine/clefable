@@ -11,14 +11,28 @@ class ChatHandler
    RELOADABLE_CLASS_VARIABLE('@@conversations', Hash.new())
    RELOADABLE_CLASS_VARIABLE('@@handlers', Array.new())
 
+   def initialize(user)
+      @user = user
+   end
+
    def self.addHandler(handler)
       @@handlers << handler
+   end
+
+   def self.handleChat(text, responseInfo)
+      user = responseInfo.fromUser
+
+      if (!@@conversations.has_key?(user))
+         @@conversations[user] = ChatHandler.new(user)
+      end
+
+      @@conversations[user].handleChatImpl(text, responseInfo)
    end
 
    # A single utterance may be handled by multiple TextHandlers,
    #  but will not be handled by the same one more than once.
    # True is returned if the utterance is handled, false otherwise.
-   def self.handleChat(text, responseInfo)
+   def handleChatImpl(text, responseInfo)
       modText = text.strip()
 
       fullResponse = ''
@@ -32,6 +46,7 @@ class ChatHandler
             if (!triggeredHandlers.member?(i))
                textConsumed, response = @@handlers[i].handleText(modText, responseInfo.fromUser)
                if (textConsumed)
+                  triggeredHandlers.add(i)
                   talked = true
                   fullResponse += "#{response} "
                   modText = modText[textConsumed...modText.length()]
@@ -109,7 +124,7 @@ class WellnessHandler < TextHandler
 
    def handleText(text, fromUser)
       sentence = grabSentence(text).downcase()
-      if (WELLNESS_WORDS.subset?(Set.new(nlpSplitString(sentence))))
+      if (Set.new(nlpSplitString(sentence)).superset?(WELLNESS_WORDS))
          #TODO: More variation
          return sentence.length(), "#{fromUser}: Pretty good, how are you?"
       else
@@ -149,10 +164,14 @@ class QandAHandler < TextHandler
    extend ClassUtil
 
    RELOADABLE_CONSTANT('QUESTION_REGEX',
-      /^(?:(?:tell\s+me\s+about\s+(?:the\s+subject\s+of\s+)?)|(?:what\s+is\s+(?!the)\s+)|(?:give\s+(?:(?:(?!info).)*)info(?:rmation)?\s+about\s+)|(?:what\s+(?:(?!know).)*know\s+about))([^!\?\.]+)[!\?\.]/i)
+      /^(?:(?:tell\s+me\s+about\s+(?:the\s+subject\s+of\s+)?)|(?:what\s+is\s+)|(?:give\s+(?:(?:(?!info).)*)info(?:rmation)?\s+about\s+)|(?:what\s+(?:(?!know).)*know\s+about))([^!\?\.]+)[!\?\.]/i)
 
    def handleText(text, fromUser)
       match = nil
+      if (text.match(/birth/))
+         return nil
+      end
+
       if (!(match = text.strip.match(QUESTION_REGEX)))
          return nil
       end
@@ -160,7 +179,7 @@ class QandAHandler < TextHandler
       doc = WikiFetcher::lookup(match[1])
 
       if (!doc || !doc[:cleanFirstPara])
-         return match[0].length, "#{fromUser}: http://lmgtfy.com/?q=#{match[1].gsub(/\s+/, '+')}"
+         return match[0].length, "#{fromUser}: I don't know about #{match[1]}, try: http://lmgtfy.com/?q=#{match[1].gsub(/\s+/, '+')}"
       end
 
       sentences = nlpSentenceSplit(doc[:cleanFirstPara])

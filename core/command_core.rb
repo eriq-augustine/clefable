@@ -109,7 +109,7 @@ class Command
       end
 
       commandName = match[1].upcase
-      if (NlpBot.instance.chatMode)
+      if (commandName != 'DIE' && NlpBot.instance.chatMode)
          # The command was not found. In the NLP context, this is a standard utterance.
          # In NLP, there are no unrecognized commands.
          if (NlpBot.instance.handleUtterance(responseInfo, line.strip))

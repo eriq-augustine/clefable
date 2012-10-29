@@ -10,9 +10,11 @@ require 'open-uri'
 # Get articles on wikipedia
 class WikiFetcher
    extend ClassUtil
-
    RELOADABLE_CONSTANT('BASE_URL', 'http://en.wikipedia.org/wiki/')
    RELOADABLE_CLASS_VARIABLE('@@cache', {})
+
+   #BASE_URL = 'http://en.wikipedia.org/wiki/'
+   #@@cache = {}
 
    def self.lookup(target)
       normalTarget = normalizeTarget(target)
@@ -37,6 +39,7 @@ class WikiFetcher
              :box => nil, :bday => nil}
       firstParaPath = '//div[@id="mw-content-text"]/p[1]'
       vboxPath = '//div[@id="mw-content-text"]/table[starts-with(@class, "infobox")]'
+      otherOptionsPath = '//div[@id="mw-content-text"]/ul[1]/li/a'
 
       begin
          doc = Nokogiri::HTML(open(BASE_URL + target))
@@ -44,7 +47,18 @@ class WikiFetcher
 
          rtn[:firstPara] = doc.xpath(firstParaPath).to_s
          if (rtn[:firstPara])
-            rtn[:cleanFirstPara] = cleanPara(rtn[:firstPara])
+            if (rtn[:firstPara].strip().match(/may refer to:\<\/p\>$/))
+               para = "#{target} is too ambiguious. Try one of the following: "
+               doc.xpath(otherOptionsPath).each{|link|
+                  if (match = link.to_s().match(/title="([^"]+)"/))
+                     para += "#{match[1]}, "
+                  end
+               }
+               rtn[:firstPara] = para.sub(/, $/, '.')
+               rtn[:cleanFirstPara] = rtn[:firstPara]
+            else
+               rtn[:cleanFirstPara] = cleanPara(rtn[:firstPara])
+            end
          end
 
          rtn[:box] = doc.xpath(vboxPath).to_s
@@ -123,3 +137,6 @@ class WikiFetcher
       return target.strip.gsub(/\s+/, '_')
    end
 end
+
+#doc = WikiFetcher::lookup('NLP')
+#puts doc[:firstPara]

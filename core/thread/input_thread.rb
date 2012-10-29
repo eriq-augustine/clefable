@@ -45,7 +45,7 @@ class InputThread < ThreadWrapper
          end
 
          now = Time.now().to_i
-         if (now - lastTime >= SELECT_TIMEOUT)
+         if (now - lastTime >= PERIODIC_TIMEOUT)
             #Do periodic stuff
             lastTime = now
             InputHandler::queueTask(InputHandler::PERIODIC_ACTIONS, nil)

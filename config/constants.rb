@@ -3,6 +3,9 @@ IRC_PORT = 6667
 IRC_NICK = 'Default_BOT'
 
 SELECT_TIMEOUT = 40
+# The min time for periodic actions.
+# Actions are guarenteed between PERIODIC_TIMEOUT and SELECT_TIMEOUT
+PERIODIC_TIMEOUT = 3
 
 DEFAULT_CHANNELS = ['#eriq_secret']
 

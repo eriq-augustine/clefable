@@ -6,15 +6,15 @@ class NlpBot < Bot
 
       registerPeriodicAction(lambda{ChatHandler::continueConverasations()})
 
-      @chatMode = false
+      @chatMode = true
    end
 
    def handleUtterance(responseInfo, utterance)
       if (!@chatMode)
-         return
+         return false
       end
 
-      ChatHandler.handleChat(utterance, responseInfo)
+      return ChatHandler.handleChat(utterance, responseInfo)
    end
 
    def enterChatMode()

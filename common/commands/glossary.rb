@@ -70,8 +70,9 @@ class Glossary < Command
          responseInfo.respond('I don''t understand. Try HELP WHAT.')
       end
    end
-   
+
    @@level = 5
    @@aliases = ['?', 'WHAT?']
-   @@instance = Glossary.new()
+   # Disable for nlp
+   #@@instance = Glossary.new()
 end
