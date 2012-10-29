@@ -17,6 +17,7 @@ class ChatHandler
 
    # A single utterance may be handled by multiple TextHandlers,
    #  but will not be handled by the same one more than once.
+   # True is returned if the utterance is handled, false otherwise.
    def self.handleChat(text, responseInfo)
       modText = text.strip()
 
@@ -48,7 +49,10 @@ class ChatHandler
 
       if (fullResponse.length() != 0)
          responseInfo.respond(fullResponse)
+         return true
       end
+
+      return false
    end
 
    # If there are any current conversations, continue them.
@@ -107,11 +111,66 @@ class WellnessHandler < TextHandler
       sentence = grabSentence(text).downcase()
       if (WELLNESS_WORDS.subset?(Set.new(nlpSplitString(sentence))))
          #TODO: More variation
-         return sentence.length(), "Pretty good, how are you?"
+         return sentence.length(), "#{fromUser}: Pretty good, how are you?"
       else
          return nil
       end
    end
 
    @@insatnce = WellnessHandler.new()
+end
+
+class BirthdayHandler < TextHandler
+   def handleText(text, fromUser)
+      match = nil
+      if ((match = text.match(/when\s+was\s+((?:(?!born)[\w\s]*))\s+born\?/i)) ||
+          (match = text.match(/what\s+is\s+the\s+birthdate\s+of\s+([^\?]+)\?/i)) ||
+          (match = text.match(/what\s+is\s+the\s+date\s+of\s+birth\s+of\s+([^\?]+)\?/i)) ||
+          (match = text.match(/what\s+is\s+([^']+)'s\s+birthdate\?/i)) ||
+          (match = text.match(/what\s+is\s+the\s+date\s+((?:(?!was)[\w\s]*))\s+was\s+born\?/i)) ||
+          (match = text.match(/when\s+is\s+([^']+)'s\s+birthday\?/i)))
+         doc = WikiFetcher::lookup(match[1])
+
+         if (!doc || !doc[:bday])
+            return match[0].length, "#{fromUser}: http://lmgtfy.com/?q=birthday+#{match[1].gsub(/\s+/, '+')}"
+         end
+
+         name = match[1].split().reduce(''){|rtn, val| "#{rtn} #{val.capitalize()}"}.strip()
+         return match[0].length, "#{fromUser}: #{name}'s birthday is on #{doc[:bday]}."
+      else
+         return nil
+      end
+   end
+
+   @@instance = BirthdayHandler.new()
+end
+
+class QandAHandler < TextHandler
+   extend ClassUtil
+
+   RELOADABLE_CONSTANT('QUESTION_REGEX',
+      /^(?:(?:tell\s+me\s+about\s+(?:the\s+subject\s+of\s+)?)|(?:what\s+is\s+(?!the)\s+)|(?:give\s+(?:(?:(?!info).)*)info(?:rmation)?\s+about\s+)|(?:what\s+(?:(?!know).)*know\s+about))([^!\?\.]+)[!\?\.]/i)
+
+   def handleText(text, fromUser)
+      match = nil
+      if (!(match = text.strip.match(QUESTION_REGEX)))
+         return nil
+      end
+
+      doc = WikiFetcher::lookup(match[1])
+
+      if (!doc || !doc[:cleanFirstPara])
+         return match[0].length, "#{fromUser}: http://lmgtfy.com/?q=#{match[1].gsub(/\s+/, '+')}"
+      end
+
+      sentences = nlpSentenceSplit(doc[:cleanFirstPara])
+      rtn = "#{fromUser}: "
+      sentences[0...2].each{|sentence|
+         rtn += "#{sentence} "
+      }
+
+      return match[0].length, rtn
+   end
+
+   @@instance = QandAHandler.new()
 end

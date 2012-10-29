@@ -9,25 +9,21 @@ require 'open-uri'
 
 # Get articles on wikipedia
 class WikiFetcher
-   #extend ClassUtil
-   #RELOADABLE_CONSTANT('BASE_URL', 'http://en.wikipedia.org/wiki/')
+   extend ClassUtil
 
-   BASE_URL = 'http://en.wikipedia.org/wiki/'
+   RELOADABLE_CONSTANT('BASE_URL', 'http://en.wikipedia.org/wiki/')
+   RELOADABLE_CLASS_VARIABLE('@@cache', {})
 
-   def initialize()
-      @cache = {}
-   end
-
-   def lookup(target)
+   def self.lookup(target)
       normalTarget = normalizeTarget(target)
 
-      if (@cache.has_key?(normalTarget))
-         return @cache[normalTarget]
+      if (@@cache.has_key?(normalTarget))
+         return @@cache[normalTarget]
       end
 
       doc = getTarget(normalTarget)
       if (doc)
-         @cache[normalTarget] = doc
+         @@cache[normalTarget] = doc
       end
 
       return doc
@@ -35,7 +31,7 @@ class WikiFetcher
 
  private
 
-   def getTarget(target)
+   def self.getTarget(target)
       rtn = {:doc => nil,
              :firstPara => nil, :cleanFirstPara => nil,
              :box => nil, :bday => nil}
@@ -56,17 +52,17 @@ class WikiFetcher
             rtn[:bday] = getBDay(rtn[:box])
          end
       rescue Exception => ex
-         puts ex.message
-         puts ex.backtrace.inspect
-         #log(ERROR, ex.message)
-         #log(ERROR, ex.backtrace.inspect)
+         #puts ex.message
+         #puts ex.backtrace.inspect
+         log(ERROR, ex.message)
+         log(ERROR, ex.backtrace.inspect)
          return nil
       end
 
       return rtn
    end
 
-   def getBDay(box)
+   def self.getBDay(box)
       # Boxes have special tags: <span class="bday">1735-10-30</span>
       match = box.match(/\<span\s+class="bday"\>(\d+-\d+-\d+)\<\/span\>/)
       if (match)
@@ -75,7 +71,6 @@ class WikiFetcher
 
       match = box.match(/Born((?:(?!\<\/tr\>).)*)\<\/tr\>((?:(?!\<\/tr\>).)*)\<\/tr\>/m)
       if (!match)
-         puts "NO MATCH"
          return nil
       end
 
@@ -97,13 +92,14 @@ class WikiFetcher
       return nil
    end
 
-   def cleanPara(text)
+   def self.cleanPara(text)
       # Remove some
       clean = text.gsub(/\<\/?(p|b)\>/, ' ')
 
       # Keep the inner parts on some
-      ['a', 'sup', 'span', 'i'].each{|tag|
-         clean = clean.gsub(/\<#{tag}[^\>]*\>((?:(?!\<\/#{tag}\>).)*)\<\/#{tag}\>/, ' \1 ')
+      ['a', 'sup', 'span', 'i', 'small'].each{|tag|
+         #clean = clean.gsub(/\<#{tag}[^\>]*\>((?:(?!\<#{tag}[^\>]*\>).)*)\<\/#{tag}\>/, ' \1 ')
+         clean = clean.gsub(/\<\/?#{tag}[^\>]*\>/, ' ')
       }
 
       # Remove cites
@@ -116,13 +112,14 @@ class WikiFetcher
       clean = clean.gsub(/\s+/, ' ')
 
       # Fix improperly spaced punctuation
-      clean = clean.gsub(/\s([\.!\?,;])/, '\1')
+      clean = clean.gsub(/\s([\.!\?,;\)])/, '\1')
       clean = clean.gsub(/([\(\[])\s/, '\1')
+      clean = clean.gsub(/(\w+)\s*-\s*(\w+)/, '\1-\2')
 
-      return clean
+      return clean.strip()
    end
 
-   def normalizeTarget(target)
+   def self.normalizeTarget(target)
       return target.strip.gsub(/\s+/, '_')
    end
 end

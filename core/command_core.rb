@@ -109,17 +109,18 @@ class Command
       end
 
       commandName = match[1].upcase
-      if (!@@commands.has_key?(commandName))
-         if (NlpBot.instance.chatMode)
-            # The command was not found. In the NLP context, this is a standard utterance.
-            # In NLP, there are no unrecognized commands.
-            NlpBot.instance.handleUtterance(responseInfo, line.strip)
-         else
-            responseInfo.respond("#{responseInfo.fromUser}: Command (#{match[1]}) not found." +
-                                 " If you want to chat, try ENTER-CHAT-MODE.")
+      if (NlpBot.instance.chatMode)
+         # The command was not found. In the NLP context, this is a standard utterance.
+         # In NLP, there are no unrecognized commands.
+         if (NlpBot.instance.handleUtterance(responseInfo, line.strip))
+            return true
          end
+      end
+
+      if (!@@commands.has_key?(commandName))
+         responseInfo.respond("#{responseInfo.fromUser}: Command (#{match[1]}) not found." +
+                              " If you want to chat, try ENTER-CHAT-MODE.")
          return true
-      else
       end
 
       command = @@commands[commandName]
