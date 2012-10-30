@@ -32,20 +32,21 @@ class ChatHandler
          end
       }
 
-      user = users.sample()
-      attemptedUsers = Set.new()
-
-      while (user == IRC_NICK || @@conversations.has_key?(user))
-         attemptedUsers.add(user)
-         if (attemptedUsers.size() == users.size())
-            return
+      finalUser = nil
+      randUsers = users.sample(users.size())
+      randUsers.each{|user|
+         if (user != IRC_NICK && !@@conversations.has_key?(user))
+            finalUser = user
+            break
          end
+      }
 
-         user = users.sample()
+      if (!finalUser)
+         return
       end
 
-      @@conversations[user] = ChatHandler.new(user, channel)
-      @@conversations[user].initiate()
+      @@conversations[finalUser] = ChatHandler.new(finalUser, channel)
+      @@conversations[finalUser].initiate()
    end
 
    def initiate()
