@@ -108,6 +108,11 @@ class Command
          return true
       end
 
+      # A hacky fix for avoiding loops with a clef based bot.
+      if (line.match(/ENTER-CHAT-MODE/))
+         return true
+      end
+
       commandName = match[1].upcase
       if (commandName != 'DIE' && NlpBot.instance.chatMode)
          # The command was not found. In the NLP context, this is a standard utterance.
@@ -118,8 +123,12 @@ class Command
       end
 
       if (!@@commands.has_key?(commandName))
-         responseInfo.respond("#{responseInfo.fromUser}: Command (#{match[1]}) not found." +
-                              " If you want to chat, try ENTER-CHAT-MODE.")
+         if (NlpBot.instance.chatMode)
+            responseInfo.respond("#{responseInfo.fromUser}: What?")
+         else
+            responseInfo.respond("#{responseInfo.fromUser}: Command (#{match[1]}) not found." +
+                                 " If you want to chat, try ENTER-CHAT-MODE.")
+         end
          return true
       end
 

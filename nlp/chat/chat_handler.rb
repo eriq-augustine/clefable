@@ -11,22 +11,63 @@ class ChatHandler
    RELOADABLE_CLASS_VARIABLE('@@conversations', Hash.new())
    RELOADABLE_CLASS_VARIABLE('@@handlers', Array.new())
 
-   def initialize(user)
+   def initialize(user, channel)
       @user = user
+      @greetingMachine = nil
+      @channel = channel
    end
 
    def self.addHandler(handler)
       @@handlers << handler
    end
 
-   def self.handleChat(text, responseInfo)
-      user = responseInfo.fromUser
+   def self.initiate(channel)
+      users = Bot.instance.channels[channel].keys()
 
-      if (!@@conversations.has_key?(user))
-         @@conversations[user] = ChatHandler.new(user)
+      users.each{|user|
+         if (user.match(/foaad/i) && !@@conversations.has_key?(user))
+            @@conversations[user] = ChatHandler.new(user, channel)
+            @@conversations[user].initiate()
+            return
+         end
+      }
+
+      user = users.sample()
+      attemptedUsers = Set.new()
+
+      while (user == IRC_NICK || @@conversations.has_key?(user))
+         attemptedUsers.add(user)
+         if (attemptedUsers.size() == users.size())
+            return
+         end
+
+         user = users.sample()
       end
 
-      @@conversations[user].handleChatImpl(text, responseInfo)
+      @@conversations[user] = ChatHandler.new(user, channel)
+      @@conversations[user].initiate()
+   end
+
+   def initiate()
+      @greetingMachine = InitiateGreetingMachine.new(@user)
+      Bot.instance.chat(@channel, @greetingMachine.next(''))
+   end
+
+   def self.handleChat(text, responseInfo)
+      user = responseInfo.fromUser
+      newChat = false
+
+      if (!@@conversations.has_key?(user))
+         @@conversations[user] = ChatHandler.new(user, responseInfo.target)
+         newChat = true
+      end
+
+      handleChat = @@conversations[user].handleChatImpl(text, responseInfo)
+      if (!handleChat && newChat)
+         @@conversations.delete(user)
+      end
+
+      return handleChat
    end
 
    # A single utterance may be handled by multiple TextHandlers,
@@ -35,8 +76,23 @@ class ChatHandler
    def handleChatImpl(text, responseInfo)
       modText = text.strip()
 
-      fullResponse = ''
+      if (NlpBot.instance.greetingMode)
+         if (!@greetingMachine && modText.match(/(hi)|(hello)/i))
+            @greetingMachine = ResponseGreetingMachine.new(@user)
+            responseInfo.respond(@greetingMachine.next(modText))
+            return true
+         end
+      end
 
+      if (@greetingMachine)
+         response = @greetingMachine.next(modText)
+         if (response)
+            responseInfo.respond(response)
+         end
+         return true
+      end
+
+      fullResponse = ''
       triggeredHandlers = Set.new()
 
       while (true)
@@ -72,6 +128,28 @@ class ChatHandler
 
    # If there are any current conversations, continue them.
    def self.continueConverasations()
+      @@conversations.delete_if{|nick, conversation|
+         !conversation.continue()
+      }
+   end
+
+   # Continue a conversation.
+   # Return true if the conversation is to be continued further.
+   # Return false if the conversation is done.
+   def continue()
+      if (@greetingMachine)
+         response = @greetingMachine.next('')
+         if (response)
+            Bot.instance.chat(@channel, response)
+         end
+
+         if (@greetingMachine.done?)
+            @greetingMachine = nil
+            return false
+         end
+      end
+
+      return true
    end
 
    def self.reset()

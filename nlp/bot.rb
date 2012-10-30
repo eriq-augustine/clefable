@@ -1,5 +1,5 @@
 class NlpBot < Bot
-   attr_reader :chatMode
+   attr_reader :chatMode, :greetingMode
 
    def initialize()
       super()
@@ -7,6 +7,7 @@ class NlpBot < Bot
       registerPeriodicAction(lambda{ChatHandler::continueConverasations()})
 
       @chatMode = true
+      @greetingMode = false
    end
 
    def handleUtterance(responseInfo, utterance)
@@ -17,6 +18,14 @@ class NlpBot < Bot
       return ChatHandler.handleChat(utterance, responseInfo)
    end
 
+   def enterGreetingMode()
+      @greetingMode = true
+   end
+
+   def leaveGreetingMode()
+      @greetingMode = false
+   end
+
    def enterChatMode()
       @chatMode = true
    end
@@ -24,6 +33,10 @@ class NlpBot < Bot
    def leaveChatMode()
       ChatHandler::reset()
       @chatMode = false
+   end
+
+   def resetConversations()
+      ChatHandler::reset()
    end
 
  private

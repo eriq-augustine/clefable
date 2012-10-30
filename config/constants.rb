@@ -2,10 +2,10 @@ IRC_HOST = 'irc.freenode.net'
 IRC_PORT = 6667
 IRC_NICK = 'Default_BOT'
 
-SELECT_TIMEOUT = 40
+SELECT_TIMEOUT = 6
 # The min time for periodic actions.
 # Actions are guarenteed between PERIODIC_TIMEOUT and SELECT_TIMEOUT
-PERIODIC_TIMEOUT = 3
+PERIODIC_TIMEOUT = 5
 
 DEFAULT_CHANNELS = ['#eriq_secret']
 
