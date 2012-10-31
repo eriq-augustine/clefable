@@ -3,7 +3,7 @@ class Forget < Command
       super('FORGET',
             'FORGET',
             "Forget about previous conversations.",
-            {:aliases => ['*FORGET']})
+            {:aliases => ['*FORGET', 'RESET']})
    end
 
    @@instance = Forget.new()

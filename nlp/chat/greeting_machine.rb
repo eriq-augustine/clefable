@@ -64,7 +64,7 @@ class ResponseGreetingMachine < GreetingMachine
             return nil
          end
       when STATE_INQUERY
-         @state = STATE_INQUERY_WAIT
+         @state = STATE_INQUERY_WAIT_1
          return "How are you?"
       when STATE_INQUERY_WAIT_1
          if (text == '')
@@ -72,7 +72,7 @@ class ResponseGreetingMachine < GreetingMachine
             return 'How are you??'
          else
             @state = STATE_END
-            return 'k'
+            return 'k cool, we are done here.'
          end
       when STATE_INQUERY_WAIT_2
          if (text == '')
@@ -80,7 +80,7 @@ class ResponseGreetingMachine < GreetingMachine
             return nil
          else
             @state = STATE_END
-            return 'k'
+            return 'k cool, we are done here.'
          end
       when STATE_END
          return nil

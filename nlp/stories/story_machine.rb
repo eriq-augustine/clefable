@@ -64,7 +64,7 @@ class StoryMachine
       end
 
       def nextState(random, startState, endState, sleepState, storyStates)
-         @@focus -= 0.1
+         @@focus -= 0.05
          nextStateImpl(random, startState, endState, sleepState, storyStates)
       end
 

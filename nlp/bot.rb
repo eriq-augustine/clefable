@@ -1,5 +1,5 @@
 class NlpBot < Bot
-   attr_reader :chatMode, :greetingMode
+   attr_reader :chatMode, :greetingMode, :testStoryMachine
 
    def initialize()
       super()
@@ -8,6 +8,7 @@ class NlpBot < Bot
 
       @chatMode = true
       @greetingMode = false
+      @testStoryMachine = StoryMachine.new()
    end
 
    def handleUtterance(responseInfo, utterance)
@@ -37,6 +38,7 @@ class NlpBot < Bot
 
    def resetConversations()
       ChatHandler::reset()
+      @testStoryMachine.reset()
    end
 
  private

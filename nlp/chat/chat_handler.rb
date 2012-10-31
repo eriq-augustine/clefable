@@ -8,6 +8,8 @@ require 'set'
 class ChatHandler
    extend ClassUtil
 
+   RELOADABLE_CONSTANT('STALE_TIMEOUT', 60)
+
    RELOADABLE_CLASS_VARIABLE('@@conversations', Hash.new())
    RELOADABLE_CLASS_VARIABLE('@@handlers', Array.new())
 
@@ -15,6 +17,15 @@ class ChatHandler
       @user = user
       @greetingMachine = nil
       @channel = channel
+      @lastSpeak = Time.now().to_i
+   end
+
+   def stale?()
+      return @lastSpeak && Time.now().to_i - @lastSpeak > STALE_TIMEOUT
+   end
+
+   def update()
+      @lastSpeak = Time.now().to_i
    end
 
    def self.addHandler(handler)
@@ -49,11 +60,6 @@ class ChatHandler
       @@conversations[finalUser].initiate()
    end
 
-   def initiate()
-      @greetingMachine = InitiateGreetingMachine.new(@user)
-      Bot.instance.chat(@channel, @greetingMachine.next(''))
-   end
-
    def self.handleChat(text, responseInfo)
       user = responseInfo.fromUser
       newChat = false
@@ -64,11 +70,29 @@ class ChatHandler
       end
 
       handleChat = @@conversations[user].handleChatImpl(text, responseInfo)
-      if (!handleChat && newChat)
+      if (handleChat)
+         @@conversations[user].update()
+      elsif (!handleChat && (newChat || @@conversations[user].stale?))
          @@conversations.delete(user)
       end
 
       return handleChat
+   end
+
+   # If there are any current conversations, continue them.
+   def self.continueConverasations()
+      @@conversations.delete_if{|nick, conversation|
+         !conversation.continue() || conversation.stale?
+      }
+   end
+
+   def self.reset()
+      @@conversations.clear()
+   end
+
+   def initiate()
+      @greetingMachine = InitiateGreetingMachine.new(@user)
+      Bot.instance.chat(@channel, @greetingMachine.next(''))
    end
 
    # A single utterance may be handled by multiple TextHandlers,
@@ -127,13 +151,6 @@ class ChatHandler
       return false
    end
 
-   # If there are any current conversations, continue them.
-   def self.continueConverasations()
-      @@conversations.delete_if{|nick, conversation|
-         !conversation.continue()
-      }
-   end
-
    # Continue a conversation.
    # Return true if the conversation is to be continued further.
    # Return false if the conversation is done.
@@ -151,11 +168,6 @@ class ChatHandler
       end
 
       return true
-   end
-
-   def self.reset()
-      @@conversations.clear()
-      #TODO(eriq): Make sure to reset the StoryMachines
    end
 end
 
