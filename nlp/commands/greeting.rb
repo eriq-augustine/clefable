@@ -3,7 +3,7 @@ class EnterGreetingMode < Command
       super('ENTER-GREETING-MODE',
             'ENTER-GREETING-MODE',
             "Initiate greeting mode.",
-            {:aliases => ['GREETING-MODE']})
+            {:aliases => ['GREETING-MODE', 'GREET-MODE', 'GREETING-MODE']})
    end
 
    @@instance = EnterGreetingMode.new()
@@ -23,7 +23,8 @@ class LeaveGreetingMode < Command
    def initialize
       super('LEAVE-GREETING-MODE',
             'LEAVE-GREETING-MODE',
-            "Leave greeting mode.")
+            "Leave greeting mode.",
+            {:aliases => ['LEAVE-GREET-MODE', 'LEAVE-GREET']})
    end
 
    @@instance = LeaveGreetingMode.new()

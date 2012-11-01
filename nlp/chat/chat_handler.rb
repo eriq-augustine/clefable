@@ -18,6 +18,7 @@ class ChatHandler
       @greetingMachine = nil
       @channel = channel
       @lastSpeak = Time.now().to_i
+      @storyMachine = nil
    end
 
    def stale?()
@@ -117,6 +118,16 @@ class ChatHandler
          return true
       end
 
+      if (@storyMachine)
+         response = "#{responseInfo.fromUser}: #{@storyMachine.getNext()}"
+         if (@storyMachine.end?)
+            @storyMachine = nil
+         end
+
+         responseInfo.respond(response)
+         return true
+      end
+
       fullResponse = ''
       triggeredHandlers = Set.new()
 
@@ -145,6 +156,7 @@ class ChatHandler
 
       if (fullResponse.length() != 0)
          responseInfo.respond(fullResponse)
+         @storyMachine = StoryMachine.new()
          return true
       end
 
@@ -165,6 +177,19 @@ class ChatHandler
             @greetingMachine = nil
             return false
          end
+      end
+
+      if (@storyMachine)
+         response = "#{@user}: #{@storyMachine.getNext()}"
+         rtn = true
+
+         if (@storyMachine.end?)
+            @storyMachine = nil
+            rtn = false
+         end
+
+         Bot.instance.chat(@channel, response)
+         return rtn
       end
 
       return true

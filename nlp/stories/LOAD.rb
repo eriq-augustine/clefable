@@ -1,3 +1,4 @@
+Loader::loadDir('./nlp/stories/gen')
 Loader::loadAllInDir('./nlp/stories')
 
 # Load all the stories into the Stories module

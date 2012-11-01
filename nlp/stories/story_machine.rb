@@ -21,8 +21,12 @@ class StoryMachine
 
       firstStates = []
 
+      allStories = StoryGenerator::genStories(15)
       Stories::getStoryKeys().each{|key|
-         story = Stories::getStory(key)
+         allStories << Stories::getStory(key)
+      }
+
+      allStories.each{|story|
          states = []
 
          (story.length() - 1).downto(0){|i|
@@ -44,14 +48,22 @@ class StoryMachine
       @currentState = @startState
    end
 
+   # Will return an empty string on an end state.
    def getNext()
-      @currentState = @currentState.nextState(@random, @startState, @endState, @sleepState, @storyStates)
+      nextState = @currentState.nextState(@random, @startState, @endState, @sleepState, @storyStates)
+      @currentState = nextState
+
       return @currentState.getText()
    end
 
    def reset()
       @currentState = @startState
       State::reset()
+   end
+
+   def end?
+      return @currentState == @endState ||
+             (@currentState.class == StoryMachine::StoryState && @currentState.nextStoryState == @endState)
    end
 
  private
@@ -65,7 +77,7 @@ class StoryMachine
 
       def nextState(random, startState, endState, sleepState, storyStates)
          @@focus -= 0.05
-         nextStateImpl(random, startState, endState, sleepState, storyStates)
+         return nextStateImpl(random, startState, endState, sleepState, storyStates)
       end
 
       def getText()
@@ -84,9 +96,11 @@ class StoryMachine
    end
 
    class StoryState < State
+      attr_accessor :nextStoryState
+
       def initialize(text, nextState)
          super(text)
-         @nextState = nextState
+         @nextStoryState = nextState
       end
 
     protected
@@ -94,17 +108,17 @@ class StoryMachine
       def nextStateImpl(random, startState, endState, sleepState, storyStates)
          nextChance = 0.90
          stayChance = 0.05
-         otherChance = 0.05
+         otherChance = 0.02
 
          # SLEEP TIME!
-         if (random.rand() > @@focus)
-            sleepState.setNext(@nextState)
+         if (random.rand() >= @@focus)
+            sleepState.setNext(@nextStoryState)
             return sleepState
          end
 
          decision = random.rand()
          if (decision < nextChance)
-            return @nextState
+            return @nextStoryState
          elsif (decision < (nextChance + stayChance))
             return self
          else
