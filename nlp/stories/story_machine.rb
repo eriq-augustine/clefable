@@ -1,3 +1,5 @@
+require 'set'
+
 # The Story Machine!
 # This machine manages the story status.
 # Every conversation gets a StoryMachine.
@@ -19,7 +21,13 @@ class StoryMachine
       @endState = EndState.new()
       @startState = nil
 
-      firstStates = []
+      # The starts of all the stories.
+      # Kept in order.
+      @firstStates = []
+
+      # A precomputed set of unigrams for each story.
+      # Kept in order.
+      @storyUnigrams = []
 
       allStories = StoryGenerator::genStories(15)
       Stories::getStoryKeys().each{|key|
@@ -28,6 +36,7 @@ class StoryMachine
 
       allStories.each{|story|
          states = []
+         unigrams = Set.new()
 
          (story.length() - 1).downto(0){|i|
             if (i == story.length() - 1)
@@ -38,13 +47,16 @@ class StoryMachine
 
             newState = StoryState.new(story[i], nextState)
             states << newState
+
+            unigrams.merge(Nlp::unigrams(story[i], true))
          }
 
-         firstStates << states[-1]
+         @storyUnigrams << unigrams
+         @firstStates << states[-1]
          @storyStates.concat(states)
       }
 
-      @startState = StartState.new(firstStates)
+      @startState = StartState.new(@firstStates)
       @currentState = @startState
    end
 
@@ -54,6 +66,31 @@ class StoryMachine
       @currentState = nextState
 
       return @currentState.getText()
+   end
+
+   # This allows a piece of text to potentially start a new story.
+   # This can be called while in any state and may initiate a new story.
+   # If a story is provoked the first part of the story will be returned.
+   # Otherwise, nil will be returned.
+   def provokeStory(text)
+      bestSim = nil
+      bestSimIndex = 0
+
+      for i in 0...@storyUnigrams.length()
+         sim = storySim(text, @storyUnigrams[i])
+         if (!bestSim || sim > bestSim)
+            bestSim = sim
+            bestSimIndex = i
+         end
+      end
+
+      # TODO(eriq): Find real threshold
+      if (bestSim && bestSim > 0.5)
+         @currentState = @firstStates[bestSimIndex]
+         return @currentState.getText()
+      end
+
+      return nil
    end
 
    def reset()
@@ -67,6 +104,13 @@ class StoryMachine
    end
 
  private
+
+   # TODO(eriq): Better.
+   def storySim(text, storyUnigrams)
+      textUnigrams = Set.new(Nlp::unigrams(text, true))
+
+      return (textUnigrams & storyUnigrams).size() / textUnigrams.size().to_f
+   end
 
    class State
       @@focus = 1.0

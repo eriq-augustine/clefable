@@ -61,6 +61,23 @@ class ChatHandler
       @@conversations[finalUser].initiate()
    end
 
+   # Potentially initiate a conversation because of something that the user said.
+   # Do not start conversations with users already in a conversation.
+   # Will return true if a story was provoked.
+   def self.provokeStory(text, fromUser, target)
+      if (@@conversations.has_key?(fromUser))
+         return false
+      end
+
+      handler = ChatHandler.new(fromUser, target)
+      if (handler.provokeStoryImpl(text))
+         @@conversations[fromUser] = handler
+         return true
+      end
+         
+      return false
+   end
+
    def self.handleChat(text, responseInfo)
       user = responseInfo.fromUser
       newChat = false
@@ -94,6 +111,18 @@ class ChatHandler
    def initiate()
       @greetingMachine = InitiateGreetingMachine.new(@user)
       Bot.instance.chat(@channel, @greetingMachine.next(''))
+   end
+
+   def provokeStoryImpl(text)
+      @storyMachine = StoryMachine.new()
+      response = @storyMachine.provokeStory(text)
+      if (response)
+         Bot.instance.chat(@channel, "#{@user}: That reminds me of a story...")
+         Bot.instance.chat(@channel, "#{@user}: #{response}", {:delay => 2})
+         return true
+      end
+
+      return false
    end
 
    # A single utterance may be handled by multiple TextHandlers,
@@ -240,7 +269,7 @@ class WellnessHandler < TextHandler
 
    def handleText(text, fromUser)
       sentence = grabSentence(text).downcase()
-      if (Set.new(nlpSplitString(sentence)).superset?(WELLNESS_WORDS))
+      if (Set.new(Nlp::splitString(sentence)).superset?(WELLNESS_WORDS))
          #TODO: More variation
          return sentence.length(), "#{fromUser}: Pretty good, how are you?"
       else
@@ -298,7 +327,7 @@ class QandAHandler < TextHandler
          return match[0].length, "#{fromUser}: I don't know about #{match[1]}, try: http://lmgtfy.com/?q=#{match[1].gsub(/\s+/, '+')}"
       end
 
-      sentences = nlpSentenceSplit(doc[:cleanFirstPara])
+      sentences = Nlp::sentenceSplit(doc[:cleanFirstPara])
       rtn = "#{fromUser}: "
       sentences[0...2].each{|sentence|
          rtn += "#{sentence} "

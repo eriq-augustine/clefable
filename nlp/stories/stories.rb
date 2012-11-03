@@ -23,6 +23,6 @@ module Stories
  private
 
    def self.normalizeStory(text)
-      return nlpSentenceSplit(text)
+      return Nlp::sentenceSplit(text)
    end
 end

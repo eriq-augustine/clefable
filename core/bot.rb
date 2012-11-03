@@ -215,19 +215,9 @@ class Bot
       # If message was sent in a PM
       elsif (target == IRC_NICK)
          command = content
-      # If it looks like a ping, but the target of the ping is not in the room.
-      elsif (pingMatch = content.match(/^\^?([^\s\^]+)\^?:(\s+.*)?$/))
-         # Note, we cannot be in a PM because of the previous case.
-         pingTarget = pingMatch[1]
-
-         # If channel exists, but the ping target does not, maybe they mistyped.
-         if (@channels.has_key?(target) && !@channels[target][pingTarget])
-            minInfo = minDistanceNoEquals(pingTarget, @channels[target].keys)
-
-            if (minInfo && minInfo[:dist] <= MAX_PING_CORRECTION_DISTANCE)
-               chat(target, "Automatic Ping Correction -- #{minInfo[:word]}: ^")
-            end
-         end
+      # This may remind me of a story
+      else
+         ChatHandler::provokeStory(content, fromUser, target)
       end
 
       if (command)
