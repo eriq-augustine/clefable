@@ -12,6 +12,30 @@ class ChatHandler
 
    RELOADABLE_CLASS_VARIABLE('@@conversations', Hash.new())
    RELOADABLE_CLASS_VARIABLE('@@handlers', Array.new())
+   RELOADABLE_CLASS_VARIABLE('@@transitions',
+         ['Shut It, Whipersnapper! I got something to say!',
+          'Hippy Hap, Yippy Yap, blah blah blah. Let me tell you something!',
+          'Gather \'round I got a real story to tell you.',
+          'Put down that Kodak Polaroid and come here.',
+          'Put down your Jello pudding and come here.',
+          'I don\'t understand the kids these days.',
+          'Stop watching your Scooby Doo and come here.',
+          'Stop playing with your Hully Hoop and Yo-Yos and come here.',
+          'Stop fiddling with you Etch-a-Sketch and listen.'
+         ])
+
+   RELOADABLE_CLASS_VARIABLE('@@ends',
+         ['And that\'s what\'s wrong with young people these days.',
+          'I hope you learned something useful.',
+          'Now go on, get.',
+          'Now go on, go play your scoch hop.',
+          'Now go study.',
+          'Now go on and get some work done.',
+          'Now go on and go play in the sun.',
+          'Now go take a run through the fields, feel the wind in your face... while you still can.',
+          'Now, get out of here. I gotta sleep.',
+          'Now go on, I need some scotch.'
+         ])
 
    def initialize(user, channel)
       @user = user
@@ -74,7 +98,7 @@ class ChatHandler
          @@conversations[fromUser] = handler
          return true
       end
-         
+
       return false
    end
 
@@ -189,6 +213,14 @@ class ChatHandler
          return true
       end
 
+      # This is for the final run.
+      # This will handle anything.
+      if (!$DEBUG)
+         responseInfo.respond("#{@user}: #{@@transitions.sample()}")
+         @storyMachine = StoryMachine.new()
+         return true
+      end
+
       return false
    end
 
@@ -210,14 +242,15 @@ class ChatHandler
 
       if (@storyMachine)
          response = "#{@user}: #{@storyMachine.getNext()}"
+         Bot.instance.chat(@channel, response)
          rtn = true
 
          if (@storyMachine.end?)
             @storyMachine = nil
+            Bot.instance.chat(@channel, "#{@user}: #{@@ends.sample()}")
             rtn = false
          end
 
-         Bot.instance.chat(@channel, response)
          return rtn
       end
 

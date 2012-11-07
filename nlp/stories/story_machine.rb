@@ -105,11 +105,16 @@ class StoryMachine
 
  private
 
-   # TODO(eriq): Better.
    def storySim(text, storyUnigrams)
       textUnigrams = Set.new(Nlp::unigrams(text, true))
 
-      return (textUnigrams & storyUnigrams).size() / textUnigrams.size().to_f
+      sym = Nlp::setSynSim(textUnigrams, storyUnigrams)
+
+      #TEST
+      puts "#{sym} :: #{storyUnigrams.to_a}"
+
+      #return (textUnigrams & storyUnigrams).size() / textUnigrams.size().to_f
+      return sym
    end
 
    class State
