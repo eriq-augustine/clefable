@@ -85,7 +85,7 @@ class StoryMachine
       end
 
       # TODO(eriq): Find real threshold
-      if (bestSim && bestSim > 0.5)
+      if (bestSim && bestSim > 0.1)
          @currentState = @firstStates[bestSimIndex]
          return @currentState.getText()
       end

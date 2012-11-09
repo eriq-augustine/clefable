@@ -215,11 +215,11 @@ class ChatHandler
 
       # This is for the final run.
       # This will handle anything.
-      if (!$DEBUG)
-         responseInfo.respond("#{@user}: #{@@transitions.sample()}")
-         @storyMachine = StoryMachine.new()
-         return true
-      end
+      #if (!$DEBUG)
+      #   responseInfo.respond("#{@user}: #{@@transitions.sample()}")
+      #   @storyMachine = StoryMachine.new()
+      #   return true
+      #end
 
       return false
    end
